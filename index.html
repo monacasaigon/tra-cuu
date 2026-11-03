@@ -234,7 +234,8 @@ function giaDem(ten, nhan, soDem, soKhach) {
 }
 
 /* Combo theo giờ: dưới 3 giờ tính Combo 3 giờ; dài hơn thì cộng giờ thêm cho tới khi đắt hơn gói lớn hơn
-   (Combo 6 giờ, rồi giá qua đêm trọn 13 giờ). Nhận phòng từ 21h luôn tính Qua đêm. */
+   (Combo 6 giờ, rồi giá qua đêm trọn 13 giờ). Nhận phòng từ 21h luôn tính Qua đêm.
+   Last-minute khi giờ nhận phòng cách lúc xem trang không quá 3 giờ; Early-bird như gói 2 ngày 1 đêm. */
 function giaGio(ten, ngayM, tu, den, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[0]) return null;
@@ -247,9 +248,22 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   var tenGoi = tot.goi === 2 && !quaDem ? 'Trọn 13 giờ (giá qua đêm)' : GOI[tot.goi];
   var dong = [[tenGoi + (ct ? ' · cuối tuần/lễ' : ''), b[tot.goi]]];
   if (tot.them) dong.push([tot.them + ' giờ thêm × ' + tien(x), tot.them * x]);
-  var tong = tot.gia, phu = quaDem || den > 24 ? Math.max(0, soKhach - 2) * u.phuThu : 0;
-  if (phu) { dong.push(['Phụ thu khách thứ 3', phu]); tong += phu; }
-  return { tong: tong, goc: tong, dong: dong, moTa: soGio + ' giờ · ' + GOI[tot.goi] + (tot.them ? ' + ' + tot.them + ' giờ' : '') + ' · ' + soKhach + ' khách' };
+  var tong = tot.gia, goc = tot.gia, lyDo = [];
+  if (u.lastMinute && ngayM + tu * 60 - BAY_GIO <= 3 * 60) {
+    var lm = lamTron(tong * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '%';
+    dong.push([tenLm, -lm]);
+    lyDo.push(tenLm);
+    tong -= lm;
+  }
+  if (u.earlyBird && (ngayM - HOM_NAY) / 1440 >= u.earlyBirdNgay) {
+    var eb = lamTron(tong * u.earlyBird / 100), tenEb = 'Early-bird −' + u.earlyBird + '%';
+    dong.push([tenEb, -eb]);
+    lyDo.push(tenEb);
+    tong -= eb;
+  }
+  var phu = quaDem || den > 24 ? Math.max(0, soKhach - 2) * u.phuThu : 0;
+  if (phu) { dong.push(['Phụ thu khách thứ 3', phu]); tong += phu; goc += phu; }
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: soGio + ' giờ · ' + GOI[tot.goi] + (tot.them ? ' + ' + tot.them + ' giờ' : '') + ' · ' + soKhach + ' khách' };
 }
 
 function el(tag, cls, text) {
