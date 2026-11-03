@@ -72,6 +72,7 @@
   .truot { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .truot::-webkit-scrollbar { display: none; }
   .truot img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; scroll-snap-align: start; cursor: zoom-in; }
+  .anh .truot img:first-child { object-position: center top; }
   .phong.het .truot img { filter: grayscale(.7); opacity: .7; }
   .nhanHang { position: absolute; left: 10px; top: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(85,0,13,.88); color: #fff; font-size: 11px; font-weight: 600; }
   .soAnh { position: absolute; right: 10px; bottom: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; }
@@ -84,6 +85,7 @@
   .gia .goc { font-size: 12px; color: var(--phu); text-decoration: line-through; }
   .gia .tong { font-size: 21px; font-weight: 700; line-height: 1.2; color: var(--dau); }
   .gia .giam { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: var(--xanhChu); color: #fff; font-size: 11px; vertical-align: 3px; }
+  .gia .lyDo { margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--xanhChu); }
   .datPhong { flex: none; padding: 10px 14px; border-radius: 10px; background: var(--dau); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
   .chiTiet { margin-top: 8px; font-size: 13px; }
   .chiTiet summary { cursor: pointer; color: var(--dau); font-weight: 600; }
@@ -196,7 +198,7 @@ function trangThai(phong, bd, kt) {
 function giaDem(ten, nhan, soDem, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[3]) return null;
-  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], goc = 0, tong = 0, giaDau = 0;
+  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, giaDau = 0;
   for (var i = 0; i < soDem; i++) {
     var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
     var ap = chiThuong ? g.thuong[3] : giaGoc;
@@ -205,10 +207,14 @@ function giaDem(ten, nhan, soDem, soKhach) {
     tong += ap;
     dong.push(['Đêm ' + ngay(m) + (ct ? ' · cuối tuần/lễ' : ''), giaGoc]);
   }
-  if (goc > tong) dong.push(['Ưu đãi từ ' + u.tuDemGiaThuong + ' đêm: chỉ tính giá ngày thường', tong - goc]);
+  if (goc > tong) {
+    dong.push(['Ưu đãi từ ' + u.tuDemGiaThuong + ' đêm: chỉ tính giá ngày thường', tong - goc]);
+    lyDo.push('Từ ' + u.tuDemGiaThuong + ' đêm: giá ngày thường');
+  }
   if (u.lastMinute && nhan + D.gioNhan * 60 - BAY_GIO <= 24 * 60) {
     var lm = lamTron(giaDau * u.lastMinute / 100);
     dong.push(['Last-minute −' + u.lastMinute + '% đêm đầu', -lm]);
+    lyDo.push('Last-minute −' + u.lastMinute + '% đêm đầu');
     tong -= lm;
   }
   var pct = 0, ly = [];
@@ -218,11 +224,12 @@ function giaDem(ten, nhan, soDem, soKhach) {
   if (pct) {
     var giam = lamTron(tong * pct / 100);
     dong.push([ly.join(', '), -giam]);
+    lyDo = lyDo.concat(ly);
     tong -= giam;
   }
   var them = Math.max(0, soKhach - 2) * u.phuThu * soDem;
   if (them) { dong.push(['Phụ thu khách thứ 3 × ' + soDem + ' đêm', them]); tong += them; goc += them; }
-  return { tong: tong, goc: goc, dong: dong, moTa: soDem + ' đêm · ' + soKhach + ' khách' };
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: soDem + ' đêm · ' + soKhach + ' khách' };
 }
 
 /* Combo theo giờ: dưới 3 giờ tính Combo 3 giờ; dài hơn thì cộng giờ thêm cho tới khi đắt hơn gói lớn hơn
@@ -339,6 +346,7 @@ function khoiGia(ten, kq, tomTat) {
     tong.appendChild(el('span', 'giam', '−' + Math.round((1 - kq.tong / kq.goc) * 100) + '%'));
   }
   trai.appendChild(tong);
+  if (kq.lyDo && kq.lyDo.length) trai.appendChild(el('div', 'lyDo', '🏷 ' + kq.lyDo.join(' · ')));
   hang.appendChild(trai);
   var nut = el('a', 'datPhong', 'Đặt qua Zalo');
   nut.href = 'https://zalo.me/' + D.zalo;
