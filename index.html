@@ -443,7 +443,8 @@ function kiemTraDem() {
 function kiemTraGio() {
   if (!byId('ngayGio').value) return 'Hãy chọn ngày.';
   var ngayM = phut(byId('ngayGio').value), tu = +byId('tuGio').value, den = +byId('denGio').value, ra = gioRa(tu, den);
-  var bd = ngayM + tu * 60, kt = ngayM + ra * 60, soTrong = 0, soO = ra > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
+  /* Phòng trống xét đúng giờ khách chọn; gói Qua đêm thì thanh giờ hiện tới trưa hôm sau để khách tự xem. */
+  var bd = ngayM + tu * 60, kt = ngayM + den * 60, soTrong = 0, soO = ra > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
   if (den <= tu) return 'Giờ trả phải sau giờ nhận.';
   if (kt <= BAY_GIO) return 'Khung giờ này đã qua.';
   if (bd + 60 <= BAY_GIO) return 'Giờ nhận đã qua, hãy chọn từ ' + gio(Math.floor((BAY_GIO - HOM_NAY) / 60)) + '.';
@@ -459,7 +460,7 @@ function kiemTraGio() {
     if (soO > 24) thanh.style.gap = '1px';
     for (var h = 0; h < soO; h++) {
       var s = ngayM + h * 60;
-      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < ra ? ' chon' : ''));
+      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < den ? ' chon' : ''));
       o2.title = gio(h % 24) + (h >= 24 ? ' hôm sau' : '');
       thanh.appendChild(o2);
     }
