@@ -214,7 +214,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
   }
   /* Last-minute: giảm cho mọi đêm có giờ nhận phòng trong vòng 24 giờ kể từ lúc xem trang. */
   if (u.lastMinute && soLm) {
-    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '% ' + (soLm > 1 ? soLm + ' đêm đầu' : 'đêm đầu');
+    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '%';
     dong.push([tenLm, -lm]);
     lyDo.push(tenLm);
     tong -= lm;
