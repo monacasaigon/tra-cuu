@@ -198,11 +198,11 @@ function trangThai(phong, bd, kt) {
 function giaDem(ten, nhan, soDem, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[3]) return null;
-  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, giaDau = 0;
+  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, lmGoc = 0, soLm = 0;
   for (var i = 0; i < soDem; i++) {
     var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
     var ap = chiThuong ? g.thuong[3] : giaGoc;
-    if (!i) giaDau = ap;
+    if (m + D.gioNhan * 60 - BAY_GIO <= 24 * 60) { lmGoc += ap; soLm++; }
     goc += giaGoc;
     tong += ap;
     dong.push(['Đêm ' + ngay(m) + (ct ? ' · cuối tuần/lễ' : ''), giaGoc]);
@@ -211,10 +211,11 @@ function giaDem(ten, nhan, soDem, soKhach) {
     dong.push(['Ưu đãi từ ' + u.tuDemGiaThuong + ' đêm: chỉ tính giá ngày thường', tong - goc]);
     lyDo.push('Từ ' + u.tuDemGiaThuong + ' đêm: giá ngày thường');
   }
-  if (u.lastMinute && nhan + D.gioNhan * 60 - BAY_GIO <= 24 * 60) {
-    var lm = lamTron(giaDau * u.lastMinute / 100);
-    dong.push(['Last-minute −' + u.lastMinute + '% đêm đầu', -lm]);
-    lyDo.push('Last-minute −' + u.lastMinute + '% đêm đầu');
+  /* Last-minute: giảm cho mọi đêm có giờ nhận phòng trong vòng 24 giờ kể từ lúc xem trang. */
+  if (u.lastMinute && soLm) {
+    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '% ' + (soLm > 1 ? soLm + ' đêm đầu' : 'đêm đầu');
+    dong.push([tenLm, -lm]);
+    lyDo.push(tenLm);
     tong -= lm;
   }
   var pct = 0, ly = [];
