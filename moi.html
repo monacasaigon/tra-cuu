@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monaca Homestay · Tra cứu phòng trống</title>
+<meta name="description" content="Chọn ngày ở, xem ngay phòng nào của Monaca Homestay còn trống và giá cho đúng ngày bạn chọn.">
+<meta property="og:title" content="Monaca Homestay · Tra cứu phòng trống">
+<meta property="og:description" content="Chọn ngày ở, xem ngay phòng nào còn trống và giá cho đúng ngày bạn chọn.">
+<meta name="theme-color" content="#790013">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%85%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://wsrv.nl">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dam: #55000D; --dau: #790013; --dauNhat: #9B1B2A; --nen: #FBF5F3; --nhat: #F6ECEB; --the: #FFFFFF;
+    --chu: #2B1A1C; --phu: #7D6A6C; --vien: #ECDCDC;
+    --xanh: #E2F2E6; --xanhChu: #1E6B3A; --vang: #FCEFD2; --vangChu: #85570A; --do: #F6E0E2; --doChu: #790013;
+    --oTrong: #BFE3CB; --oDat: #790013; --oGiu: #E8B64A; --oBaoTri: #A99A9C; --oQua: #EEE6E6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--nen); color: var(--chu); font: 15px/1.5 'Lexend', system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px; }
+  .hero { background: linear-gradient(135deg, var(--dam), var(--dau) 60%, var(--dauNhat)); color: #fff; border-radius: 18px; padding: 18px 20px; }
+  .hero .ten { font-size: 13px; opacity: .9; }
+  .hero h1 { margin: 2px 0; font-size: 22px; line-height: 1.25; font-weight: 700; }
+  .hero p { margin: 0; font-size: 13px; opacity: .85; }
+  .the, .phong { background: var(--the); border-radius: 16px; box-shadow: 0 1px 2px rgba(85,0,13,.06), 0 4px 14px rgba(85,0,13,.07); }
+  .the { padding: 16px; margin-top: 12px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--nhat); }
+  .seg button { border: 0; padding: 9px 6px; border-radius: 9px; background: transparent; font: inherit; font-size: 14px; line-height: 1.3; font-weight: 600; color: var(--phu); cursor: pointer; }
+  .seg button.on { background: var(--dau); color: #fff; box-shadow: 0 1px 3px rgba(85,0,13,.25); }
+  .luoi { display: grid; gap: 10px; margin-top: 14px; }
+  .luoi.hai { grid-template-columns: 1fr 1fr; }
+  .luoi.ba { grid-template-columns: 1.4fr 1fr 1fr; }
+  label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--phu); }
+  input, select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--vien); border-radius: 10px; background: #fff; font: inherit; font-size: 15px; color: var(--chu); }
+  input[type="date"] { -webkit-appearance: none; appearance: none; display: block; min-height: 44px; text-align: left; }
+  input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  input:focus, select:focus { outline: 2px solid var(--dau); outline-offset: 1px; }
+  .goiY { margin: 8px 0 0; font-size: 12px; color: var(--phu); }
+  .nut { display: block; width: 100%; margin-top: 14px; padding: 13px; border: 0; border-radius: 12px; background: var(--dau); color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .nut:active { transform: translateY(1px); }
+  .nut:disabled { opacity: .6; cursor: wait; }
+  .loi { margin: 10px 0 0; font-size: 13px; color: var(--doChu); }
+  .tom { margin: 18px 4px 4px; font-weight: 600; }
+  .tom small { display: block; font-size: 12px; font-weight: 400; color: var(--phu); }
+  .phong { margin-top: 12px; overflow: hidden; }
+  .noiDung { padding: 14px; }
+  .dauPhong { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tenPhong { font-weight: 600; }
+  .moTa { margin: 4px 0 0; font-size: 12px; color: var(--phu); }
+  .chip { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .chip.trong, .dem .trong { background: var(--xanh); color: var(--xanhChu); }
+  .chip.giu, .chip.motPhan, .dem .giu { background: var(--vang); color: var(--vangChu); }
+  .chip.kin, .dem .kin { background: var(--do); color: var(--doChu); }
+  .dem { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .dem span { padding: 3px 8px; border-radius: 8px; font-size: 12px; }
+  .dem .kin { text-decoration: line-through; }
+  .gio { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 10px; }
+  .gio i, .chuGiai b { display: block; height: 18px; border-radius: 3px; }
+  .trong { background: var(--oTrong); } .dat { background: var(--oDat); } .giu { background: var(--oGiu); }
+  .baoTri { background: var(--oBaoTri); } .qua { background: var(--oQua); }
+  .gio i.chon, .chuGiai b.chon { box-shadow: inset 0 -4px 0 var(--dam); }
+  .moc { display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; color: var(--phu); }
+  .chuGiai { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 10px 4px 0; font-size: 11px; color: var(--phu); }
+  .chuGiai span { display: flex; align-items: center; gap: 4px; }
+  .chuGiai b { width: 12px; height: 12px; }
+  .chuGiai b.chon { background: #fff; border: 1px solid var(--vien); }
+
+  .anh { position: relative; aspect-ratio: 4 / 3; background: var(--nhat); }
+  .truot { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .truot::-webkit-scrollbar { display: none; }
+  .truot img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; scroll-snap-align: start; cursor: zoom-in; }
+  .phong.het .truot img { filter: grayscale(.7); opacity: .7; }
+  .nhanHang { position: absolute; left: 10px; top: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(85,0,13,.88); color: #fff; font-size: 11px; font-weight: 600; }
+  .soAnh { position: absolute; right: 10px; bottom: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; }
+  .mui { position: absolute; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--dam); font-size: 20px; line-height: 1; cursor: pointer; display: none; }
+  .mui.trai { left: 8px; } .mui.phai { right: 8px; }
+  @media (hover: hover) { .anh:hover .mui { display: block; } }
+
+  .gia { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--vien); }
+  .gia .nhan { font-size: 12px; color: var(--phu); }
+  .gia .goc { font-size: 12px; color: var(--phu); text-decoration: line-through; }
+  .gia .tong { font-size: 21px; font-weight: 700; line-height: 1.2; color: var(--dau); }
+  .gia .giam { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: var(--xanhChu); color: #fff; font-size: 11px; vertical-align: 3px; }
+  .datPhong { flex: none; padding: 10px 14px; border-radius: 10px; background: var(--dau); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
+  .chiTiet { margin-top: 8px; font-size: 13px; }
+  .chiTiet summary { cursor: pointer; color: var(--dau); font-weight: 600; }
+  .dongGia { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .dongGia.tru span:last-child { color: var(--xanhChu); }
+  .dongGia.tongCong { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--vien); font-weight: 700; }
+  .ghiChu { margin: 14px 4px 0; font-size: 12px; color: var(--phu); }
+
+  .zalo { display: block; margin-top: 16px; padding: 12px; border: 2px solid var(--dau); border-radius: 14px; background: var(--the); color: var(--dau); text-align: center; font-weight: 700; text-decoration: none; }
+  .zalo small { display: block; font-size: 12px; font-weight: 400; opacity: .85; }
+  footer { margin: 14px 0 6px; text-align: center; font-size: 12px; color: var(--phu); }
+  footer a { color: var(--dau); }
+
+  .hop { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: rgba(15,5,6,.95); }
+  .hopDau { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
+  .hopDau button { border: 0; background: none; color: #fff; font-size: 30px; line-height: 1; cursor: pointer; }
+  .hop .truot { flex: 1; min-height: 0; }
+  .hop .truot img { object-fit: contain; object-position: center; cursor: default; }
+  .toast { position: fixed; left: 50%; bottom: 18px; z-index: 60; max-width: 92%; transform: translateX(-50%); padding: 10px 14px; border-radius: 12px; background: var(--chu); color: #fff; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  [hidden] { display: none !important; }
+  @media (max-width: 400px) {
+    .luoi.hai { grid-template-columns: 1fr; }
+    .luoi.ba { grid-template-columns: 1fr 1fr; }
+    .luoi.ba label:first-child { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="ten">🏡 <span id="ten">Monaca Homestay</span></div>
+    <h1>Tra cứu phòng trống</h1>
+    <p>Chọn ngày bạn muốn ở để xem phòng nào còn trống và giá cho đúng ngày đó.</p>
+  </header>
+  <section class="the">
+    <div class="seg" role="tablist">
+      <button type="button" class="on" data-che-do="dem" role="tab" aria-selected="true">🌙 2 ngày 1 đêm</button>
+      <button type="button" data-che-do="gio" role="tab" aria-selected="false">⏱ Combo giờ và qua đêm</button>
+    </div>
+    <div id="formDem">
+      <div class="luoi hai">
+        <label>Ngày nhận phòng<input type="date" id="ngayNhan"></label>
+        <label>Ngày trả phòng<input type="date" id="ngayTra"></label>
+      </div>
+      <p class="goiY" id="goiYDem"></p>
+    </div>
+    <div id="formGio" hidden>
+      <div class="luoi ba">
+        <label>Ngày<input type="date" id="ngayGio"></label>
+        <label>Từ<select id="tuGio"></select></label>
+        <label>Đến<select id="denGio"></select></label>
+      </div>
+      <p class="goiY">Gói qua đêm: chọn giờ trả có chữ “hôm sau”.</p>
+    </div>
+    <div class="luoi">
+      <label>Số khách (từ 10 tuổi)<select id="soKhach"></select></label>
+    </div>
+    <p class="goiY" id="goiYKhach"></p>
+    <button type="button" class="nut" id="kiemTra">Kiểm tra phòng trống</button>
+    <p class="loi" id="loi" hidden></p>
+  </section>
+  <section id="ketQua" aria-live="polite"></section>
+  <a class="zalo" id="zalo" href="https://zalo.me/0367674477" target="_blank" rel="noopener">💬 Nhắn Zalo đặt phòng<small id="soZalo">Zalo/ĐT: 036 767 4477</small></a>
+  <footer>Giờ Việt Nam · cập nhật <span id="capNhat"></span> · <a id="xemLich" target="_blank" rel="noopener">Xem lịch đầy đủ ↗</a></footer>
+</div>
+<div class="hop" id="hop" role="dialog" aria-modal="true" aria-label="Ảnh phòng" hidden>
+  <div class="hopDau"><span><b id="hopTen"></b> · <span id="hopDem"></span></span><button type="button" id="dongHop" aria-label="Đóng">×</button></div>
+  <div class="truot" id="hopTruot"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbyHN4mRMvgDdwTQwvVwj015MBfmh0Ui5Z0zR1iXGwd3dWdYGHDssv0HttQcF34slNp3/exec?format=json';
+var D, BAY_GIO, HOM_NAY, LICH, LE = {}, cheDo = 'dem';
+var THU = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+var GOI = ['Combo 3 giờ', 'Combo 6 giờ', 'Qua đêm', '2 ngày 1 đêm'];
+
+function byId(id) { return document.getElementById(id); }
+/* Mốc thời gian tính bằng phút theo giờ Việt Nam, không phụ thuộc múi giờ của máy khách. */
+function phut(s) {
+  var p = s.split('T'), d = p[0].split('-'), t = (p[1] || '00:00').split(':');
+  return Date.UTC(+d[0], +d[1] - 1, +d[2], +t[0], +t[1]) / 60000;
+}
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function iso(m) { return new Date(m * 60000).toISOString().slice(0, 10); }
+function thu(m) { return new Date(m * 60000).getUTCDay(); }
+function ngay(m) { var d = new Date(m * 60000); return THU[d.getUTCDay()] + ' ' + pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1); }
+function gio(h) { return pad(h) + ':00'; }
+function chuan(s) { return String(s).trim().toLowerCase(); }
+function tien(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+function lamTron(n) { return Math.round(n / 1000) * 1000; }
+function anhNho(url, rong) { return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&w=' + rong + '&q=72&output=webp'; }
+
+/* Cuối tuần: combo giờ là thứ 7, chủ nhật; qua đêm và 2 ngày 1 đêm là đêm thứ 6, thứ 7. Ngày lễ luôn tính cuối tuần. */
+function laLe(m) { return !!LE[iso(m)]; }
+function cuoiTuanCombo(m) { var t = thu(m); return t === 6 || t === 0 || laLe(m); }
+function cuoiTuanDem(m) { var t = thu(m); return t === 5 || t === 6 || laLe(m); }
+
+/* Trạng thái của phòng trong [bd, kt): lệch 1 phút để lượt trả 12:00 và nhận 12:00 không bị tính là trùng. */
+function trangThai(phong, bd, kt) {
+  var p = chuan(phong), co = {};
+  LICH.forEach(function (b) {
+    if (b.phong !== p || !(b.bd < kt - 1 && b.kt > bd + 1)) return;
+    co[b.tt === D.tt.GIU ? 'giu' : b.tt === D.tt.BAO_TRI ? 'baoTri' : 'dat'] = 1;
+  });
+  return co.dat ? 'dat' : co.baoTri ? 'baoTri' : co.giu ? 'giu' : 'trong';
+}
+
+/* Gói 2 ngày 1 đêm: mỗi đêm theo giá ngày thường/cuối tuần, rồi trừ ưu đãi trong tab "Ưu đãi & lễ".
+   Ưu đãi ở dài chỉ lấy mức cao nhất; Early-bird và Last-minute cộng thêm. */
+function giaDem(ten, nhan, soDem, soKhach) {
+  var g = D.gia[ten], u = D.uuDai;
+  if (!g || !g.thuong[3]) return null;
+  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], goc = 0, tong = 0, giaDau = 0;
+  for (var i = 0; i < soDem; i++) {
+    var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
+    var ap = chiThuong ? g.thuong[3] : giaGoc;
+    if (!i) giaDau = ap;
+    goc += giaGoc;
+    tong += ap;
+    dong.push(['Đêm ' + ngay(m) + (ct ? ' · cuối tuần/lễ' : ''), giaGoc]);
+  }
+  if (goc > tong) dong.push(['Ưu đãi từ ' + u.tuDemGiaThuong + ' đêm: chỉ tính giá ngày thường', tong - goc]);
+  if (u.lastMinute && nhan + D.gioNhan * 60 - BAY_GIO <= 24 * 60) {
+    var lm = lamTron(giaDau * u.lastMinute / 100);
+    dong.push(['Last-minute −' + u.lastMinute + '% đêm đầu', -lm]);
+    tong -= lm;
+  }
+  var pct = 0, ly = [];
+  if (u.earlyBird && (nhan - HOM_NAY) / 1440 >= u.earlyBirdNgay) { pct += u.earlyBird; ly.push('Early-bird −' + u.earlyBird + '%'); }
+  var dai = soDem >= 15 ? u.dai15 : soDem >= 7 ? u.dai7 : soDem >= 5 ? u.dai5 : 0;
+  if (dai) { pct += dai; ly.push('Ở ' + soDem + ' đêm −' + dai + '%'); }
+  if (pct) {
+    var giam = lamTron(tong * pct / 100);
+    dong.push([ly.join(', '), -giam]);
+    tong -= giam;
+  }
+  var them = Math.max(0, soKhach - 2) * u.phuThu * soDem;
+  if (them) { dong.push(['Phụ thu khách thứ 3 × ' + soDem + ' đêm', them]); tong += them; goc += them; }
+  return { tong: tong, goc: goc, dong: dong, moTa: soDem + ' đêm · ' + soKhach + ' khách' };
+}
+
+/* Combo theo giờ: dưới 3 giờ tính Combo 3 giờ; dài hơn thì cộng giờ thêm cho tới khi đắt hơn gói lớn hơn
+   (Combo 6 giờ, rồi giá qua đêm trọn 13 giờ). Nhận phòng từ 21h luôn tính Qua đêm. */
+function giaGio(ten, ngayM, tu, den, soKhach) {
+  var g = D.gia[ten], u = D.uuDai;
+  if (!g || !g.thuong[0]) return null;
+  var soGio = den - tu, quaDem = tu >= 21, ct = quaDem ? cuoiTuanDem(ngayM) : cuoiTuanCombo(ngayM);
+  var b = ct ? g.cuoiTuan : g.thuong, x = b[4], tot = null;
+  (quaDem ? [[2, 13]] : [[0, 3], [1, 6], [2, 13]]).forEach(function (l) {
+    var them = Math.max(0, soGio - l[1]), gia = b[l[0]] + them * x;
+    if (!tot || gia < tot.gia) tot = { goi: l[0], them: them, gia: gia };
+  });
+  var tenGoi = tot.goi === 2 && !quaDem ? 'Trọn 13 giờ (giá qua đêm)' : GOI[tot.goi];
+  var dong = [[tenGoi + (ct ? ' · cuối tuần/lễ' : ''), b[tot.goi]]];
+  if (tot.them) dong.push([tot.them + ' giờ thêm × ' + tien(x), tot.them * x]);
+  var tong = tot.gia, phu = quaDem || den > 24 ? Math.max(0, soKhach - 2) * u.phuThu : 0;
+  if (phu) { dong.push(['Phụ thu khách thứ 3', phu]); tong += phu; }
+  return { tong: tong, goc: tong, dong: dong, moTa: soGio + ' giờ · ' + GOI[tot.goi] + (tot.them ? ' + ' + tot.them + ' giờ' : '') + ' · ' + soKhach + ' khách' };
+}
+
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function taoAnh(url, rong, ten, i) {
+  var img = document.createElement('img');
+  img.alt = ten + ' – ảnh ' + (i + 1);
+  img.decoding = 'async';
+  img.loading = i ? 'lazy' : 'eager';
+  img.src = anhNho(url, rong);
+  img.onerror = function () { if (!img.dataset.goc) { img.dataset.goc = '1'; img.src = url; } };
+  return img;
+}
+
+function soThuTu(truot, tong) { return (Math.round(truot.scrollLeft / Math.max(1, truot.clientWidth)) + 1) + '/' + tong; }
+
+function khungAnh(ten) {
+  var ds = D.anh[ten] || [], g = D.gia[ten] || {}, khung = el('div', 'anh');
+  if (!ds.length) return khung;
+  var truot = el('div', 'truot'), dem = el('span', 'soAnh', '1/' + ds.length);
+  ds.forEach(function (url, i) {
+    var img = taoAnh(url, 720, ten, i);
+    img.addEventListener('click', function () { moHop(ds, i, ten); });
+    truot.appendChild(img);
+  });
+  truot.addEventListener('scroll', function () { dem.textContent = soThuTu(truot, ds.length); }, { passive: true });
+  khung.appendChild(truot);
+  if (g.hang) khung.appendChild(el('span', 'nhanHang', g.hang));
+  khung.appendChild(dem);
+  if (ds.length > 1) {
+    [['trai', '‹', -1, 'Ảnh trước'], ['phai', '›', 1, 'Ảnh sau']].forEach(function (x) {
+      var n = el('button', 'mui ' + x[0], x[1]);
+      n.type = 'button';
+      n.setAttribute('aria-label', x[3]);
+      n.addEventListener('click', function () { truot.scrollBy({ left: x[2] * truot.clientWidth, behavior: 'smooth' }); });
+      khung.appendChild(n);
+    });
+  }
+  return khung;
+}
+
+function moHop(ds, i, ten) {
+  var truot = byId('hopTruot');
+  truot.textContent = '';
+  ds.forEach(function (url, j) { truot.appendChild(taoAnh(url, 1080, ten, j)); });
+  byId('hopTen').textContent = ten;
+  truot.onscroll = function () { byId('hopDem').textContent = soThuTu(truot, ds.length); };
+  byId('hop').hidden = false;
+  document.body.style.overflow = 'hidden';
+  truot.scrollLeft = i * truot.clientWidth;
+  byId('hopDem').textContent = (i + 1) + '/' + ds.length;
+}
+
+function dongHop() {
+  byId('hop').hidden = true;
+  document.body.style.overflow = '';
+}
+
+function thongBao(s) {
+  var t = byId('toast');
+  t.textContent = s;
+  t.hidden = false;
+  clearTimeout(t.hen);
+  t.hen = setTimeout(function () { t.hidden = true; }, 6000);
+}
+
+function chepDatPhong(ten, tomTat, tong) {
+  var noiDung = 'Chào ' + D.ten + ', mình muốn đặt ' + ten + ': ' + tomTat + '. Giá trên trang: ' + tien(tong) + '.';
+  var bao = function (ok) { thongBao(ok ? 'Đã chép nội dung đặt phòng, bạn dán vào khung chat Zalo nhé.' : noiDung); };
+  try { navigator.clipboard.writeText(noiDung).then(function () { bao(true); }, function () { bao(false); }); } catch (e) { bao(false); }
+}
+
+function thePhong(ten, loai, nhan) {
+  var o = el('div', 'phong' + (loai === 'kin' ? ' het' : '')), nd = el('div', 'noiDung'), dau = el('div', 'dauPhong');
+  o.appendChild(khungAnh(ten));
+  dau.appendChild(el('span', 'tenPhong', ten));
+  dau.appendChild(el('span', 'chip ' + loai, nhan));
+  nd.appendChild(dau);
+  if (D.gia[ten] && D.gia[ten].moTa) nd.appendChild(el('p', 'moTa', D.gia[ten].moTa));
+  o.appendChild(nd);
+  o.noiDung = nd;
+  return o;
+}
+
+function khoiGia(ten, kq, tomTat) {
+  var khoi = el('div'), hang = el('div', 'gia'), trai = el('div'), tong = el('div', 'tong', tien(kq.tong));
+  trai.appendChild(el('div', 'nhan', kq.moTa));
+  if (kq.goc > kq.tong) {
+    trai.appendChild(el('div', 'goc', tien(kq.goc)));
+    tong.appendChild(el('span', 'giam', '−' + Math.round((1 - kq.tong / kq.goc) * 100) + '%'));
+  }
+  trai.appendChild(tong);
+  hang.appendChild(trai);
+  var nut = el('a', 'datPhong', 'Đặt qua Zalo');
+  nut.href = 'https://zalo.me/' + D.zalo;
+  nut.target = '_blank';
+  nut.rel = 'noopener';
+  nut.addEventListener('click', function () { chepDatPhong(ten, tomTat, kq.tong); });
+  hang.appendChild(nut);
+  khoi.appendChild(hang);
+  var ct = el('details', 'chiTiet');
+  ct.appendChild(el('summary', null, 'Chi tiết giá'));
+  kq.dong.forEach(function (d) {
+    var r = el('div', 'dongGia' + (d[1] < 0 ? ' tru' : ''));
+    r.appendChild(el('span', null, d[0]));
+    r.appendChild(el('span', null, (d[1] < 0 ? '−' : '') + tien(Math.abs(d[1]))));
+    ct.appendChild(r);
+  });
+  var cuoi = el('div', 'dongGia tongCong');
+  cuoi.appendChild(el('span', null, 'Tổng cộng'));
+  cuoi.appendChild(el('span', null, tien(kq.tong)));
+  ct.appendChild(cuoi);
+  khoi.appendChild(ct);
+  return khoi;
+}
+
+var THU_TU = { trong: 0, giu: 1, motPhan: 2, kin: 3 };
+
+function hienKetQua(ds, soTrong, moTa) {
+  var kq = byId('ketQua'), n = D.phong.length;
+  kq.textContent = '';
+  var tom = el('p', 'tom', soTrong === n ? 'Cả ' + n + ' phòng đều còn trống 🎉'
+    : soTrong === 0 ? 'Rất tiếc, không còn phòng trống trọn khoảng này' : soTrong + '/' + n + ' phòng còn trống');
+  tom.appendChild(el('small', null, moTa));
+  kq.appendChild(tom);
+  ds.sort(function (a, b) { return a.thuTu - b.thuTu; }).forEach(function (x) { kq.appendChild(x.o); });
+}
+
+function ghiChuGia() {
+  byId('ketQua').appendChild(el('p', 'ghiChu', 'Giá tính theo bảng giá và ưu đãi hiện hành. ' + D.ten + ' sẽ xác nhận lại khi bạn nhắn Zalo.'));
+}
+
+function kiemTraDem() {
+  if (!byId('ngayNhan').value || !byId('ngayTra').value) return 'Hãy chọn ngày nhận và ngày trả phòng.';
+  var nhan = phut(byId('ngayNhan').value), tra = phut(byId('ngayTra').value);
+  var soDem = Math.round((tra - nhan) / 1440), soKhach = +byId('soKhach').value || 2;
+  if (nhan < HOM_NAY) return 'Ngày nhận phòng đã qua.';
+  if (soDem < 1) return 'Ngày trả phải sau ngày nhận.';
+  if (soDem > 30) return 'Vui lòng chọn tối đa 30 đêm.';
+  var bd = nhan + D.gioNhan * 60, kt = tra + D.gioTra * 60, soTrong = 0;
+  var tomTat = 'nhận ' + gio(D.gioNhan) + ' ' + ngay(nhan) + ', trả ' + gio(D.gioTra) + ' ' + ngay(tra) + ' (' + soDem + ' đêm), ' + soKhach + ' khách';
+  var ds = D.phong.map(function (ten, viTri) {
+    var tong = trangThai(ten, bd, kt), dem = [], demTrong = 0;
+    for (var i = 0; i < soDem; i++) {
+      var s = bd + i * 1440, t = trangThai(ten, s, i === soDem - 1 ? kt : s + 1440);
+      if (t === 'trong') demTrong++;
+      dem.push([s, t]);
+    }
+    var loai = tong === 'trong' ? 'trong' : tong === 'giu' ? 'giu' : demTrong ? 'motPhan' : 'kin';
+    if (loai === 'trong') soTrong++;
+    var o = thePhong(ten, loai, { trong: '✓ Còn trống', giu: '◐ Có khách giữ chỗ', motPhan: '◐ Trống ' + demTrong + '/' + soDem + ' đêm', kin: '✕ Hết phòng' }[loai]);
+    if (tong !== 'trong' && soDem > 1) {
+      var hang = el('div', 'dem');
+      dem.forEach(function (d) { hang.appendChild(el('span', d[1] === 'trong' ? 'trong' : d[1] === 'giu' ? 'giu' : 'kin', ngay(d[0]))); });
+      o.noiDung.appendChild(hang);
+    }
+    var gia = loai === 'trong' || loai === 'giu' ? giaDem(ten, nhan, soDem, soKhach) : null;
+    if (gia) o.noiDung.appendChild(khoiGia(ten, gia, tomTat));
+    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+  });
+  hienKetQua(ds, soTrong, 'Nhận ' + gio(D.gioNhan) + ' ' + ngay(nhan) + ' → trả ' + gio(D.gioTra) + ' ' + ngay(tra) + ' · ' + soDem + ' đêm · ' + soKhach + ' khách');
+  ghiChuGia();
+}
+
+function kiemTraGio() {
+  if (!byId('ngayGio').value) return 'Hãy chọn ngày.';
+  var ngayM = phut(byId('ngayGio').value), tu = +byId('tuGio').value, den = +byId('denGio').value;
+  var bd = ngayM + tu * 60, kt = ngayM + den * 60, soTrong = 0, soO = den > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
+  if (den <= tu) return 'Giờ trả phải sau giờ nhận.';
+  if (kt <= BAY_GIO) return 'Khung giờ này đã qua.';
+  if (bd + 60 <= BAY_GIO) return 'Giờ nhận đã qua, hãy chọn từ ' + gio(Math.floor((BAY_GIO - HOM_NAY) / 60)) + '.';
+  var denChu = den > 24 ? gio(den - 24) + ' ' + ngay(ngayM + 1440) : gio(den);
+  var tomTat = ngay(ngayM) + ' từ ' + gio(tu) + ' đến ' + denChu + ', ' + soKhach + ' khách';
+  var ds = D.phong.map(function (ten, viTri) {
+    var tong = trangThai(ten, bd, kt);
+    var loai = tong === 'trong' ? 'trong' : tong === 'giu' ? 'giu' : 'kin';
+    if (loai === 'trong') soTrong++;
+    var o = thePhong(ten, loai, { trong: '✓ Còn trống', giu: '◐ Có khách giữ chỗ', kin: '✕ Đã kín' }[loai]);
+    var thanh = el('div', 'gio'), moc = el('div', 'moc');
+    thanh.style.gridTemplateColumns = 'repeat(' + soO + ', 1fr)';
+    if (soO > 24) thanh.style.gap = '1px';
+    for (var h = 0; h < soO; h++) {
+      var s = ngayM + h * 60;
+      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < den ? ' chon' : ''));
+      o2.title = gio(h % 24) + (h >= 24 ? ' hôm sau' : '');
+      thanh.appendChild(o2);
+    }
+    (soO > 24 ? ['0h', '6h', '12h', '18h', '0h', '6h', '12h'] : ['0h', '6h', '12h', '18h', '24h']).forEach(function (m) { moc.appendChild(el('span', null, m)); });
+    o.noiDung.appendChild(thanh);
+    o.noiDung.appendChild(moc);
+    var gia = loai === 'kin' ? null : giaGio(ten, ngayM, tu, den, soKhach);
+    if (gia) o.noiDung.appendChild(khoiGia(ten, gia, tomTat));
+    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+  });
+  hienKetQua(ds, soTrong, ngay(ngayM) + ' · ' + gio(tu) + ' → ' + denChu + ' · ' + soKhach + ' khách');
+  var cg = el('div', 'chuGiai');
+  [['trong', 'Trống'], ['dat', 'Đã đặt'], ['giu', 'Giữ chỗ'], ['baoTri', 'Tạm đóng'], ['qua', 'Đã qua'], ['chon', 'Giờ bạn chọn']].forEach(function (x) {
+    var s = el('span');
+    s.appendChild(el('b', x[0]));
+    s.appendChild(document.createTextNode(x[1]));
+    cg.appendChild(s);
+  });
+  byId('ketQua').appendChild(cg);
+  ghiChuGia();
+}
+
+function kiemTra() {
+  var loi = cheDo === 'dem' ? kiemTraDem() : kiemTraGio();
+  byId('loi').hidden = !loi;
+  if (loi) {
+    byId('loi').textContent = loi;
+    byId('ketQua').textContent = '';
+  }
+}
+
+function khoiTao(duLieu) {
+  D = duLieu;
+  D.gia = D.gia || {};
+  D.anh = D.anh || {};
+  D.uuDai = D.uuDai || { lastMinute: 0, earlyBird: 0, earlyBirdNgay: 30, tuDemGiaThuong: 99, dai5: 0, dai7: 0, dai15: 0, phuThu: 0, toiDaKhach: 3, ngayLe: [] };
+  (D.uuDai.ngayLe || []).forEach(function (s) { LE[s] = 1; });
+  BAY_GIO = phut(D.bayGio);
+  HOM_NAY = Math.floor(BAY_GIO / 1440) * 1440;
+  LICH = D.lich.map(function (b) { return { phong: chuan(b.phong), bd: phut(b.bd), kt: phut(b.kt), tt: b.tt }; });
+  var homNay = iso(HOM_NAY), ngayMai = iso(HOM_NAY + 1440);
+  byId('ten').textContent = D.ten;
+  byId('goiYDem').textContent = 'Nhận phòng từ ' + gio(D.gioNhan) + ' · trả phòng trước ' + gio(D.gioTra);
+  ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = homNay; byId(id).value = homNay; });
+  byId('ngayTra').min = ngayMai;
+  byId('ngayTra').value = ngayMai;
+  for (var h = 0; h < 24; h++) byId('tuGio').add(new Option(gio(h), h));
+  for (var k = 1; k <= 36; k++) byId('denGio').add(new Option(k > 24 ? gio(k - 24) + ' hôm sau' : gio(k), k));
+  var tiep = Math.floor((BAY_GIO - HOM_NAY) / 60) + 1;
+  if (tiep > 21) { byId('ngayGio').value = ngayMai; tiep = 9; }
+  byId('tuGio').value = tiep;
+  byId('denGio').value = Math.min(24, tiep + 3);
+  for (var n = 1; n <= (D.uuDai.toiDaKhach || 3); n++) byId('soKhach').add(new Option(n + ' khách', n));
+  byId('soKhach').value = Math.min(2, D.uuDai.toiDaKhach || 3);
+  byId('goiYKhach').textContent = 'Trẻ em dưới 10 tuổi miễn phí' + (D.uuDai.phuThu ? ' · từ khách thứ 3 phụ thu ' + tien(D.uuDai.phuThu) + '/đêm' : '') + '.';
+
+  byId('ngayNhan').addEventListener('change', function () {
+    if (!this.value) return;
+    var n = phut(this.value);
+    byId('ngayTra').min = iso(n + 1440);
+    if (!byId('ngayTra').value || phut(byId('ngayTra').value) <= n) byId('ngayTra').value = iso(n + 1440);
+  });
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      cheDo = b.getAttribute('data-che-do');
+      document.querySelectorAll('.seg button').forEach(function (x) {
+        x.classList.toggle('on', x === b);
+        x.setAttribute('aria-selected', x === b);
+      });
+      byId('formDem').hidden = cheDo !== 'dem';
+      byId('formGio').hidden = cheDo !== 'gio';
+      kiemTra();
+    });
+  });
+  byId('kiemTra').addEventListener('click', kiemTra);
+  byId('soKhach').addEventListener('change', kiemTra);
+  byId('dongHop').addEventListener('click', dongHop);
+  document.addEventListener('keydown', function (e) {
+    if (byId('hop').hidden) return;
+    var truot = byId('hopTruot');
+    if (e.key === 'Escape') dongHop();
+    if (e.key === 'ArrowRight') truot.scrollBy({ left: truot.clientWidth, behavior: 'smooth' });
+    if (e.key === 'ArrowLeft') truot.scrollBy({ left: -truot.clientWidth, behavior: 'smooth' });
+  });
+
+  byId('zalo').href = 'https://zalo.me/' + D.zalo;
+  byId('soZalo').textContent = D.lienHe;
+  var cn = D.bayGio.split('T');
+  byId('capNhat').textContent = cn[1] + ' ' + cn[0].split('-').reverse().join('/');
+  byId('xemLich').href = D.xemLich;
+  byId('kiemTra').disabled = false;
+  kiemTra();
+}
+
+byId('kiemTra').disabled = true;
+byId('ketQua').appendChild(el('p', 'tom', 'Đang tải lịch phòng…'));
+fetch(API, { cache: 'no-store' })
+  .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function (d) { byId('ketQua').textContent = ''; khoiTao(d); })
+  .catch(function () {
+    byId('ketQua').textContent = '';
+    byId('loi').hidden = false;
+    byId('loi').textContent = 'Chưa tải được lịch phòng. Bạn tải lại trang giúp mình, hoặc nhắn Zalo để hỏi phòng trống nhé.';
+  });
+</script>
+</body>
+</html>
