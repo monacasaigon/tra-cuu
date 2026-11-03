@@ -138,7 +138,7 @@
         <label>Từ<select id="tuGio"></select></label>
         <label>Đến<select id="denGio"></select></label>
       </div>
-      <p class="goiY">Gói qua đêm: chọn giờ trả có chữ “hôm sau”.</p>
+      <p class="goiY">Nhận phòng từ 21:00 là gói Qua đêm, được ở 13 tiếng kể từ giờ nhận.</p>
     </div>
     <div class="luoi">
       <label>Số khách (từ 10 tuổi)<select id="soKhach"></select></label>
@@ -237,6 +237,8 @@ function giaDem(ten, nhan, soDem, soKhach) {
 /* Combo theo giờ: dưới 3 giờ tính Combo 3 giờ; dài hơn thì cộng giờ thêm cho tới khi đắt hơn gói lớn hơn
    (Combo 6 giờ, rồi giá qua đêm trọn 13 giờ). Nhận phòng từ 21h luôn tính Qua đêm.
    Last-minute khi giờ nhận phòng cách lúc xem trang không quá 3 giờ; Early-bird như gói 2 ngày 1 đêm. */
+/* Gói Qua đêm được ở trọn 13 tiếng kể từ giờ nhận, dù khách chọn giờ trả sớm hơn. */
+function gioRa(tu, den) { return tu >= 21 ? Math.max(den, tu + 13) : den; }
 function giaGio(ten, ngayM, tu, den, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[0]) return null;
@@ -246,7 +248,8 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
     var them = Math.max(0, soGio - l[1]), gia = b[l[0]] + them * x;
     if (!tot || gia < tot.gia) tot = { goi: l[0], them: them, gia: gia };
   });
-  var tenGoi = tot.goi === 2 && !quaDem ? 'Trọn 13 giờ (giá qua đêm)' : GOI[tot.goi];
+  var ra = gioRa(tu, den), tenGoi = quaDem ? 'Qua đêm 13 tiếng (' + gio(tu) + ' → ' + gio(tu - 11) + ' hôm sau)'
+    : tot.goi === 2 ? 'Trọn 13 giờ (giá qua đêm)' : GOI[tot.goi];
   var dong = [[tenGoi + (ct ? ' · cuối tuần/lễ' : ''), b[tot.goi]]];
   if (tot.them) dong.push([tot.them + ' giờ thêm × ' + tien(x), tot.them * x]);
   var tong = tot.gia, goc = tot.gia, lyDo = [];
@@ -264,7 +267,9 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   }
   var phu = quaDem || den > 24 ? Math.max(0, soKhach - 2) * u.phuThu : 0;
   if (phu) { dong.push(['Phụ thu khách thứ 3', phu]); tong += phu; goc += phu; }
-  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: soGio + ' giờ · ' + GOI[tot.goi] + (tot.them ? ' + ' + tot.them + ' giờ' : '') + ' · ' + soKhach + ' khách' };
+  var moTa = quaDem ? (ra - tu) + ' tiếng · Qua đêm' + (tot.them ? ' + ' + tot.them + ' giờ' : '') + ' · ' + gio(tu) + ' → ' + gio(ra - 24) + ' hôm sau'
+    : soGio + ' giờ · ' + GOI[tot.goi] + (tot.them ? ' + ' + tot.them + ' giờ' : '');
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: moTa + ' · ' + soKhach + ' khách' };
 }
 
 function el(tag, cls, text) {
@@ -437,13 +442,13 @@ function kiemTraDem() {
 
 function kiemTraGio() {
   if (!byId('ngayGio').value) return 'Hãy chọn ngày.';
-  var ngayM = phut(byId('ngayGio').value), tu = +byId('tuGio').value, den = +byId('denGio').value;
-  var bd = ngayM + tu * 60, kt = ngayM + den * 60, soTrong = 0, soO = den > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
+  var ngayM = phut(byId('ngayGio').value), tu = +byId('tuGio').value, den = +byId('denGio').value, ra = gioRa(tu, den);
+  var bd = ngayM + tu * 60, kt = ngayM + ra * 60, soTrong = 0, soO = ra > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
   if (den <= tu) return 'Giờ trả phải sau giờ nhận.';
   if (kt <= BAY_GIO) return 'Khung giờ này đã qua.';
   if (bd + 60 <= BAY_GIO) return 'Giờ nhận đã qua, hãy chọn từ ' + gio(Math.floor((BAY_GIO - HOM_NAY) / 60)) + '.';
-  var denChu = den > 24 ? gio(den - 24) + ' ' + ngay(ngayM + 1440) : gio(den);
-  var tomTat = ngay(ngayM) + ' từ ' + gio(tu) + ' đến ' + denChu + ', ' + soKhach + ' khách';
+  var denChu = ra > 24 ? gio(ra - 24) + ' ' + ngay(ngayM + 1440) : gio(ra);
+  var tomTat = ngay(ngayM) + ' từ ' + gio(tu) + ' đến ' + denChu + (tu >= 21 ? ' (qua đêm ' + (ra - tu) + ' tiếng)' : '') + ', ' + soKhach + ' khách';
   var ds = D.phong.map(function (ten, viTri) {
     var tong = trangThai(ten, bd, kt);
     var loai = tong === 'trong' ? 'trong' : tong === 'giu' ? 'giu' : 'kin';
@@ -454,7 +459,7 @@ function kiemTraGio() {
     if (soO > 24) thanh.style.gap = '1px';
     for (var h = 0; h < soO; h++) {
       var s = ngayM + h * 60;
-      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < den ? ' chon' : ''));
+      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < ra ? ' chon' : ''));
       o2.title = gio(h % 24) + (h >= 24 ? ' hôm sau' : '');
       thanh.appendChild(o2);
     }
@@ -465,7 +470,7 @@ function kiemTraGio() {
     if (gia) o.noiDung.appendChild(khoiGia(ten, gia, tomTat));
     return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
   });
-  hienKetQua(ds, soTrong, ngay(ngayM) + ' · ' + gio(tu) + ' → ' + denChu + ' · ' + soKhach + ' khách');
+  hienKetQua(ds, soTrong, (tu >= 21 ? 'Qua đêm ' + (ra - tu) + ' tiếng · ' : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + denChu + ' · ' + soKhach + ' khách');
   var cg = el('div', 'chuGiai');
   [['trong', 'Trống'], ['dat', 'Đã đặt'], ['giu', 'Giữ chỗ'], ['baoTri', 'Tạm đóng'], ['qua', 'Đã qua'], ['chon', 'Giờ bạn chọn']].forEach(function (x) {
     var s = el('span');
