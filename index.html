@@ -194,6 +194,7 @@ function trangThai(phong, bd, kt) {
 }
 
 /* Gói 2 ngày 1 đêm: mỗi đêm theo giá ngày thường/cuối tuần, rồi trừ ưu đãi trong tab "Ưu đãi & lễ".
+   Ở đủ số đêm thì cuối tuần tính giá ngày thường, riêng đêm lễ vẫn giữ giá lễ.
    Ưu đãi ở dài chỉ lấy mức cao nhất; Early-bird và Last-minute cộng thêm. */
 function giaDem(ten, nhan, soDem, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
@@ -201,7 +202,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
   var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, lmGoc = 0, soLm = 0;
   for (var i = 0; i < soDem; i++) {
     var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
-    var ap = chiThuong ? g.thuong[3] : giaGoc;
+    var ap = chiThuong && !laLe(m) ? g.thuong[3] : giaGoc;
     if (m + D.gioNhan * 60 - BAY_GIO <= 24 * 60) { lmGoc += ap; soLm++; }
     goc += giaGoc;
     tong += ap;
