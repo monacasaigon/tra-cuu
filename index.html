@@ -42,6 +42,1875 @@
   input[type="date"]::-webkit-date-and-time-value { text-align: left; }
   input:focus, select:focus { outline: 2px solid var(--dau); outline-offset: 1px; }
   .goiY { margin: 8px 0 0; font-size: 12px; color: var(--phu); }
+  .goiY span { display: block; }
+  .goiY span + span { margin-top: 2px; }
+  .goiY.noiBat { padding: 8px 10px; border-radius: 10px; background: var(--nhat); color: var(--dau); font-weight: 600; }
+  .nut { display: block; width: 100%; margin-top: 14px; padding: 13px; border: 0; border-radius: 12px; background: var(--dau); color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .nut:active { transform: translateY(1px); }
+  .nut:disabled { opacity: .6; cursor: wait; }
+  .loi { margin: 10px 0 0; font-size: 13px; color: var(--doChu); }
+  .tom { margin: 18px 4px 4px; font-weight: 600; }
+  .tom small { display: block; font-size: 12px; font-weight: 400; color: var(--phu); }
+  .phong { margin-top: 12px; overflow: hidden; }
+  .noiDung { padding: 14px; }
+  .dauPhong { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tenPhong { font-weight: 600; }
+  .moTa { margin: 4px 0 0; font-size: 12px; color: var(--phu); }
+  .chip { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .chip.trong, .dem .trong { background: var(--xanh); color: var(--xanhChu); }
+  .chip.motPhan { background: var(--vang); color: var(--vangChu); }
+  .chip.kin, .dem .kin { background: var(--do); color: var(--doChu); }
+  .dem { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .dem span { padding: 3px 8px; border-radius: 8px; font-size: 12px; }
+  .dem .kin { text-decoration: line-through; }
+  .gio { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 10px; }
+  .gio i, .chuGiai b { display: block; height: 18px; border-radius: 3px; }
+  .trong { background: var(--oTrong); } .dat { background: var(--oDat); } .qua { background: var(--oQua); }
+  .gio i.chon, .chuGiai b.chon { box-shadow: inset 0 -4px 0 var(--dam); }
+  .moc { display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; color: var(--phu); }
+  .chuGiai { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 10px 4px 0; font-size: 11px; color: var(--phu); }
+  .chuGiai span { display: flex; align-items: center; gap: 4px; }
+  .chuGiai b { width: 12px; height: 12px; }
+  .chuGiai b.chon { background: #fff; border: 1px solid var(--vien); }
+
+  .anh { position: relative; aspect-ratio: 4 / 3; background: var(--nhat); }
+  .truot { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .truot::-webkit-scrollbar { display: none; }
+  .truot img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; scroll-snap-align: start; cursor: zoom-in; }
+  .anh .truot img:first-child { object-position: center 18%; }
+  .phong.het .truot img { filter: grayscale(.7); opacity: .7; }
+  .nhanHang { position: absolute; left: 10px; bottom: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(85,0,13,.88); color: #fff; font-size: 11px; font-weight: 600; }
+  .soAnh { position: absolute; right: 10px; bottom: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; }
+  .mui { position: absolute; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--dam); font-size: 20px; line-height: 1; cursor: pointer; display: none; }
+  .mui.trai { left: 8px; } .mui.phai { right: 8px; }
+  @media (hover: hover) { .anh:hover .mui { display: block; } }
+
+  .gia { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--vien); }
+  .gia .nhan { font-size: 12px; color: var(--phu); }
+  .gia .goc { font-size: 12px; color: var(--phu); text-decoration: line-through; }
+  .gia .tong { font-size: 21px; font-weight: 700; line-height: 1.2; color: var(--dau); }
+  .gia .giam { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: var(--xanhChu); color: #fff; font-size: 11px; vertical-align: 3px; }
+  .gia .lyDo { margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--xanhChu); }
+  .datPhong { flex: none; padding: 10px 14px; border-radius: 10px; background: var(--dau); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
+  .chiTiet { margin-top: 8px; font-size: 13px; }
+  .chiTiet summary { cursor: pointer; color: var(--dau); font-weight: 600; }
+  .dongGia { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .dongGia.tru span:last-child { color: var(--xanhChu); }
+  .dongGia.gach span:last-child { color: var(--phu); text-decoration: line-through; }
+  .dongGia.toiUu { color: var(--xanhChu); font-weight: 600; }
+  .dongGia.tongCong { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--vien); font-weight: 700; }
+  .ghiChu { margin: 14px 4px 0; font-size: 12px; color: var(--phu); }
+  .themDem { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--vang); color: var(--vangChu); font-size: 13px; line-height: 1.4; }
+  .themDem span { flex: 1; }
+  .themDem button { flex: none; padding: 8px 12px; border: 0; border-radius: 9px; background: var(--vangChu); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+  .zalo { display: block; margin-top: 16px; padding: 12px; border: 2px solid var(--dau); border-radius: 14px; background: var(--the); color: var(--dau); text-align: center; font-weight: 700; text-decoration: none; }
+  .zalo small { display: block; font-size: 12px; font-weight: 400; opacity: .85; }
+  footer { margin: 14px 0 6px; text-align: center; font-size: 12px; color: var(--phu); }
+  footer a { color: var(--dau); }
+
+  .hop { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: #120607; }
+  .hopDau { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
+  .hopDau button { border: 0; background: none; color: #fff; font-size: 30px; line-height: 1; cursor: pointer; }
+  .hop .truot { flex: 1; min-height: 0; }
+  .hop .truot img { object-fit: contain; object-position: center; cursor: default; }
+  .toast { position: fixed; left: 50%; bottom: 18px; z-index: 60; max-width: 92%; transform: translateX(-50%); padding: 10px 14px; border-radius: 12px; background: var(--chu); color: #fff; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  [hidden] { display: none !important; }
+  @media (max-width: 400px) {
+    .luoi.hai { grid-template-columns: 1fr; }
+    .luoi.ba { grid-template-columns: 1fr 1fr; }
+    .luoi.ba label:first-child { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="ngonNgu" role="group" aria-label="Ngôn ngữ / Language"><button type="button" data-nn="vi">VI</button><button type="button" data-nn="en">EN</button></div>
+    <img class="logo" src="data:image/png;base64,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" alt="Monaca Homestay" width="108" height="56">
+    <h1 data-c="tieuDe">Tra cứu phòng trống</h1>
+    <p data-c="moDau">Chọn ngày và khung giờ bạn muốn ở để xem phòng nào còn trống và tổng giá</p>
+  </header>
+  <section class="the">
+    <div class="seg" role="tablist">
+      <button type="button" class="on" data-che-do="gio" data-c="tabGio" role="tab" aria-selected="true">⏱ Combo giờ và qua đêm</button>
+      <button type="button" data-che-do="dem" data-c="tabDem" role="tab" aria-selected="false">🌙 2 ngày 1 đêm</button>
+    </div>
+    <div id="formDem" hidden>
+      <div class="luoi hai">
+        <label><span data-c="ngayNhan">Ngày nhận phòng</span><input type="date" id="ngayNhan"></label>
+        <label><span data-c="ngayTra">Ngày trả phòng</span><input type="date" id="ngayTra"></label>
+      </div>
+      <p class="goiY" id="goiYDem"></p>
+    </div>
+    <div id="formGio">
+      <div class="luoi ba">
+        <label><span data-c="ngay">Ngày</span><input type="date" id="ngayGio"></label>
+        <label><span data-c="tu">Từ</span><select id="tuGio"></select></label>
+        <label><span data-c="den">Đến</span><select id="denGio"></select></label>
+      </div>
+      <p class="goiY" id="goiYGio"></p>
+      <p class="goiY noiBat" id="giaiThich" aria-live="polite" hidden></p>
+    </div>
+    <div class="luoi">
+      <label><span data-c="soKhachNhan">Số khách (từ 10 tuổi)</span><select id="soKhach"></select></label>
+    </div>
+    <p class="goiY" id="goiYKhach"></p>
+    <button type="button" class="nut" id="kiemTra" data-c="nutKiemTra">Kiểm tra phòng trống</button>
+    <p class="loi" id="loi" hidden></p>
+  </section>
+  <section id="ketQua" aria-live="polite"></section>
+  <a class="zalo" id="zalo" href="https://zalo.me/0367674477" target="_blank" rel="noopener"><span data-c="nhanZalo">💬 Nhắn Zalo đặt phòng</span><small id="soZalo">Zalo/ĐT: 036 767 4477</small></a>
+  <footer><span data-c="gioVN">Giờ Việt Nam · cập nhật</span> <span id="capNhat"></span> · <a id="xemLich" data-c="xemLich" target="_blank" rel="noopener">Xem lịch đầy đủ ↗</a></footer>
+</div>
+<div class="hop" id="hop" role="dialog" aria-modal="true" aria-label="Ảnh phòng" hidden>
+  <div class="hopDau"><span><b id="hopTen"></b> · <span id="hopDem"></span></span><button type="button" id="dongHop" aria-label="Đóng">×</button></div>
+  <div class="truot" id="hopTruot"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbyHN4mRMvgDdwTQwvVwj015MBfmh0Ui5Z0zR1iXGwd3dWdYGHDssv0HttQcF34slNp3/exec?format=json';
+var D, BAY_GIO, HOM_NAY, LICH, LE = {}, cheDo = 'gio', NN = 'vi';
+
+/* Chữ trên trang theo ngôn ngữ (NN). {0}, {1}… là chỗ điền số liệu; tiếng Anh dùng hàm khi cần số ít / số nhiều. */
+function nhieu(n, mot, nhieu) { return n + ' ' + (n === 1 ? mot : nhieu); }
+var CHU = {
+  vi: {
+    thu: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+    goi: ['Combo 3 giờ', 'Combo 6 giờ', 'Qua đêm', '2 ngày 1 đêm'],
+    tieuDeTrang: 'Monaca Homestay · Tra cứu phòng trống',
+    tieuDe: 'Tra cứu phòng trống',
+    moDau: 'Chọn ngày và khung giờ bạn muốn ở để xem phòng nào còn trống và tổng giá',
+    tabGio: '⏱ Combo giờ và qua đêm',
+    tabDem: '🌙 2 ngày 1 đêm',
+    ngayNhan: 'Ngày nhận phòng', ngayTra: 'Ngày trả phòng', ngay: 'Ngày', tu: 'Từ', den: 'Đến',
+    goiYCombo: '⏱ Combo giờ: nhận từ {0}, trả phòng trước {1}.',
+    goiYQuaDem: '🌙 Qua đêm: trả phòng sau {0}, hoặc nhận từ {1} đến {2} sáng. Ở 13 tiếng kể từ giờ nhận, trả phòng muộn nhất {3} trưa.',
+    giaiCombo: '👉 {0} → {1}: combo giờ, {2}.',
+    giaiSau21: '👉 Trả phòng sau {0} nên tính gói Qua đêm: ',
+    giaiTu22: '👉 Nhận phòng từ {0} là gói Qua đêm: ',
+    giaiSang: '👉 Nhận phòng trước {0} sáng là gói Qua đêm: ',
+    giaiDuocO: 'nhận {0}, trả phòng trước {1} ({2} tiếng).',
+    giaiTrua: ' Qua đêm trả phòng muộn nhất {0} trưa.',
+    giaiQuaGio: ' Ở sau {0}: tính thêm giờ, hoặc giá 2 ngày 1 đêm nếu rẻ hơn.',
+    goiYDem: 'Nhận phòng từ {0} · trả phòng trước {1}',
+    soKhachNhan: 'Số khách (từ 10 tuổi)',
+    treEm: 'Trẻ em dưới 10 tuổi miễn phí',
+    phuThuTu3: 'Từ khách thứ 3 phụ thu {0}/đêm - ',
+    nutKiemTra: 'Kiểm tra phòng trống',
+    nhanZalo: '💬 Nhắn Zalo đặt phòng',
+    gioVN: 'Giờ Việt Nam · cập nhật',
+    xemLich: 'Xem lịch đầy đủ ↗',
+    anhPhong: 'Ảnh phòng', dong: 'Đóng', anhTruoc: 'Ảnh trước', anhSau: 'Ảnh sau', anhSo: '{0} – ảnh {1}',
+    dangTai: 'Đang tải lịch phòng…',
+    loiTai: 'Chưa tải được lịch phòng. Bạn tải lại trang giúp mình, hoặc nhắn Zalo để hỏi phòng trống nhé.',
+    homSau: 'hôm sau',
+    khach: '{0} khách', dem: '{0} đêm', tieng: '{0} tiếng', soGio: '{0} giờ', congGio: ' + {0} giờ',
+    loiChonNgayDem: 'Hãy chọn ngày nhận và ngày trả phòng.',
+    loiNhanQua: 'Ngày nhận phòng đã qua.',
+    loiTraSau: 'Ngày trả phải sau ngày nhận.',
+    loi30: 'Vui lòng chọn tối đa 30 đêm.',
+    loiChonNgay: 'Hãy chọn ngày.',
+    loiGioTra: 'Giờ trả phải sau giờ nhận.',
+    loiKhungQua: 'Khung giờ này đã qua.',
+    loiGioNhanQua: 'Giờ nhận đã qua, hãy chọn từ {0}.',
+    conTrong: '✓ Còn trống', trongDem: '◐ Trống {0}/{1} đêm', hetPhong: '✕ Hết phòng', daKin: '✕ Đã kín',
+    caPhong: 'Cả {0} phòng đều còn trống 🎉',
+    khongTrong: 'Rất tiếc, không còn phòng trống trọn khoảng này',
+    soTrong: '{0}/{1} phòng còn trống',
+    tomDem: 'Nhận {0} {1} → trả {2} {3} · {4} · {5}',
+    quaDemTieng: 'Qua đêm {0} tiếng · ',
+    cgTrong: 'Trống', cgDat: 'Đã đặt', cgQua: 'Đã qua', cgChon: 'Giờ bạn chọn',
+    ghiChuGia: 'Giá tính theo bảng giá và ưu đãi hiện hành. {0} sẽ xác nhận lại khi bạn nhắn Zalo.',
+    datQuaZalo: 'Đặt qua Zalo', chiTietGia: 'Chi tiết giá', tongCong: 'Tổng cộng',
+    demNgay: 'Đêm {0}',
+    cuoiTuanLe: ' · cuối tuần/lễ',
+    uuDaiTuDem: 'Ưu đãi từ {0} đêm: chỉ tính giá ngày thường',
+    lyDoTuDem: 'Từ {0} đêm: giá ngày thường',
+    lmDem: 'Last-minute −{0}% (đặt phòng trước khi nhận phòng 24 tiếng)',
+    lmGio: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 4 tiếng)',
+    eb: 'Early-bird −{0}%',
+    oDem: 'Ở {0} đêm −{1}%',
+    phuThuDem: 'Phụ thu khách thứ {0} × {1} đêm',
+    phuThu: 'Phụ thu khách thứ {0} ({1}/khách)',
+    phuThuTu3Gio: 'Từ khách thứ 3 phụ thu {0}/khách (combo giờ), {1}/khách (qua đêm) - ',
+    toiDaKhach: '✕ Tối đa {0} khách',
+    quaDemGoi: 'Qua đêm {2} tiếng ({0} → {1})',
+    tron13: 'Trọn 13 giờ (giá qua đêm)',
+    theoGia2N1D: 'Tính theo giá 2 ngày 1 đêm',
+    gioThem: '{0} giờ thêm × {1}',
+    congGioThem: ' + {0} giờ thêm',
+    giaThuong: 'Giá thông thường: {0}',
+    toiUu: '✓ Trang tự chọn giá tốt hơn: {0}',
+    lyDoToiUu: 'Trang đã tự chọn giá tốt hơn cho bạn, lợi {0}',
+    moTaQuaDem: '{0} tiếng · Qua đêm{1} · {2} → {3}',
+    moTa2N1D: 'Giá 2 ngày 1 đêm · {0} → {1}',
+    tomTat2N1D: ' (giá 2 ngày 1 đêm)',
+    themDem: '💡 Đặt thêm 1 đêm (trả phòng {0}): cả {1} đêm tính giá ngày thường, tổng {2} — chỉ thêm {3}.',
+    nutThemDem: 'Thêm 1 đêm',
+    tomTatDem: 'nhận {0} {1}, trả {2} {3} ({4}), {5}',
+    tomTatGio: '{0} từ {1} đến {2}{3}, {4}',
+    quaDemTomTat: ' (qua đêm {0} tiếng)',
+    loiNhan: 'Chào {0}, mình muốn đặt {1}: {2}. Giá trên trang: {3}.',
+    daChep: 'Đã chép nội dung đặt phòng, bạn dán vào khung chat Zalo nhé.',
+  },
+  en: {
+    thu: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    thang: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    goi: ['3-hour combo', '6-hour combo', 'Overnight', '2 days 1 night'],
+    tieuDeTrang: 'Monaca Homestay · Room availability',
+    tieuDe: 'Check room availability',
+    moDau: 'Choose your dates and times to see which rooms are free and the total price',
+    tabGio: '⏱ Hourly & overnight',
+    tabDem: '🌙 2 days 1 night',
+    ngayNhan: 'Check-in date', ngayTra: 'Check-out date', ngay: 'Date', tu: 'From', den: 'To',
+    goiYCombo: '⏱ Hourly combo: check-in from {0}, check-out before {1}.',
+    goiYQuaDem: '🌙 Overnight: check-out after {0}, or check-in from {1} to {2}. Stay 13 hours from check-in; latest check-out {3}.',
+    giaiCombo: '👉 {0} → {1}: hourly combo, {2}.',
+    giaiSau21: '👉 Check-out is after {0}, so this is the Overnight package: ',
+    giaiTu22: '👉 Check-in from {0} is the Overnight package: ',
+    giaiSang: '👉 Check-in before {0} is the Overnight package: ',
+    giaiDuocO: function (a, b, n) { return 'check-in ' + a + ', check-out before ' + b + ' (' + nhieu(n, 'hour', 'hours') + ').'; },
+    giaiTrua: ' Latest overnight check-out is {0}.',
+    giaiQuaGio: ' After {0}: extra hours, or the 2 days 1 night rate if cheaper.',
+    goiYDem: 'Check-in after {0} · check-out before {1}',
+    soKhachNhan: 'Guests (age 10+)',
+    treEm: 'Children under 10 stay free',
+    phuThuTu3: 'From the 3rd guest: +{0}/night - ',
+    nutKiemTra: 'Check availability',
+    nhanZalo: '💬 Message us on WhatsApp to book',
+    gioVN: 'Vietnam time · updated',
+    xemLich: 'Full calendar ↗',
+    anhPhong: 'Room photos', dong: 'Close', anhTruoc: 'Previous photo', anhSau: 'Next photo', anhSo: '{0} – photo {1}',
+    dangTai: 'Loading availability…',
+    loiTai: 'Couldn\'t load the room calendar. Please reload the page, or message us on WhatsApp to ask about availability.',
+    homSau: 'next day',
+    khach: function (n) { return nhieu(n, 'guest', 'guests'); },
+    dem: function (n) { return nhieu(n, 'night', 'nights'); },
+    tieng: function (n) { return nhieu(n, 'hour', 'hours'); },
+    soGio: function (n) { return nhieu(n, 'hour', 'hours'); },
+    congGio: ' + {0} h',
+    loiChonNgayDem: 'Please choose check-in and check-out dates.',
+    loiNhanQua: 'The check-in date has already passed.',
+    loiTraSau: 'Check-out must be after check-in.',
+    loi30: 'Please choose 30 nights at most.',
+    loiChonNgay: 'Please choose a date.',
+    loiGioTra: 'Check-out time must be after check-in time.',
+    loiKhungQua: 'This time slot has already passed.',
+    loiGioNhanQua: 'That check-in time has passed, please choose {0} or later.',
+    conTrong: '✓ Available', trongDem: '◐ Free {0}/{1} nights', hetPhong: '✕ Fully booked', daKin: '✕ Booked',
+    caPhong: 'All {0} rooms are available 🎉',
+    khongTrong: 'Sorry, no room is free for this whole period',
+    soTrong: '{0}/{1} rooms available',
+    tomDem: 'Check-in after {0} {1} → check-out before {2} {3} · {4} · {5}',
+    quaDemTieng: 'Overnight, {0} hours · ',
+    cgTrong: 'Free', cgDat: 'Booked', cgQua: 'Past', cgChon: 'Your hours',
+    ghiChuGia: 'Prices follow our current rates and offers. {0} will confirm when you message us on WhatsApp.',
+    datQuaZalo: 'Book via WhatsApp', chiTietGia: 'Price details', tongCong: 'Total',
+    demNgay: 'Night of {0}',
+    cuoiTuanLe: ' · weekend/holiday',
+    uuDaiTuDem: '{0}+ nights: weekday rates only',
+    lyDoTuDem: '{0}+ nights: weekday rates',
+    lmDem: 'Last-minute −{0}% (booked within 24 hours of check-in)',
+    lmGio: 'Last-minute −{0}% (booked within 4 hours of check-in)',
+    eb: 'Early-bird −{0}%',
+    oDem: '{0}-night stay −{1}%',
+    phuThuDem: function (k, n) { return k + ' guest surcharge × ' + nhieu(n, 'night', 'nights'); },
+    phuThu: '{0} guest surcharge ({1} per guest)',
+    phuThuTu3Gio: 'From the 3rd guest: +{0} per guest (hourly combo), +{1} per guest (overnight) - ',
+    toiDaKhach: '✕ Max {0} guests',
+    quaDemGoi: function (a, b, n) { return 'Overnight, ' + nhieu(n, 'hour', 'hours') + ' (' + a + ' → ' + b + ')'; },
+    tron13: 'Full 13 hours (overnight rate)',
+    theoGia2N1D: 'Charged at the 2 days 1 night rate',
+    gioThem: function (n, gia) { return nhieu(n, 'extra hour', 'extra hours') + ' × ' + gia; },
+    congGioThem: function (n) { return ' + ' + nhieu(n, 'extra hour', 'extra hours'); },
+    giaThuong: 'Regular price: {0}',
+    toiUu: '✓ Better price picked for you: {0}',
+    lyDoToiUu: 'We picked a better price for you: you save {0}',
+    moTaQuaDem: '{0} hours · Overnight{1} · {2} → {3}',
+    moTa2N1D: '2 days 1 night rate · {0} → {1}',
+    tomTat2N1D: ' (2 days 1 night rate)',
+    themDem: '💡 Add 1 more night (check-out {0}): all {1} nights at weekday rates, total {2} — only {3} more.',
+    nutThemDem: 'Add 1 night',
+    tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
+    tomTatGio: '{0} from {1} to {2}{3}, {4}',
+    quaDemTomTat: ' (overnight, {0} hours)',
+    loiNhan: 'Hi {0}, I\'d like to book {1}: {2}. Price shown on the website: {3}.',
+  },
+};
+function c(k) {
+  var v = CHU[NN][k], a = arguments;
+  if (typeof v === 'function') return v.apply(null, [].slice.call(a, 1));
+  return String(v).replace(/\{(\d)\}/g, function (_, i) { return a[+i + 1]; });
+}
+
+function byId(id) { return document.getElementById(id); }
+/* Mốc thời gian tính bằng phút theo giờ Việt Nam, không phụ thuộc múi giờ của máy khách. */
+function phut(s) {
+  var p = s.split('T'), d = p[0].split('-'), t = (p[1] || '00:00').split(':');
+  return Date.UTC(+d[0], +d[1] - 1, +d[2], +t[0], +t[1]) / 60000;
+}
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function iso(m) { return new Date(m * 60000).toISOString().slice(0, 10); }
+function thu(m) { return new Date(m * 60000).getUTCDay(); }
+function ngay(m) {
+  var d = new Date(m * 60000), t = CHU[NN].thu[d.getUTCDay()];
+  return NN === 'en' ? t + ' ' + d.getUTCDate() + ' ' + CHU.en.thang[d.getUTCMonth()]
+    : t + ' ' + pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1);
+}
+/* Giờ tròn: bản Việt 24 giờ (14:00), bản Anh 12 giờ (2:00PM). */
+function gio(h) {
+  if (NN !== 'en') return pad(h) + ':00';
+  var g = h % 24;
+  return (g % 12 || 12) + ':00' + (g < 12 ? 'AM' : 'PM');
+}
+function chuan(s) { return String(s).trim().toLowerCase(); }
+function tien(n) { return NN === 'en' ? Math.round(n).toLocaleString('en-US') + '₫' : Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+/* Tên phòng trong Sheet là tiếng Việt ("Phòng 101 - …"); bản tiếng Anh chỉ đổi chữ "Phòng". */
+function tenHien(ten) { return NN === 'en' ? String(ten).replace(/^Phòng\s+/i, 'Room ') : ten; }
+/* Khách Việt liên hệ qua Zalo, khách nước ngoài qua WhatsApp (cùng số điện thoại). */
+function soQuocTe() { return '84' + D.zalo.replace(/^0/, ''); }
+function lienHe() { return NN === 'en' ? 'WhatsApp: ' + D.lienHe.replace(/^[^0-9+]*/, '').replace(/^0/, '+84 ') : D.lienHe; }
+function linkLienHe(noiDung) {
+  return NN === 'en' ? 'https://wa.me/' + soQuocTe() + (noiDung ? '?text=' + encodeURIComponent(noiDung) : '')
+    : 'https://zalo.me/' + D.zalo;
+}
+function lamTron(n) { return Math.round(n / 1000) * 1000; }
+function anhNho(url, rong) { return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&w=' + rong + '&q=72&output=webp'; }
+
+/* Cuối tuần: combo giờ là thứ 7, chủ nhật; qua đêm và 2 ngày 1 đêm là đêm thứ 6, thứ 7. Ngày lễ luôn tính cuối tuần. */
+function laLe(m) { return !!LE[iso(m)]; }
+function cuoiTuanCombo(m) { var t = thu(m); return t === 6 || t === 0 || laLe(m); }
+function cuoiTuanDem(m) { var t = thu(m); return t === 5 || t === 6 || laLe(m); }
+
+/* Giờ trên ô "Đến" tính từ 0:00 ngày đã chọn: 24 trở lên là hôm sau (36 = 12:00 trưa hôm sau). */
+function moc(h) { return h >= 24 ? gio(h - 24) + ' ' + c('homSau') : gio(h); }
+
+/* Sức chứa: phòng 101 và 202 ở được 4 khách; phòng khác theo "Số khách tối đa mỗi phòng" trong Sheet. */
+var SUC_CHUA = { '101': 4, '202': 4 };
+function sucChua(ten) { var so = (String(ten).match(/\d+/) || [])[0]; return SUC_CHUA[so] || D.uuDai.toiDaKhach || 3; }
+/* Phụ thu combo giờ ban ngày cho mỗi khách từ khách thứ 3 (Sheet chưa có dòng này thì dùng 50.000đ). */
+function phuThuGio() { var v = D.uuDai.phuThuGio; return typeof v === 'number' ? v : 50000; }
+/* "3" hoặc "3, 4" (bản Anh "3rd" hoặc "3rd & 4th") cho dòng phụ thu. */
+function khachThem(n) {
+  var ds = [];
+  for (var i = 3; i < 3 + n; i++) ds.push(NN === 'en' ? i + (i === 3 ? 'rd' : 'th') : i);
+  return ds.join(NN === 'en' ? ' & ' : ', ');
+}
+
+/* Trạng thái của phòng trong [bd, kt): lệch 1 phút để lượt trả 12:00 và nhận 12:00 không bị tính là trùng. */
+function trangThai(phong, bd, kt) {
+  var p = chuan(phong);
+  return LICH.some(function (b) { return b.phong === p && b.bd < kt - 1 && b.kt > bd + 1; }) ? 'dat' : 'trong';
+}
+
+/* Gói 2 ngày 1 đêm: mỗi đêm theo giá ngày thường/cuối tuần, rồi trừ ưu đãi trong tab "Ưu đãi & lễ".
+   Ở đủ số đêm thì cuối tuần tính giá ngày thường, riêng đêm lễ vẫn giữ giá lễ.
+   Ưu đãi ở dài chỉ lấy mức cao nhất; Early-bird và Last-minute cộng thêm. */
+function giaDem(ten, nhan, soDem, soKhach) {
+  var g = D.gia[ten], u = D.uuDai;
+  if (!g || !g.thuong[3]) return null;
+  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, lmGoc = 0, soLm = 0;
+  for (var i = 0; i < soDem; i++) {
+    var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
+    var ap = chiThuong && !laLe(m) ? g.thuong[3] : giaGoc;
+    if (!ct && m + D.gioNhan * 60 - BAY_GIO <= 24 * 60) { lmGoc += ap; soLm++; }
+    goc += giaGoc;
+    tong += ap;
+    dong.push([c('demNgay', ngay(m)) + (ct ? c('cuoiTuanLe') : ''), giaGoc]);
+  }
+  if (goc > tong) {
+    dong.push([c('uuDaiTuDem', u.tuDemGiaThuong), tong - goc]);
+    lyDo.push(c('lyDoTuDem', u.tuDemGiaThuong));
+  }
+  /* Last-minute: giảm cho mọi đêm ngày thường (không phải đêm T6, T7, lễ) có giờ nhận phòng trong vòng 24 giờ kể từ lúc xem trang. */
+  if (u.lastMinute && soLm) {
+    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = c('lmDem', u.lastMinute);
+    dong.push([tenLm, -lm]);
+    lyDo.push(tenLm);
+    tong -= lm;
+  }
+  var pct = 0, ly = [];
+  if (u.earlyBird && (nhan - HOM_NAY) / 1440 >= u.earlyBirdNgay) { pct += u.earlyBird; ly.push(c('eb', u.earlyBird)); }
+  var dai = soDem >= 15 ? u.dai15 : soDem >= 7 ? u.dai7 : soDem >= 5 ? u.dai5 : 0;
+  if (dai) { pct += dai; ly.push(c('oDem', soDem, dai)); }
+  if (pct) {
+    var giam = lamTron(tong * pct / 100);
+    dong.push([ly.join(', '), -giam]);
+    lyDo = lyDo.concat(ly);
+    tong -= giam;
+  }
+  var soThem = Math.max(0, soKhach - 2), them = soThem * u.phuThu * soDem;
+  if (them) { dong.push([c('phuThuDem', khachThem(soThem), soDem), them]); tong += them; goc += them; }
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: c('dem', soDem) + ' · ' + c('khach', soKhach) };
+}
+
+/* Combo giờ ban ngày: nhận từ 09:00, trả trước 21:00. Dưới 3 giờ tính Combo 3 giờ; dài hơn thì trang so Combo 3 giờ,
+   Combo 6 giờ (cộng giờ thêm) và giá qua đêm trọn 13 giờ, lấy giá rẻ nhất. Cuối tuần theo ngày (T7, CN).
+   Gói Qua đêm khi trả sau 21:00, hoặc nhận từ 22:00 đến trước 09:00 sáng: ở 13 tiếng kể từ giờ nhận, trả muộn nhất
+   12:00 trưa. Ở quá giờ trả thì cộng giờ thêm, hoặc tính giá 2 ngày 1 đêm (nhận trước 14:00 thì cộng giờ) nếu rẻ hơn.
+   Cuối tuần theo đêm (đêm T6, T7); nhận lúc rạng sáng thuộc đêm hôm trước.
+   Trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm, Qua đêm + giờ thêm) thì giá thông thường
+   hiện gạch ngang để khách thấy phần lợi.
+   Last-minute chỉ ngày thường, khi giờ nhận cách lúc xem trang không quá 4 giờ, chỉ giảm giá gói (không giảm giờ thêm).
+   Early-bird như gói 2 ngày 1 đêm. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
+var COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, TRUA = 12;
+function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
+/* Nhận rạng sáng thì trả muộn nhất 12:00 cùng ngày; nhận từ 09:00 thì 12:00 hôm sau. */
+function denToiDa(tu) { return tu < COMBO_TU ? TRUA : TRUA + 24; }
+function gioTraQuaDem(tu) { return Math.min(tu + 13, denToiDa(tu)); }
+function giaGio(ten, ngayM, tu, den, soKhach) {
+  var g = D.gia[ten], u = D.uuDai;
+  if (!g || !g.thuong[0]) return null;
+  var quaDem = laQuaDem(tu, den), soGio = den - tu, ra = gioTraQuaDem(tu);
+  var ct = quaDem ? cuoiTuanDem(tu < COMBO_TU ? ngayM - 1440 : ngayM) : cuoiTuanCombo(ngayM);
+  var b = ct ? g.cuoiTuan : g.thuong, x = b[4] || 0, ds, thuong;
+  function cach(goi, them, tra) { return b[goi] ? { goi: goi, them: them, gia: b[goi] + them * x, tra: tra } : null; }
+  if (quaDem) {
+    ds = [cach(2, Math.max(0, den - ra), Math.max(den, ra))];
+    if (tu >= COMBO_TU) ds.push(cach(3, Math.max(0, 14 - tu), TRUA + 24));
+    thuong = ds[0];
+  } else {
+    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), cach(2, 0, den)];
+    thuong = soGio >= 6 ? ds[1] : ds[0];
+  }
+  ds = ds.filter(Boolean);
+  if (!ds.length) return null;
+  thuong = thuong || ds[0];
+  var tot = ds.reduce(function (a, v) { return v.gia < a.gia ? v : a; }, thuong);
+  var kieu = tot.goi === 3 ? '2n1d' : quaDem ? 'quaDem' : 'gio';
+  function tenGoi(v) {
+    return v.goi === 3 ? c('theoGia2N1D') : v.goi === 2 ? (quaDem ? c('quaDemGoi', moc(tu), moc(ra), ra - tu) : c('tron13'))
+      : CHU[NN].goi[v.goi];
+  }
+  function tenDu(v) { return tenGoi(v) + (v.them ? c('congGioThem', v.them) : ''); }
+  var cuoi = ct ? c('cuoiTuanLe') : '', dong = [], lyDo = [], loi = thuong.gia - tot.gia;
+  if (loi > 0) {
+    dong.push([c('giaThuong', tenDu(thuong)) + cuoi, thuong.gia, 'gach']);
+    dong.push([c('toiUu', tenDu(tot)), tot.gia, 'toiUu']);
+    lyDo.push(c('lyDoToiUu', tien(loi)));
+  } else {
+    dong.push([tenGoi(tot) + cuoi, b[tot.goi]]);
+    if (tot.them) dong.push([c('gioThem', tot.them, tien(x)), tot.them * x]);
+  }
+  var tong = tot.gia, goc = thuong.gia;
+  if (u.lastMinute && !ct && ngayM + tu * 60 - BAY_GIO <= 4 * 60) {
+    var lm = lamTron(b[tot.goi] * u.lastMinute / 100), tenLm = c('lmGio', u.lastMinute);
+    dong.push([tenLm, -lm]);
+    lyDo.push(tenLm);
+    tong -= lm;
+  }
+  if (u.earlyBird && (ngayM - HOM_NAY) / 1440 >= u.earlyBirdNgay) {
+    var eb = lamTron(tong * u.earlyBird / 100), tenEb = c('eb', u.earlyBird);
+    dong.push([tenEb, -eb]);
+    lyDo.push(tenEb);
+    tong -= eb;
+  }
+  var soThem = Math.max(0, soKhach - 2), donGia = kieu === 'gio' ? phuThuGio() : u.phuThu;
+  if (soThem && donGia) {
+    dong.push([c('phuThu', khachThem(soThem), tien(donGia)), soThem * donGia]);
+    tong += soThem * donGia;
+    goc += soThem * donGia;
+  }
+  var congGio = tot.them ? c('congGio', tot.them) : '';
+  var moTa = kieu === '2n1d' ? c('moTa2N1D', moc(tu), moc(tot.tra))
+    : kieu === 'quaDem' ? c('moTaQuaDem', tot.tra - tu, congGio, moc(tu), moc(tot.tra))
+    : c('soGio', soGio) + ' · ' + (tot.goi === 2 ? c('tron13') : CHU[NN].goi[tot.goi] + congGio);
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: moTa + ' · ' + c('khach', soKhach), tra: tot.tra, kieu: kieu };
+}
+
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function taoAnh(url, rong, ten, i) {
+  var img = document.createElement('img');
+  img.alt = c('anhSo', tenHien(ten), i + 1);
+  img.decoding = 'async';
+  img.loading = i ? 'lazy' : 'eager';
+  img.src = anhNho(url, rong);
+  img.onerror = function () { if (!img.dataset.goc) { img.dataset.goc = '1'; img.src = url; } };
+  return img;
+}
+
+function soThuTu(truot, tong) { return (Math.round(truot.scrollLeft / Math.max(1, truot.clientWidth)) + 1) + '/' + tong; }
+
+/* Bộ ảnh tiếng Anh nằm cạnh trang: <số phòng>-01.jpg, -02.jpg… (số ảnh của từng phòng ở ANH_EN).
+   Phòng không có trong ANH_EN thì bản tiếng Anh dùng ảnh trong Sheet như bản tiếng Việt. */
+var ANH_EN = { '101': 10, '201': 9, '202': 11, '301': 10 };
+var GOC_TRANG = /^https?:/.test(location.href) ? location.href : 'https://monacasaigon.github.io/tra-cuu/';
+function dsAnh(ten) {
+  var so = (String(ten).match(/\d+/) || [])[0], n = NN === 'en' && ANH_EN[so], ds = [];
+  if (!n) return D.anh[ten] || [];
+  for (var i = 1; i <= n; i++) ds.push(new URL(so + '-' + pad(i) + '.jpg', GOC_TRANG).href);
+  return ds;
+}
+
+function khungAnh(ten) {
+  var ds = dsAnh(ten), g = D.gia[ten] || {}, khung = el('div', 'anh');
+  if (!ds.length) return khung;
+  var truot = el('div', 'truot'), dem = el('span', 'soAnh', '1/' + ds.length);
+  ds.forEach(function (url, i) {
+    var img = taoAnh(url, 720, ten, i);
+    img.addEventListener('click', function () { moHop(ds, i, ten); });
+    truot.appendChild(img);
+  });
+  truot.addEventListener('scroll', function () { dem.textContent = soThuTu(truot, ds.length); }, { passive: true });
+  khung.appendChild(truot);
+  if (g.hang) khung.appendChild(el('span', 'nhanHang', g.hang));
+  khung.appendChild(dem);
+  if (ds.length > 1) {
+    [['trai', '‹', -1, c('anhTruoc')], ['phai', '›', 1, c('anhSau')]].forEach(function (x) {
+      var n = el('button', 'mui ' + x[0], x[1]);
+      n.type = 'button';
+      n.setAttribute('aria-label', x[3]);
+      n.addEventListener('click', function () { truot.scrollBy({ left: x[2] * truot.clientWidth, behavior: 'smooth' }); });
+      khung.appendChild(n);
+    });
+  }
+  return khung;
+}
+
+function moHop(ds, i, ten) {
+  var truot = byId('hopTruot');
+  truot.textContent = '';
+  ds.forEach(function (url, j) { truot.appendChild(taoAnh(url, 1080, ten, j)); });
+  byId('hopTen').textContent = tenHien(ten);
+  truot.onscroll = function () { byId('hopDem').textContent = soThuTu(truot, ds.length); };
+  byId('hop').hidden = false;
+  document.body.style.overflow = 'hidden';
+  truot.scrollLeft = i * truot.clientWidth;
+  byId('hopDem').textContent = (i + 1) + '/' + ds.length;
+}
+
+function dongHop() {
+  byId('hop').hidden = true;
+  document.body.style.overflow = '';
+}
+
+function thongBao(s) {
+  var t = byId('toast');
+  t.textContent = s;
+  t.hidden = false;
+  clearTimeout(t.hen);
+  t.hen = setTimeout(function () { t.hidden = true; }, 6000);
+}
+
+/* Zalo không nhận sẵn nội dung qua link nên chép vào bộ nhớ tạm; WhatsApp thì gửi kèm ngay trong link. */
+function chepDatPhong(noiDung) {
+  var bao = function (ok) { thongBao(ok ? c('daChep') : noiDung); };
+  try { navigator.clipboard.writeText(noiDung).then(function () { bao(true); }, function () { bao(false); }); } catch (e) { bao(false); }
+}
+
+function thePhong(ten, loai, nhan) {
+  var o = el('div', 'phong' + (loai === 'kin' ? ' het' : '')), nd = el('div', 'noiDung'), dau = el('div', 'dauPhong');
+  o.appendChild(khungAnh(ten));
+  dau.appendChild(el('span', 'tenPhong', tenHien(ten)));
+  dau.appendChild(el('span', 'chip ' + loai, nhan));
+  nd.appendChild(dau);
+  if (D.gia[ten] && D.gia[ten].moTa) nd.appendChild(el('p', 'moTa', D.gia[ten].moTa));
+  o.appendChild(nd);
+  o.noiDung = nd;
+  return o;
+}
+
+function khoiGia(ten, kq, tomTat) {
+  var khoi = el('div'), hang = el('div', 'gia'), trai = el('div'), tong = el('div', 'tong', tien(kq.tong));
+  trai.appendChild(el('div', 'nhan', kq.moTa));
+  if (kq.goc > kq.tong) {
+    trai.appendChild(el('div', 'goc', tien(kq.goc)));
+    tong.appendChild(el('span', 'giam', '−' + Math.round((1 - kq.tong / kq.goc) * 100) + '%'));
+  }
+  trai.appendChild(tong);
+  if (kq.lyDo && kq.lyDo.length) trai.appendChild(el('div', 'lyDo', '🏷 ' + kq.lyDo.join(' · ')));
+  hang.appendChild(trai);
+  var noiDung = c('loiNhan', D.ten, tenHien(ten), tomTat, tien(kq.tong)), nut = el('a', 'datPhong', c('datQuaZalo'));
+  nut.href = linkLienHe(noiDung);
+  nut.target = '_blank';
+  nut.rel = 'noopener';
+  if (NN !== 'en') nut.addEventListener('click', function () { chepDatPhong(noiDung); });
+  hang.appendChild(nut);
+  khoi.appendChild(hang);
+  var ct = el('details', 'chiTiet');
+  ct.appendChild(el('summary', null, c('chiTietGia')));
+  kq.dong.forEach(function (d) {
+    var r = el('div', 'dongGia' + (d[1] < 0 ? ' tru' : '') + (d[2] ? ' ' + d[2] : ''));
+    r.appendChild(el('span', null, d[0]));
+    r.appendChild(el('span', null, (d[1] < 0 ? '−' : '') + tien(Math.abs(d[1]))));
+    ct.appendChild(r);
+  });
+  var cuoi = el('div', 'dongGia tongCong');
+  cuoi.appendChild(el('span', null, c('tongCong')));
+  cuoi.appendChild(el('span', null, tien(kq.tong)));
+  ct.appendChild(cuoi);
+  khoi.appendChild(ct);
+  return khoi;
+}
+
+var THU_TU = { trong: 0, motPhan: 1, kin: 2 };
+
+/* Phòng không đủ chỗ cho số khách đã chọn: hiện mờ ở cuối danh sách, không báo giá. */
+function khongVua(ten, viTri) {
+  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten))), thuTu: 300 + viTri };
+}
+
+/* Ở thiếu đúng 1 đêm để được ưu đãi "từ N đêm chỉ tính giá ngày thường" và có đêm cuối tuần được hạ giá:
+   gợi ý đặt thêm đêm kế tiếp (nếu phòng còn trống), ghi tổng mới và phần chỉ phải trả thêm. */
+function goiYThemDem(ten, nhan, tra, soDem, soKhach, gia) {
+  var u = D.uuDai, moi = soDem + 1, kt = tra + D.gioTra * 60;
+  if (moi !== u.tuDemGiaThuong || moi > 30) return null;
+  var coHa = false;
+  for (var i = 0; i < moi; i++) { var m = nhan + i * 1440; if (cuoiTuanDem(m) && !laLe(m)) coHa = true; }
+  if (!coHa || trangThai(ten, kt, kt + 1440) !== 'trong') return null;
+  var g = giaDem(ten, nhan, moi, soKhach);
+  if (!g) return null;
+  var hop = el('div', 'themDem'), nut = el('button', null, c('nutThemDem'));
+  hop.appendChild(el('span', null, c('themDem', gio(D.gioTra) + ' ' + ngay(tra + 1440), moi, tien(g.tong), tien(g.tong - gia.tong))));
+  nut.type = 'button';
+  nut.addEventListener('click', function () {
+    byId('ngayTra').value = iso(tra + 1440);
+    kiemTra();
+    byId('ketQua').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  hop.appendChild(nut);
+  return hop;
+}
+
+function hienKetQua(ds, soTrong, moTa) {
+  var kq = byId('ketQua'), n = D.phong.length;
+  kq.textContent = '';
+  var tom = el('p', 'tom', soTrong === n ? c('caPhong', n) : soTrong === 0 ? c('khongTrong') : c('soTrong', soTrong, n));
+  tom.appendChild(el('small', null, moTa));
+  kq.appendChild(tom);
+  ds.sort(function (a, b) { return a.thuTu - b.thuTu; }).forEach(function (x) { kq.appendChild(x.o); });
+}
+
+function ghiChuGia() {
+  byId('ketQua').appendChild(el('p', 'ghiChu', c('ghiChuGia', D.ten)));
+}
+
+function kiemTraDem() {
+  if (!byId('ngayNhan').value || !byId('ngayTra').value) return c('loiChonNgayDem');
+  var nhan = phut(byId('ngayNhan').value), tra = phut(byId('ngayTra').value);
+  var soDem = Math.round((tra - nhan) / 1440), soKhach = +byId('soKhach').value || 2;
+  if (nhan < HOM_NAY) return c('loiNhanQua');
+  if (soDem < 1) return c('loiTraSau');
+  if (soDem > 30) return c('loi30');
+  var bd = nhan + D.gioNhan * 60, kt = tra + D.gioTra * 60, soTrong = 0;
+  var tomTat = c('tomTatDem', gio(D.gioNhan), ngay(nhan), gio(D.gioTra), ngay(tra), c('dem', soDem), c('khach', soKhach));
+  var ds = D.phong.map(function (ten, viTri) {
+    if (soKhach > sucChua(ten)) return khongVua(ten, viTri);
+    var tong = trangThai(ten, bd, kt), dem = [], demTrong = 0;
+    for (var i = 0; i < soDem; i++) {
+      var s = bd + i * 1440, t = trangThai(ten, s, i === soDem - 1 ? kt : s + 1440);
+      if (t === 'trong') demTrong++;
+      dem.push([s, t]);
+    }
+    var loai = tong === 'trong' ? 'trong' : demTrong ? 'motPhan' : 'kin';
+    if (loai === 'trong') soTrong++;
+    var o = thePhong(ten, loai, { trong: c('conTrong'), motPhan: c('trongDem', demTrong, soDem), kin: c('hetPhong') }[loai]);
+    if (tong !== 'trong' && soDem > 1) {
+      var hang = el('div', 'dem');
+      dem.forEach(function (d) { hang.appendChild(el('span', d[1] === 'trong' ? 'trong' : 'kin', ngay(d[0]))); });
+      o.noiDung.appendChild(hang);
+    }
+    var gia = loai === 'trong' ? giaDem(ten, nhan, soDem, soKhach) : null;
+    if (gia) o.noiDung.appendChild(khoiGia(ten, gia, tomTat));
+    var them = gia && goiYThemDem(ten, nhan, tra, soDem, soKhach, gia);
+    if (them) o.noiDung.appendChild(them);
+    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+  });
+  hienKetQua(ds, soTrong, c('tomDem', gio(D.gioNhan), ngay(nhan), gio(D.gioTra), ngay(tra), c('dem', soDem), c('khach', soKhach)));
+  ghiChuGia();
+}
+
+function kiemTraGio() {
+  if (!byId('ngayGio').value) return c('loiChonNgay');
+  var ngayM = phut(byId('ngayGio').value), tu = +byId('tuGio').value, den = +byId('denGio').value;
+  var quaDem = laQuaDem(tu, den), ra = quaDem ? Math.max(den, gioTraQuaDem(tu)) : den;
+  /* Phòng trống xét đúng giờ khách chọn; gói Qua đêm thì thanh giờ hiện tới trưa hôm sau để khách tự xem. */
+  var bd = ngayM + tu * 60, kt = ngayM + den * 60, soTrong = 0, soO = ra > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
+  if (den <= tu) return c('loiGioTra');
+  if (kt <= BAY_GIO) return c('loiKhungQua');
+  if (bd + 60 <= BAY_GIO) return c('loiGioNhanQua', gio(Math.floor((BAY_GIO - HOM_NAY) / 60)));
+  function mocNgay(h) { return h >= 24 ? gio(h - 24) + ' ' + ngay(ngayM + 1440) : gio(h); }
+  var ds = D.phong.map(function (ten, viTri) {
+    if (soKhach > sucChua(ten)) return khongVua(ten, viTri);
+    var tong = trangThai(ten, bd, kt);
+    var loai = tong === 'trong' ? 'trong' : 'kin';
+    if (loai === 'trong') soTrong++;
+    var o = thePhong(ten, loai, { trong: c('conTrong'), kin: c('daKin') }[loai]);
+    var thanh = el('div', 'gio'), moc = el('div', 'moc');
+    thanh.style.gridTemplateColumns = 'repeat(' + soO + ', 1fr)';
+    if (soO > 24) thanh.style.gap = '1px';
+    for (var h = 0; h < soO; h++) {
+      var s = ngayM + h * 60;
+      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < den ? ' chon' : ''));
+      o2.title = gio(h % 24) + (h >= 24 ? ' ' + c('homSau') : '');
+      thanh.appendChild(o2);
+    }
+    (soO > 24 ? [0, 6, 12, 18, 24, 30, 36] : [0, 6, 12, 18, 24]).forEach(function (h) {
+      moc.appendChild(el('span', null, NN === 'en' ? (h % 12 || 12) + (h % 24 < 12 ? 'AM' : 'PM') : (soO > 24 ? h % 24 : h) + 'h'));
+    });
+    o.noiDung.appendChild(thanh);
+    o.noiDung.appendChild(moc);
+    var gia = loai === 'kin' ? null : giaGio(ten, ngayM, tu, den, soKhach);
+    if (gia) {
+      var goi = gia.kieu === 'quaDem' ? c('quaDemTomTat', gia.tra - tu) : gia.kieu === '2n1d' ? c('tomTat2N1D') : '';
+      o.noiDung.appendChild(khoiGia(ten, gia, c('tomTatGio', ngay(ngayM), gio(tu), mocNgay(gia.tra), goi, c('khach', soKhach))));
+    }
+    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+  });
+  hienKetQua(ds, soTrong, (quaDem ? c('quaDemTieng', ra - tu) : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + mocNgay(ra) + ' · ' + c('khach', soKhach));
+  var cg = el('div', 'chuGiai');
+  [['trong', c('cgTrong')], ['dat', c('cgDat')], ['qua', c('cgQua')], ['chon', c('cgChon')]].forEach(function (x) {
+    var s = el('span');
+    s.appendChild(el('b', x[0]));
+    s.appendChild(document.createTextNode(x[1]));
+    cg.appendChild(s);
+  });
+  byId('ketQua').appendChild(cg);
+  ghiChuGia();
+}
+
+function kiemTra() {
+  var loi = cheDo === 'dem' ? kiemTraDem() : kiemTraGio();
+  byId('loi').hidden = !loi;
+  if (loi) {
+    byId('loi').textContent = loi;
+    byId('ketQua').textContent = '';
+  }
+}
+
+function khoiTao(duLieu) {
+  D = duLieu;
+  D.gia = D.gia || {};
+  D.anh = D.anh || {};
+  D.uuDai = D.uuDai || { lastMinute: 0, earlyBird: 0, earlyBirdNgay: 30, tuDemGiaThuong: 99, dai5: 0, dai7: 0, dai15: 0, phuThu: 0, toiDaKhach: 3, ngayLe: [] };
+  (D.uuDai.ngayLe || []).forEach(function (s) { LE[s] = 1; });
+  BAY_GIO = phut(D.bayGio);
+  HOM_NAY = Math.floor(BAY_GIO / 1440) * 1440;
+  LICH = D.lich.map(function (b) { return { phong: chuan(b.phong), bd: phut(b.bd), kt: phut(b.kt) }; });
+  var homNay = iso(HOM_NAY), ngayMai = iso(HOM_NAY + 1440);
+  ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = homNay; byId(id).value = homNay; });
+  byId('ngayTra').min = ngayMai;
+  byId('ngayTra').value = ngayMai;
+  for (var h = 0; h < 24; h++) byId('tuGio').add(new Option(gio(h), h));
+  /* Mặc định giờ tròn kế tiếp; trước 09:00 sáng thì lấy 09:00, sau 23:00 thì 09:00 hôm sau. */
+  var tiep = Math.floor((BAY_GIO - HOM_NAY) / 60) + 1;
+  if (tiep > 23) { byId('ngayGio').value = ngayMai; tiep = COMBO_TU; }
+  else if (tiep < COMBO_TU) tiep = COMBO_TU;
+  byId('tuGio').value = tiep;
+  dsGioDen(false);
+  var toiDa = Math.max.apply(null, D.phong.map(sucChua));
+  for (var n = 1; n <= toiDa; n++) byId('soKhach').add(new Option('', n));
+  byId('soKhach').value = Math.min(2, toiDa);
+  byId('tuGio').addEventListener('change', function () { dsGioDen(true); giaiThichGio(); });
+  byId('denGio').addEventListener('change', giaiThichGio);
+
+  byId('ngayNhan').addEventListener('change', function () {
+    if (!this.value) return;
+    var n = phut(this.value);
+    byId('ngayTra').min = iso(n + 1440);
+    if (!byId('ngayTra').value || phut(byId('ngayTra').value) <= n) byId('ngayTra').value = iso(n + 1440);
+  });
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      cheDo = b.getAttribute('data-che-do');
+      document.querySelectorAll('.seg button').forEach(function (x) {
+        x.classList.toggle('on', x === b);
+        x.setAttribute('aria-selected', x === b);
+      });
+      byId('formDem').hidden = cheDo !== 'dem';
+      byId('formGio').hidden = cheDo !== 'gio';
+      goiYKhach();
+      kiemTra();
+    });
+  });
+  byId('kiemTra').addEventListener('click', kiemTra);
+  byId('soKhach').addEventListener('change', kiemTra);
+  byId('dongHop').addEventListener('click', dongHop);
+  document.addEventListener('keydown', function (e) {
+    if (byId('hop').hidden) return;
+    var truot = byId('hopTruot');
+    if (e.key === 'Escape') dongHop();
+    if (e.key === 'ArrowRight') truot.scrollBy({ left: truot.clientWidth, behavior: 'smooth' });
+    if (e.key === 'ArrowLeft') truot.scrollBy({ left: -truot.clientWidth, behavior: 'smooth' });
+  });
+
+  byId('xemLich').href = D.xemLich;
+  byId('kiemTra').disabled = false;
+  apDungNgonNgu();
+  kiemTra();
+}
+
+/* Ô "Đến" chỉ có giờ sau giờ nhận, tới 12:00 trưa sau đêm đó. Đổi giờ nhận combo thì giữ giờ trả nếu còn hợp lệ;
+   giờ nhận của gói Qua đêm (hoặc combo không còn đủ 3 giờ trước 21:00) thì đặt giờ trả theo gói Qua đêm. */
+function dsGioDen(giu) {
+  var tu = +byId('tuGio').value, s = byId('denGio'), cu = +s.value, max = denToiDa(tu);
+  var quaDem = laQuaDem(tu, tu + 1), macDinh = quaDem || tu + 3 > COMBO_DEN ? gioTraQuaDem(tu) : tu + 3;
+  s.textContent = '';
+  for (var k = tu + 1; k <= max; k++) s.add(new Option(moc(k), k));
+  s.value = giu && !quaDem && cu > tu && cu <= max ? cu : macDinh;
+}
+
+/* Dòng giải thích ngay dưới ô chọn giờ: combo giờ hay Qua đêm, vì sao, và giờ trả phòng thực tế. */
+function giaiThichGio() {
+  var tu = +byId('tuGio').value, den = +byId('denGio').value, p = byId('giaiThich'), s;
+  if (!(den > tu)) { p.hidden = true; return; }
+  if (!laQuaDem(tu, den)) s = c('giaiCombo', gio(tu), moc(den), c('soGio', den - tu));
+  else {
+    var ra = gioTraQuaDem(tu);
+    s = (tu < COMBO_TU ? c('giaiSang', gio(COMBO_TU)) : tu >= QUA_DEM_TU ? c('giaiTu22', gio(QUA_DEM_TU)) : c('giaiSau21', gio(COMBO_DEN)))
+      + c('giaiDuocO', gio(tu), moc(ra), ra - tu)
+      + (ra < tu + 13 ? c('giaiTrua', gio(TRUA)) : '')
+      + (den > ra ? c('giaiQuaGio', moc(ra)) : '');
+  }
+  p.textContent = s;
+  p.hidden = false;
+}
+
+/* Dòng phụ thu dưới ô số khách: tab combo ghi cả mức combo giờ và qua đêm, tab 2 ngày 1 đêm ghi theo đêm. */
+function goiYKhach() {
+  var u = D.uuDai, s = '';
+  if (cheDo === 'gio' && u.phuThu) s = c('phuThuTu3Gio', tien(phuThuGio()), tien(u.phuThu));
+  else if (u.phuThu) s = c('phuThuTu3', tien(u.phuThu));
+  byId('goiYKhach').textContent = s + c('treEm');
+}
+
+/* Đổi chữ theo ngôn ngữ đang chọn. Phần cần dữ liệu (giờ nhận/trả, phụ thu, liên hệ) chỉ điền khi đã tải xong. */
+function apDungNgonNgu() {
+  document.documentElement.lang = NN;
+  document.title = c('tieuDeTrang');
+  document.querySelectorAll('[data-c]').forEach(function (e) { e.textContent = c(e.getAttribute('data-c')); });
+  document.querySelectorAll('.ngonNgu button').forEach(function (b) {
+    var on = b.getAttribute('data-nn') === NN;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  byId('hop').setAttribute('aria-label', c('anhPhong'));
+  byId('dongHop').setAttribute('aria-label', c('dong'));
+  var gy = byId('goiYGio');
+  gy.textContent = '';
+  gy.appendChild(el('span', null, c('goiYCombo', gio(COMBO_TU), gio(COMBO_DEN))));
+  gy.appendChild(el('span', null, c('goiYQuaDem', gio(COMBO_DEN), gio(QUA_DEM_TU), gio(COMBO_TU - 1), gio(TRUA))));
+  if (!D) return;
+  byId('goiYDem').textContent = c('goiYDem', gio(D.gioNhan), gio(D.gioTra));
+  Array.from(byId('tuGio').options).forEach(function (o) { o.text = gio(+o.value); });
+  /* Nửa đêm ghi "00:00 hôm sau" (bản Anh 12:00AM next day) cho khỏi nhầm với 0 giờ hôm nay. */
+  Array.from(byId('denGio').options).forEach(function (o) { o.text = moc(+o.value); });
+  giaiThichGio();
+  var cn = D.bayGio.split('T'), t = cn[1].split(':'), d = cn[0].split('-');
+  byId('capNhat').textContent = NN === 'en'
+    ? (+t[0] % 12 || 12) + ':' + t[1] + (+t[0] < 12 ? 'AM' : 'PM') + ' ' + (+d[2]) + ' ' + CHU.en.thang[d[1] - 1] + ' ' + d[0]
+    : cn[1] + ' ' + d.slice().reverse().join('/');
+  Array.from(byId('soKhach').options).forEach(function (o) { o.text = c('khach', +o.value); });
+  goiYKhach();
+  byId('zalo').href = linkLienHe();
+  byId('soZalo').textContent = lienHe();
+}
+
+/* Ngôn ngữ: ?lang=en|vi trên link, rồi tới lựa chọn lần trước của khách, mặc định tiếng Việt. */
+NN = (function () {
+  var q = (location.search.match(/[?&]lang=(vi|en)\b/) || [])[1];
+  if (q) return q;
+  try { return localStorage.getItem('ngonNgu') === 'en' ? 'en' : 'vi'; } catch (e) { return 'vi'; }
+})();
+document.querySelectorAll('.ngonNgu button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    NN = b.getAttribute('data-nn');
+    try { localStorage.setItem('ngonNgu', NN); } catch (e) {}
+    apDungNgonNgu();
+    if (D) kiemTra();
+  });
+});
+apDungNgonNgu();
+
+byId('kiemTra').disabled = true;
+byId('ketQua').appendChild(el('p', 'tom', c('dangTai')));
+fetch(API, { cache: 'no-store' })
+  .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function (d) { byId('ketQua').textContent = ''; khoiTao(d); })
+  .catch(function () {
+    byId('ketQua').textContent = '';
+    byId('loi').hidden = false;
+    byId('loi').textContent = c('loiTai');
+  });
+</script>
+</body>
+</html>
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monaca Homestay · Tra cứu phòng trống</title>
+<meta name="description" content="Chọn ngày ở, xem ngay phòng nào của Monaca Homestay còn trống và giá cho đúng ngày bạn chọn.">
+<meta property="og:title" content="Monaca Homestay · Tra cứu phòng trống">
+<meta property="og:description" content="Chọn ngày ở, xem ngay phòng nào còn trống và giá cho đúng ngày bạn chọn.">
+<meta name="theme-color" content="#790013">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%85%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://wsrv.nl">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dam: #55000D; --dau: #790013; --dauNhat: #9B1B2A; --nen: #FBF5F3; --nhat: #F6ECEB; --the: #FFFFFF;
+    --chu: #2B1A1C; --phu: #7D6A6C; --vien: #ECDCDC;
+    --xanh: #E2F2E6; --xanhChu: #1E6B3A; --vang: #FCEFD2; --vangChu: #85570A; --do: #F6E0E2; --doChu: #790013;
+    --oTrong: #BFE3CB; --oDat: #790013; --oQua: #EEE6E6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--nen); color: var(--chu); font: 15px/1.5 'Lexend', system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px; }
+  .hero { position: relative; background: linear-gradient(135deg, var(--dam), var(--dau) 60%, var(--dauNhat)); color: #fff; border-radius: 18px; padding: 18px 20px; }
+  .ngonNgu { position: absolute; top: 12px; right: 12px; display: flex; padding: 2px; border-radius: 999px; background: rgba(255,255,255,.16); }
+  .ngonNgu button { border: 0; padding: 3px 9px; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .04em; cursor: pointer; opacity: .8; }
+  .ngonNgu button.on { background: #fff; color: var(--dau); opacity: 1; }
+  .hero .logo { display: block; width: auto; height: 56px; margin: -6px 0 4px -4px; }
+  .hero h1 { margin: 2px 0; font-size: 22px; line-height: 1.25; font-weight: 700; }
+  .hero p { margin: 0; font-size: 13px; opacity: .85; }
+  .the, .phong { background: var(--the); border-radius: 16px; box-shadow: 0 1px 2px rgba(85,0,13,.06), 0 4px 14px rgba(85,0,13,.07); }
+  .the { padding: 16px; margin-top: 12px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--nhat); }
+  .seg button { border: 0; padding: 9px 6px; border-radius: 9px; background: transparent; font: inherit; font-size: 14px; line-height: 1.3; font-weight: 600; color: var(--phu); cursor: pointer; }
+  .seg button.on { background: var(--dau); color: #fff; box-shadow: 0 1px 3px rgba(85,0,13,.25); }
+  .luoi { display: grid; gap: 10px; margin-top: 14px; }
+  .luoi.hai { grid-template-columns: 1fr 1fr; }
+  .luoi.ba { grid-template-columns: 1.4fr 1fr 1fr; }
+  label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--phu); }
+  input, select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--vien); border-radius: 10px; background: #fff; font: inherit; font-size: 15px; color: var(--chu); }
+  input[type="date"] { -webkit-appearance: none; appearance: none; display: block; min-height: 44px; text-align: left; }
+  input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  input:focus, select:focus { outline: 2px solid var(--dau); outline-offset: 1px; }
+  .goiY { margin: 8px 0 0; font-size: 12px; color: var(--phu); }
+  .goiY span { display: block; }
+  .goiY span + span { margin-top: 2px; }
+  .goiY.noiBat { padding: 8px 10px; border-radius: 10px; background: var(--nhat); color: var(--dau); font-weight: 600; }
+  .nut { display: block; width: 100%; margin-top: 14px; padding: 13px; border: 0; border-radius: 12px; background: var(--dau); color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .nut:active { transform: translateY(1px); }
+  .nut:disabled { opacity: .6; cursor: wait; }
+  .loi { margin: 10px 0 0; font-size: 13px; color: var(--doChu); }
+  .tom { margin: 18px 4px 4px; font-weight: 600; }
+  .tom small { display: block; font-size: 12px; font-weight: 400; color: var(--phu); }
+  .phong { margin-top: 12px; overflow: hidden; }
+  .noiDung { padding: 14px; }
+  .dauPhong { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tenPhong { font-weight: 600; }
+  .moTa { margin: 4px 0 0; font-size: 12px; color: var(--phu); }
+  .chip { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .chip.trong, .dem .trong { background: var(--xanh); color: var(--xanhChu); }
+  .chip.motPhan { background: var(--vang); color: var(--vangChu); }
+  .chip.kin, .dem .kin { background: var(--do); color: var(--doChu); }
+  .dem { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .dem span { padding: 3px 8px; border-radius: 8px; font-size: 12px; }
+  .dem .kin { text-decoration: line-through; }
+  .gio { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-top: 10px; }
+  .gio i, .chuGiai b { display: block; height: 18px; border-radius: 3px; }
+  .trong { background: var(--oTrong); } .dat { background: var(--oDat); } .qua { background: var(--oQua); }
+  .gio i.chon, .chuGiai b.chon { box-shadow: inset 0 -4px 0 var(--dam); }
+  .moc { display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; color: var(--phu); }
+  .chuGiai { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 10px 4px 0; font-size: 11px; color: var(--phu); }
+  .chuGiai span { display: flex; align-items: center; gap: 4px; }
+  .chuGiai b { width: 12px; height: 12px; }
+  .chuGiai b.chon { background: #fff; border: 1px solid var(--vien); }
+
+  .anh { position: relative; aspect-ratio: 4 / 3; background: var(--nhat); }
+  .truot { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .truot::-webkit-scrollbar { display: none; }
+  .truot img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; scroll-snap-align: start; cursor: zoom-in; }
+  .anh .truot img:first-child { object-position: center 18%; }
+  .phong.het .truot img { filter: grayscale(.7); opacity: .7; }
+  .nhanHang { position: absolute; left: 10px; bottom: 10px; padding: 3px 9px; border-radius: 999px; background: rgba(85,0,13,.88); color: #fff; font-size: 11px; font-weight: 600; }
+  .soAnh { position: absolute; right: 10px; bottom: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 11px; }
+  .mui { position: absolute; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); color: var(--dam); font-size: 20px; line-height: 1; cursor: pointer; display: none; }
+  .mui.trai { left: 8px; } .mui.phai { right: 8px; }
+  @media (hover: hover) { .anh:hover .mui { display: block; } }
+
+  .gia { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--vien); }
+  .gia .nhan { font-size: 12px; color: var(--phu); }
+  .gia .goc { font-size: 12px; color: var(--phu); text-decoration: line-through; }
+  .gia .tong { font-size: 21px; font-weight: 700; line-height: 1.2; color: var(--dau); }
+  .gia .giam { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: var(--xanhChu); color: #fff; font-size: 11px; vertical-align: 3px; }
+  .gia .lyDo { margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--xanhChu); }
+  .datPhong { flex: none; padding: 10px 14px; border-radius: 10px; background: var(--dau); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
+  .chiTiet { margin-top: 8px; font-size: 13px; }
+  .chiTiet summary { cursor: pointer; color: var(--dau); font-weight: 600; }
+  .dongGia { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+  .dongGia.tru span:last-child { color: var(--xanhChu); }
+  .dongGia.gach span:last-child { color: var(--phu); text-decoration: line-through; }
+  .dongGia.toiUu { color: var(--xanhChu); font-weight: 600; }
+  .dongGia.tongCong { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--vien); font-weight: 700; }
+  .ghiChu { margin: 14px 4px 0; font-size: 12px; color: var(--phu); }
+  .themDem { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--vang); color: var(--vangChu); font-size: 13px; line-height: 1.4; }
+  .themDem span { flex: 1; }
+  .themDem button { flex: none; padding: 8px 12px; border: 0; border-radius: 9px; background: var(--vangChu); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+  .zalo { display: block; margin-top: 16px; padding: 12px; border: 2px solid var(--dau); border-radius: 14px; background: var(--the); color: var(--dau); text-align: center; font-weight: 700; text-decoration: none; }
+  .zalo small { display: block; font-size: 12px; font-weight: 400; opacity: .85; }
+  footer { margin: 14px 0 6px; text-align: center; font-size: 12px; color: var(--phu); }
+  footer a { color: var(--dau); }
+
+  .hop { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: #120607; }
+  .hopDau { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
+  .hopDau button { border: 0; background: none; color: #fff; font-size: 30px; line-height: 1; cursor: pointer; }
+  .hop .truot { flex: 1; min-height: 0; }
+  .hop .truot img { object-fit: contain; object-position: center; cursor: default; }
+  .toast { position: fixed; left: 50%; bottom: 18px; z-index: 60; max-width: 92%; transform: translateX(-50%); padding: 10px 14px; border-radius: 12px; background: var(--chu); color: #fff; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  [hidden] { display: none !important; }
+  @media (max-width: 400px) {
+    .luoi.hai { grid-template-columns: 1fr; }
+    .luoi.ba { grid-template-columns: 1fr 1fr; }
+    .luoi.ba label:first-child { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="ngonNgu" role="group" aria-label="Ngôn ngữ / Language"><button type="button" data-nn="vi">VI</button><button type="button" data-nn="en">EN</button></div>
+    <img class="logo" src="data:image/png;base64,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" alt="Monaca Homestay" width="108" height="56">
+    <h1 data-c="tieuDe">Tra cứu phòng trống</h1>
+    <p data-c="moDau">Chọn ngày và khung giờ bạn muốn ở để xem phòng nào còn trống và tổng giá</p>
+  </header>
+  <section class="the">
+    <div class="seg" role="tablist">
+      <button type="button" class="on" data-che-do="gio" data-c="tabGio" role="tab" aria-selected="true">⏱ Combo giờ và qua đêm</button>
+      <button type="button" data-che-do="dem" data-c="tabDem" role="tab" aria-selected="false">🌙 2 ngày 1 đêm</button>
+    </div>
+    <div id="formDem" hidden>
+      <div class="luoi hai">
+        <label><span data-c="ngayNhan">Ngày nhận phòng</span><input type="date" id="ngayNhan"></label>
+        <label><span data-c="ngayTra">Ngày trả phòng</span><input type="date" id="ngayTra"></label>
+      </div>
+      <p class="goiY" id="goiYDem"></p>
+    </div>
+    <div id="formGio">
+      <div class="luoi ba">
+        <label><span data-c="ngay">Ngày</span><input type="date" id="ngayGio"></label>
+        <label><span data-c="tu">Từ</span><select id="tuGio"></select></label>
+        <label><span data-c="den">Đến</span><select id="denGio"></select></label>
+      </div>
+      <p class="goiY" id="goiYGio"></p>
+      <p class="goiY noiBat" id="giaiThich" aria-live="polite" hidden></p>
+    </div>
+    <div class="luoi">
+      <label><span data-c="soKhachNhan">Số khách (từ 10 tuổi)</span><select id="soKhach"></select></label>
+    </div>
+    <p class="goiY" id="goiYKhach"></p>
+    <button type="button" class="nut" id="kiemTra" data-c="nutKiemTra">Kiểm tra phòng trống</button>
+    <p class="loi" id="loi" hidden></p>
+  </section>
+  <section id="ketQua" aria-live="polite"></section>
+  <a class="zalo" id="zalo" href="https://zalo.me/0367674477" target="_blank" rel="noopener"><span data-c="nhanZalo">💬 Nhắn Zalo đặt phòng</span><small id="soZalo">Zalo/ĐT: 036 767 4477</small></a>
+  <footer><span data-c="gioVN">Giờ Việt Nam · cập nhật</span> <span id="capNhat"></span> · <a id="xemLich" data-c="xemLich" target="_blank" rel="noopener">Xem lịch đầy đủ ↗</a></footer>
+</div>
+<div class="hop" id="hop" role="dialog" aria-modal="true" aria-label="Ảnh phòng" hidden>
+  <div class="hopDau"><span><b id="hopTen"></b> · <span id="hopDem"></span></span><button type="button" id="dongHop" aria-label="Đóng">×</button></div>
+  <div class="truot" id="hopTruot"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbyHN4mRMvgDdwTQwvVwj015MBfmh0Ui5Z0zR1iXGwd3dWdYGHDssv0HttQcF34slNp3/exec?format=json';
+var D, BAY_GIO, HOM_NAY, LICH, LE = {}, cheDo = 'gio', NN = 'vi';
+
+/* Chữ trên trang theo ngôn ngữ (NN). {0}, {1}… là chỗ điền số liệu; tiếng Anh dùng hàm khi cần số ít / số nhiều. */
+function nhieu(n, mot, nhieu) { return n + ' ' + (n === 1 ? mot : nhieu); }
+var CHU = {
+  vi: {
+    thu: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+    goi: ['Combo 3 giờ', 'Combo 6 giờ', 'Qua đêm', '2 ngày 1 đêm'],
+    tieuDeTrang: 'Monaca Homestay · Tra cứu phòng trống',
+    tieuDe: 'Tra cứu phòng trống',
+    moDau: 'Chọn ngày và khung giờ bạn muốn ở để xem phòng nào còn trống và tổng giá',
+    tabGio: '⏱ Combo giờ và qua đêm',
+    tabDem: '🌙 2 ngày 1 đêm',
+    ngayNhan: 'Ngày nhận phòng', ngayTra: 'Ngày trả phòng', ngay: 'Ngày', tu: 'Từ', den: 'Đến',
+    goiYCombo: '⏱ Combo giờ: nhận từ {0}, trả phòng trước {1}.',
+    goiYQuaDem: '🌙 Qua đêm: nhận phòng từ {0} đến {1} sáng, được ở 13 tiếng kể từ khi nhận, tối đa đến {2}.',
+    giaiSau21: '👉 Trả phòng sau {0} được tính gói Qua đêm: bạn ở được từ {1} đến {2} ({3} tiếng).',
+    goiYDem: 'Nhận phòng từ {0} · trả phòng trước {1}',
+    soKhachNhan: 'Số khách (từ 10 tuổi)',
+    treEm: 'Trẻ em dưới 10 tuổi miễn phí',
+    phuThuTu3: 'Từ khách thứ 3 phụ thu {0}/đêm - ',
+    nutKiemTra: 'Kiểm tra phòng trống',
+    nhanZalo: '💬 Nhắn Zalo đặt phòng',
+    gioVN: 'Giờ Việt Nam · cập nhật',
+    xemLich: 'Xem lịch đầy đủ ↗',
+    anhPhong: 'Ảnh phòng', dong: 'Đóng', anhTruoc: 'Ảnh trước', anhSau: 'Ảnh sau', anhSo: '{0} – ảnh {1}',
+    dangTai: 'Đang tải lịch phòng…',
+    loiTai: 'Chưa tải được lịch phòng. Bạn tải lại trang giúp mình, hoặc nhắn Zalo để hỏi phòng trống nhé.',
+    homSau: 'hôm sau',
+    khach: '{0} khách', dem: '{0} đêm', tieng: '{0} tiếng', soGio: '{0} giờ', congGio: ' + {0} giờ',
+    loiChonNgayDem: 'Hãy chọn ngày nhận và ngày trả phòng.',
+    loiNhanQua: 'Ngày nhận phòng đã qua.',
+    loiTraSau: 'Ngày trả phải sau ngày nhận.',
+    loi30: 'Vui lòng chọn tối đa 30 đêm.',
+    loiChonNgay: 'Hãy chọn ngày.',
+    loiGioTra: 'Giờ trả phải sau giờ nhận.',
+    loiKhungQua: 'Khung giờ này đã qua.',
+    loiGioNhanQua: 'Giờ nhận đã qua, hãy chọn từ {0}.',
+    conTrong: '✓ Còn trống', trongDem: '◐ Trống {0}/{1} đêm', hetPhong: '✕ Hết phòng', daKin: '✕ Đã kín',
+    caPhong: 'Cả {0} phòng đều còn trống 🎉',
+    khongTrong: 'Rất tiếc, không còn phòng trống trọn khoảng này',
+    soTrong: '{0}/{1} phòng còn trống',
+    tomDem: 'Nhận {0} {1} → trả {2} {3} · {4} · {5}',
+    quaDemTieng: 'Qua đêm {0} tiếng · ',
+    cgTrong: 'Trống', cgDat: 'Đã đặt', cgQua: 'Đã qua', cgChon: 'Giờ bạn chọn',
+    ghiChuGia: 'Giá tính theo bảng giá và ưu đãi hiện hành. {0} sẽ xác nhận lại khi bạn nhắn Zalo.',
+    datQuaZalo: 'Đặt qua Zalo', chiTietGia: 'Chi tiết giá', tongCong: 'Tổng cộng',
+    demNgay: 'Đêm {0}',
+    cuoiTuanLe: ' · cuối tuần/lễ',
+    uuDaiTuDem: 'Ưu đãi từ {0} đêm: chỉ tính giá ngày thường',
+    lyDoTuDem: 'Từ {0} đêm: giá ngày thường',
+    lmDem: 'Last-minute −{0}% (đặt phòng trước khi nhận phòng 24 tiếng)',
+    lmGio: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 4 tiếng)',
+    eb: 'Early-bird −{0}%',
+    oDem: 'Ở {0} đêm −{1}%',
+    phuThuDem: 'Phụ thu khách thứ {0} × {1} đêm',
+    phuThu: 'Phụ thu khách thứ {0} ({1}/khách)',
+    phuThuTu3Gio: 'Từ khách thứ 3 phụ thu {0}/khách (combo giờ), {1}/khách (qua đêm) - ',
+    toiDaKhach: '✕ Tối đa {0} khách',
+    quaDemGoi: 'Qua đêm {2} tiếng ({0} → {1})',
+    tron13: 'Trọn 13 giờ (giá qua đêm)',
+    theoGia2N1D: 'Tính theo giá 2 ngày 1 đêm',
+    gioThem: '{0} giờ thêm × {1}',
+    congGioThem: ' + {0} giờ thêm',
+    giaThuong: 'Giá thông thường: {0}',
+    toiUu: '✓ Trang tự chọn giá tốt hơn: {0}',
+    lyDoToiUu: 'Trang đã tự chọn giá tốt hơn cho bạn, lợi {0}',
+    moTaQuaDem: '{0} tiếng · Qua đêm{1} · {2} → {3}',
+    moTa2N1D: 'Giá 2 ngày 1 đêm · {0} → {1}',
+    tomTat2N1D: ' (giá 2 ngày 1 đêm)',
+    themDem: '💡 Đặt thêm 1 đêm (trả phòng {0}): cả {1} đêm tính giá ngày thường, tổng {2} — chỉ thêm {3}.',
+    nutThemDem: 'Thêm 1 đêm',
+    tomTatDem: 'nhận {0} {1}, trả {2} {3} ({4}), {5}',
+    tomTatGio: '{0} từ {1} đến {2}{3}, {4}',
+    quaDemTomTat: ' (qua đêm {0} tiếng)',
+    loiNhan: 'Chào {0}, mình muốn đặt {1}: {2}. Giá trên trang: {3}.',
+    daChep: 'Đã chép nội dung đặt phòng, bạn dán vào khung chat Zalo nhé.',
+  },
+  en: {
+    thu: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    thang: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    goi: ['3-hour combo', '6-hour combo', 'Overnight', '2 days 1 night'],
+    tieuDeTrang: 'Monaca Homestay · Room availability',
+    tieuDe: 'Check room availability',
+    moDau: 'Choose your dates and times to see which rooms are free and the total price',
+    tabGio: '⏱ Hourly & overnight',
+    tabDem: '🌙 2 days 1 night',
+    ngayNhan: 'Check-in date', ngayTra: 'Check-out date', ngay: 'Date', tu: 'From', den: 'To',
+    goiYCombo: '⏱ Hourly combo: check-in from {0}, check-out before {1}.',
+    goiYQuaDem: '🌙 Overnight: check-in from {0} to {1}, stay 13 hours from check-in, until {2} at the latest.',
+    giaiSau21: function (a, b, d, n) { return '👉 Check-out after ' + a + ' counts as the Overnight package: you can stay from ' + b + ' until ' + d + ' (' + nhieu(n, 'hour', 'hours') + ').'; },
+    goiYDem: 'Check-in after {0} · check-out before {1}',
+    soKhachNhan: 'Guests (age 10+)',
+    treEm: 'Children under 10 stay free',
+    phuThuTu3: 'From the 3rd guest: +{0}/night - ',
+    nutKiemTra: 'Check availability',
+    nhanZalo: '💬 Message us on WhatsApp to book',
+    gioVN: 'Vietnam time · updated',
+    xemLich: 'Full calendar ↗',
+    anhPhong: 'Room photos', dong: 'Close', anhTruoc: 'Previous photo', anhSau: 'Next photo', anhSo: '{0} – photo {1}',
+    dangTai: 'Loading availability…',
+    loiTai: 'Couldn\'t load the room calendar. Please reload the page, or message us on WhatsApp to ask about availability.',
+    homSau: 'next day',
+    khach: function (n) { return nhieu(n, 'guest', 'guests'); },
+    dem: function (n) { return nhieu(n, 'night', 'nights'); },
+    tieng: function (n) { return nhieu(n, 'hour', 'hours'); },
+    soGio: function (n) { return nhieu(n, 'hour', 'hours'); },
+    congGio: ' + {0} h',
+    loiChonNgayDem: 'Please choose check-in and check-out dates.',
+    loiNhanQua: 'The check-in date has already passed.',
+    loiTraSau: 'Check-out must be after check-in.',
+    loi30: 'Please choose 30 nights at most.',
+    loiChonNgay: 'Please choose a date.',
+    loiGioTra: 'Check-out time must be after check-in time.',
+    loiKhungQua: 'This time slot has already passed.',
+    loiGioNhanQua: 'That check-in time has passed, please choose {0} or later.',
+    conTrong: '✓ Available', trongDem: '◐ Free {0}/{1} nights', hetPhong: '✕ Fully booked', daKin: '✕ Booked',
+    caPhong: 'All {0} rooms are available 🎉',
+    khongTrong: 'Sorry, no room is free for this whole period',
+    soTrong: '{0}/{1} rooms available',
+    tomDem: 'Check-in after {0} {1} → check-out before {2} {3} · {4} · {5}',
+    quaDemTieng: 'Overnight, {0} hours · ',
+    cgTrong: 'Free', cgDat: 'Booked', cgQua: 'Past', cgChon: 'Your hours',
+    ghiChuGia: 'Prices follow our current rates and offers. {0} will confirm when you message us on WhatsApp.',
+    datQuaZalo: 'Book via WhatsApp', chiTietGia: 'Price details', tongCong: 'Total',
+    demNgay: 'Night of {0}',
+    cuoiTuanLe: ' · weekend/holiday',
+    uuDaiTuDem: '{0}+ nights: weekday rates only',
+    lyDoTuDem: '{0}+ nights: weekday rates',
+    lmDem: 'Last-minute −{0}% (booked within 24 hours of check-in)',
+    lmGio: 'Last-minute −{0}% (booked within 4 hours of check-in)',
+    eb: 'Early-bird −{0}%',
+    oDem: '{0}-night stay −{1}%',
+    phuThuDem: function (k, n) { return k + ' guest surcharge × ' + nhieu(n, 'night', 'nights'); },
+    phuThu: '{0} guest surcharge ({1} per guest)',
+    phuThuTu3Gio: 'From the 3rd guest: +{0} per guest (hourly combo), +{1} per guest (overnight) - ',
+    toiDaKhach: '✕ Max {0} guests',
+    quaDemGoi: function (a, b, n) { return 'Overnight, ' + nhieu(n, 'hour', 'hours') + ' (' + a + ' → ' + b + ')'; },
+    tron13: 'Full 13 hours (overnight rate)',
+    theoGia2N1D: 'Charged at the 2 days 1 night rate',
+    gioThem: function (n, gia) { return nhieu(n, 'extra hour', 'extra hours') + ' × ' + gia; },
+    congGioThem: function (n) { return ' + ' + nhieu(n, 'extra hour', 'extra hours'); },
+    giaThuong: 'Regular price: {0}',
+    toiUu: '✓ Better price picked for you: {0}',
+    lyDoToiUu: 'We picked a better price for you: you save {0}',
+    moTaQuaDem: '{0} hours · Overnight{1} · {2} → {3}',
+    moTa2N1D: '2 days 1 night rate · {0} → {1}',
+    tomTat2N1D: ' (2 days 1 night rate)',
+    themDem: '💡 Add 1 more night (check-out {0}): all {1} nights at weekday rates, total {2} — only {3} more.',
+    nutThemDem: 'Add 1 night',
+    tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
+    tomTatGio: '{0} from {1} to {2}{3}, {4}',
+    quaDemTomTat: ' (overnight, {0} hours)',
+    loiNhan: 'Hi {0}, I\'d like to book {1}: {2}. Price shown on the website: {3}.',
+  },
+};
+function c(k) {
+  var v = CHU[NN][k], a = arguments;
+  if (typeof v === 'function') return v.apply(null, [].slice.call(a, 1));
+  return String(v).replace(/\{(\d)\}/g, function (_, i) { return a[+i + 1]; });
+}
+
+function byId(id) { return document.getElementById(id); }
+/* Mốc thời gian tính bằng phút theo giờ Việt Nam, không phụ thuộc múi giờ của máy khách. */
+function phut(s) {
+  var p = s.split('T'), d = p[0].split('-'), t = (p[1] || '00:00').split(':');
+  return Date.UTC(+d[0], +d[1] - 1, +d[2], +t[0], +t[1]) / 60000;
+}
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function iso(m) { return new Date(m * 60000).toISOString().slice(0, 10); }
+function thu(m) { return new Date(m * 60000).getUTCDay(); }
+function ngay(m) {
+  var d = new Date(m * 60000), t = CHU[NN].thu[d.getUTCDay()];
+  return NN === 'en' ? t + ' ' + d.getUTCDate() + ' ' + CHU.en.thang[d.getUTCMonth()]
+    : t + ' ' + pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1);
+}
+/* Giờ tròn: bản Việt 24 giờ (14:00), bản Anh 12 giờ (2:00PM). */
+function gio(h) {
+  if (NN !== 'en') return pad(h) + ':00';
+  var g = h % 24;
+  return (g % 12 || 12) + ':00' + (g < 12 ? 'AM' : 'PM');
+}
+function chuan(s) { return String(s).trim().toLowerCase(); }
+function tien(n) { return NN === 'en' ? Math.round(n).toLocaleString('en-US') + '₫' : Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+/* Tên phòng trong Sheet là tiếng Việt ("Phòng 101 - …"); bản tiếng Anh chỉ đổi chữ "Phòng". */
+function tenHien(ten) { return NN === 'en' ? String(ten).replace(/^Phòng\s+/i, 'Room ') : ten; }
+/* Khách Việt liên hệ qua Zalo, khách nước ngoài qua WhatsApp (cùng số điện thoại). */
+function soQuocTe() { return '84' + D.zalo.replace(/^0/, ''); }
+function lienHe() { return NN === 'en' ? 'WhatsApp: ' + D.lienHe.replace(/^[^0-9+]*/, '').replace(/^0/, '+84 ') : D.lienHe; }
+function linkLienHe(noiDung) {
+  return NN === 'en' ? 'https://wa.me/' + soQuocTe() + (noiDung ? '?text=' + encodeURIComponent(noiDung) : '')
+    : 'https://zalo.me/' + D.zalo;
+}
+function lamTron(n) { return Math.round(n / 1000) * 1000; }
+function anhNho(url, rong) { return 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&w=' + rong + '&q=72&output=webp'; }
+
+/* Cuối tuần: combo giờ là thứ 7, chủ nhật; qua đêm và 2 ngày 1 đêm là đêm thứ 6, thứ 7. Ngày lễ luôn tính cuối tuần. */
+function laLe(m) { return !!LE[iso(m)]; }
+function cuoiTuanCombo(m) { var t = thu(m); return t === 6 || t === 0 || laLe(m); }
+function cuoiTuanDem(m) { var t = thu(m); return t === 5 || t === 6 || laLe(m); }
+
+/* Giờ trên ô "Đến" tính từ 0:00 ngày đã chọn: 24 trở lên là hôm sau (36 = 12:00 trưa hôm sau). */
+function moc(h) { return h >= 24 ? gio(h - 24) + ' ' + c('homSau') : gio(h); }
+
+/* Sức chứa: phòng 101 và 202 ở được 4 khách; phòng khác theo "Số khách tối đa mỗi phòng" trong Sheet. */
+var SUC_CHUA = { '101': 4, '202': 4 };
+function sucChua(ten) { var so = (String(ten).match(/\d+/) || [])[0]; return SUC_CHUA[so] || D.uuDai.toiDaKhach || 3; }
+/* Phụ thu combo giờ ban ngày cho mỗi khách từ khách thứ 3 (Sheet chưa có dòng này thì dùng 50.000đ). */
+function phuThuGio() { var v = D.uuDai.phuThuGio; return typeof v === 'number' ? v : 50000; }
+/* "3" hoặc "3, 4" (bản Anh "3rd" hoặc "3rd & 4th") cho dòng phụ thu. */
+function khachThem(n) {
+  var ds = [];
+  for (var i = 3; i < 3 + n; i++) ds.push(NN === 'en' ? i + (i === 3 ? 'rd' : 'th') : i);
+  return ds.join(NN === 'en' ? ' & ' : ', ');
+}
+
+/* Trạng thái của phòng trong [bd, kt): lệch 1 phút để lượt trả 12:00 và nhận 12:00 không bị tính là trùng. */
+function trangThai(phong, bd, kt) {
+  var p = chuan(phong);
+  return LICH.some(function (b) { return b.phong === p && b.bd < kt - 1 && b.kt > bd + 1; }) ? 'dat' : 'trong';
+}
+
+/* Gói 2 ngày 1 đêm: mỗi đêm theo giá ngày thường/cuối tuần, rồi trừ ưu đãi trong tab "Ưu đãi & lễ".
+   Ở đủ số đêm thì cuối tuần tính giá ngày thường, riêng đêm lễ vẫn giữ giá lễ.
+   Ưu đãi ở dài chỉ lấy mức cao nhất; Early-bird và Last-minute cộng thêm. */
+function giaDem(ten, nhan, soDem, soKhach) {
+  var g = D.gia[ten], u = D.uuDai;
+  if (!g || !g.thuong[3]) return null;
+  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, lmGoc = 0, soLm = 0;
+  for (var i = 0; i < soDem; i++) {
+    var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
+    var ap = chiThuong && !laLe(m) ? g.thuong[3] : giaGoc;
+    if (!ct && m + D.gioNhan * 60 - BAY_GIO <= 24 * 60) { lmGoc += ap; soLm++; }
+    goc += giaGoc;
+    tong += ap;
+    dong.push([c('demNgay', ngay(m)) + (ct ? c('cuoiTuanLe') : ''), giaGoc]);
+  }
+  if (goc > tong) {
+    dong.push([c('uuDaiTuDem', u.tuDemGiaThuong), tong - goc]);
+    lyDo.push(c('lyDoTuDem', u.tuDemGiaThuong));
+  }
+  /* Last-minute: giảm cho mọi đêm ngày thường (không phải đêm T6, T7, lễ) có giờ nhận phòng trong vòng 24 giờ kể từ lúc xem trang. */
+  if (u.lastMinute && soLm) {
+    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = c('lmDem', u.lastMinute);
+    dong.push([tenLm, -lm]);
+    lyDo.push(tenLm);
+    tong -= lm;
+  }
+  var pct = 0, ly = [];
+  if (u.earlyBird && (nhan - HOM_NAY) / 1440 >= u.earlyBirdNgay) { pct += u.earlyBird; ly.push(c('eb', u.earlyBird)); }
+  var dai = soDem >= 15 ? u.dai15 : soDem >= 7 ? u.dai7 : soDem >= 5 ? u.dai5 : 0;
+  if (dai) { pct += dai; ly.push(c('oDem', soDem, dai)); }
+  if (pct) {
+    var giam = lamTron(tong * pct / 100);
+    dong.push([ly.join(', '), -giam]);
+    lyDo = lyDo.concat(ly);
+    tong -= giam;
+  }
+  var soThem = Math.max(0, soKhach - 2), them = soThem * u.phuThu * soDem;
+  if (them) { dong.push([c('phuThuDem', khachThem(soThem), soDem), them]); tong += them; goc += them; }
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: c('dem', soDem) + ' · ' + c('khach', soKhach) };
+}
+
+/* Combo giờ ban ngày: nhận từ 09:00, trả trước 21:00. Dưới 3 giờ tính Combo 3 giờ; dài hơn thì trang so Combo 3 giờ,
+   Combo 6 giờ (cộng giờ thêm) và giá qua đêm trọn 13 giờ, lấy giá rẻ nhất. Cuối tuần theo ngày (T7, CN).
+   Gói Qua đêm khi trả sau 21:00, hoặc nhận từ 22:00 đến trước 09:00 sáng: ở 13 tiếng kể từ giờ nhận, tối đa đến
+   13:00. Ở quá giờ trả thì cộng giờ thêm, hoặc tính giá 2 ngày 1 đêm (nhận trước 14:00 thì cộng giờ) nếu rẻ hơn.
+   Cuối tuần theo đêm (đêm T6, T7); nhận lúc rạng sáng thuộc đêm hôm trước.
+   Trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm, Qua đêm + giờ thêm) thì giá thông thường
+   hiện gạch ngang để khách thấy phần lợi.
+   Last-minute chỉ ngày thường, khi giờ nhận cách lúc xem trang không quá 4 giờ, chỉ giảm giá gói (không giảm giờ thêm).
+   Early-bird như gói 2 ngày 1 đêm. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
+var COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
+function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
+/* Giờ trả của gói Qua đêm: 13 tiếng sau giờ nhận, tối đa đến 13:00 (chỉ chạm khi nhận lúc rạng sáng). */
+function gioTraQuaDem(tu) { return Math.min(tu + 13, QUA_DEM_MUON + (tu < COMBO_TU ? 0 : 24)); }
+/* Ô "Đến": nhận rạng sáng thì tới 13:00 cùng ngày; còn lại tới giờ trả của gói 2 ngày 1 đêm hôm sau (12:00). */
+function denToiDa(tu) { return tu < COMBO_TU ? QUA_DEM_MUON : D.gioTra + 24; }
+function giaGio(ten, ngayM, tu, den, soKhach) {
+  var g = D.gia[ten], u = D.uuDai;
+  if (!g || !g.thuong[0]) return null;
+  var quaDem = laQuaDem(tu, den), soGio = den - tu, ra = gioTraQuaDem(tu);
+  var ct = quaDem ? cuoiTuanDem(tu < COMBO_TU ? ngayM - 1440 : ngayM) : cuoiTuanCombo(ngayM);
+  var b = ct ? g.cuoiTuan : g.thuong, x = b[4] || 0, ds, thuong;
+  function cach(goi, them, tra) { return b[goi] ? { goi: goi, them: them, gia: b[goi] + them * x, tra: tra } : null; }
+  if (quaDem) {
+    ds = [cach(2, Math.max(0, den - ra), Math.max(den, ra))];
+    if (tu >= COMBO_TU) ds.push(cach(3, Math.max(0, D.gioNhan - tu), D.gioTra + 24));
+    thuong = ds[0];
+  } else {
+    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), cach(2, 0, den)];
+    thuong = soGio >= 6 ? ds[1] : ds[0];
+  }
+  ds = ds.filter(Boolean);
+  if (!ds.length) return null;
+  thuong = thuong || ds[0];
+  var tot = ds.reduce(function (a, v) { return v.gia < a.gia ? v : a; }, thuong);
+  var kieu = tot.goi === 3 ? '2n1d' : quaDem ? 'quaDem' : 'gio';
+  function tenGoi(v) {
+    return v.goi === 3 ? c('theoGia2N1D') : v.goi === 2 ? (quaDem ? c('quaDemGoi', moc(tu), moc(ra), ra - tu) : c('tron13'))
+      : CHU[NN].goi[v.goi];
+  }
+  function tenDu(v) { return tenGoi(v) + (v.them ? c('congGioThem', v.them) : ''); }
+  var cuoi = ct ? c('cuoiTuanLe') : '', dong = [], lyDo = [], loi = thuong.gia - tot.gia;
+  if (loi > 0) {
+    dong.push([c('giaThuong', tenDu(thuong)) + cuoi, thuong.gia, 'gach']);
+    dong.push([c('toiUu', tenDu(tot)), tot.gia, 'toiUu']);
+    lyDo.push(c('lyDoToiUu', tien(loi)));
+  } else {
+    dong.push([tenGoi(tot) + cuoi, b[tot.goi]]);
+    if (tot.them) dong.push([c('gioThem', tot.them, tien(x)), tot.them * x]);
+  }
+  var tong = tot.gia, goc = thuong.gia;
+  if (u.lastMinute && !ct && ngayM + tu * 60 - BAY_GIO <= 4 * 60) {
+    var lm = lamTron(b[tot.goi] * u.lastMinute / 100), tenLm = c('lmGio', u.lastMinute);
+    dong.push([tenLm, -lm]);
+    lyDo.push(tenLm);
+    tong -= lm;
+  }
+  if (u.earlyBird && (ngayM - HOM_NAY) / 1440 >= u.earlyBirdNgay) {
+    var eb = lamTron(tong * u.earlyBird / 100), tenEb = c('eb', u.earlyBird);
+    dong.push([tenEb, -eb]);
+    lyDo.push(tenEb);
+    tong -= eb;
+  }
+  var soThem = Math.max(0, soKhach - 2), donGia = kieu === 'gio' ? phuThuGio() : u.phuThu;
+  if (soThem && donGia) {
+    dong.push([c('phuThu', khachThem(soThem), tien(donGia)), soThem * donGia]);
+    tong += soThem * donGia;
+    goc += soThem * donGia;
+  }
+  var congGio = tot.them ? c('congGio', tot.them) : '';
+  var moTa = kieu === '2n1d' ? c('moTa2N1D', moc(tu), moc(tot.tra))
+    : kieu === 'quaDem' ? c('moTaQuaDem', tot.tra - tu, congGio, moc(tu), moc(tot.tra))
+    : c('soGio', soGio) + ' · ' + (tot.goi === 2 ? c('tron13') : CHU[NN].goi[tot.goi] + congGio);
+  return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: moTa + ' · ' + c('khach', soKhach), tra: tot.tra, kieu: kieu };
+}
+
+function el(tag, cls, text) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function taoAnh(url, rong, ten, i) {
+  var img = document.createElement('img');
+  img.alt = c('anhSo', tenHien(ten), i + 1);
+  img.decoding = 'async';
+  img.loading = i ? 'lazy' : 'eager';
+  img.src = anhNho(url, rong);
+  img.onerror = function () { if (!img.dataset.goc) { img.dataset.goc = '1'; img.src = url; } };
+  return img;
+}
+
+function soThuTu(truot, tong) { return (Math.round(truot.scrollLeft / Math.max(1, truot.clientWidth)) + 1) + '/' + tong; }
+
+/* Bộ ảnh tiếng Anh nằm cạnh trang: <số phòng>-01.jpg, -02.jpg… (số ảnh của từng phòng ở ANH_EN).
+   Phòng không có trong ANH_EN thì bản tiếng Anh dùng ảnh trong Sheet như bản tiếng Việt. */
+var ANH_EN = { '101': 10, '201': 9, '202': 11, '301': 10 };
+var GOC_TRANG = /^https?:/.test(location.href) ? location.href : 'https://monacasaigon.github.io/tra-cuu/';
+function dsAnh(ten) {
+  var so = (String(ten).match(/\d+/) || [])[0], n = NN === 'en' && ANH_EN[so], ds = [];
+  if (!n) return D.anh[ten] || [];
+  for (var i = 1; i <= n; i++) ds.push(new URL(so + '-' + pad(i) + '.jpg', GOC_TRANG).href);
+  return ds;
+}
+
+function khungAnh(ten) {
+  var ds = dsAnh(ten), g = D.gia[ten] || {}, khung = el('div', 'anh');
+  if (!ds.length) return khung;
+  var truot = el('div', 'truot'), dem = el('span', 'soAnh', '1/' + ds.length);
+  ds.forEach(function (url, i) {
+    var img = taoAnh(url, 720, ten, i);
+    img.addEventListener('click', function () { moHop(ds, i, ten); });
+    truot.appendChild(img);
+  });
+  truot.addEventListener('scroll', function () { dem.textContent = soThuTu(truot, ds.length); }, { passive: true });
+  khung.appendChild(truot);
+  if (g.hang) khung.appendChild(el('span', 'nhanHang', g.hang));
+  khung.appendChild(dem);
+  if (ds.length > 1) {
+    [['trai', '‹', -1, c('anhTruoc')], ['phai', '›', 1, c('anhSau')]].forEach(function (x) {
+      var n = el('button', 'mui ' + x[0], x[1]);
+      n.type = 'button';
+      n.setAttribute('aria-label', x[3]);
+      n.addEventListener('click', function () { truot.scrollBy({ left: x[2] * truot.clientWidth, behavior: 'smooth' }); });
+      khung.appendChild(n);
+    });
+  }
+  return khung;
+}
+
+function moHop(ds, i, ten) {
+  var truot = byId('hopTruot');
+  truot.textContent = '';
+  ds.forEach(function (url, j) { truot.appendChild(taoAnh(url, 1080, ten, j)); });
+  byId('hopTen').textContent = tenHien(ten);
+  truot.onscroll = function () { byId('hopDem').textContent = soThuTu(truot, ds.length); };
+  byId('hop').hidden = false;
+  document.body.style.overflow = 'hidden';
+  truot.scrollLeft = i * truot.clientWidth;
+  byId('hopDem').textContent = (i + 1) + '/' + ds.length;
+}
+
+function dongHop() {
+  byId('hop').hidden = true;
+  document.body.style.overflow = '';
+}
+
+function thongBao(s) {
+  var t = byId('toast');
+  t.textContent = s;
+  t.hidden = false;
+  clearTimeout(t.hen);
+  t.hen = setTimeout(function () { t.hidden = true; }, 6000);
+}
+
+/* Zalo không nhận sẵn nội dung qua link nên chép vào bộ nhớ tạm; WhatsApp thì gửi kèm ngay trong link. */
+function chepDatPhong(noiDung) {
+  var bao = function (ok) { thongBao(ok ? c('daChep') : noiDung); };
+  try { navigator.clipboard.writeText(noiDung).then(function () { bao(true); }, function () { bao(false); }); } catch (e) { bao(false); }
+}
+
+function thePhong(ten, loai, nhan) {
+  var o = el('div', 'phong' + (loai === 'kin' ? ' het' : '')), nd = el('div', 'noiDung'), dau = el('div', 'dauPhong');
+  o.appendChild(khungAnh(ten));
+  dau.appendChild(el('span', 'tenPhong', tenHien(ten)));
+  dau.appendChild(el('span', 'chip ' + loai, nhan));
+  nd.appendChild(dau);
+  if (D.gia[ten] && D.gia[ten].moTa) nd.appendChild(el('p', 'moTa', D.gia[ten].moTa));
+  o.appendChild(nd);
+  o.noiDung = nd;
+  return o;
+}
+
+function khoiGia(ten, kq, tomTat) {
+  var khoi = el('div'), hang = el('div', 'gia'), trai = el('div'), tong = el('div', 'tong', tien(kq.tong));
+  trai.appendChild(el('div', 'nhan', kq.moTa));
+  if (kq.goc > kq.tong) {
+    trai.appendChild(el('div', 'goc', tien(kq.goc)));
+    tong.appendChild(el('span', 'giam', '−' + Math.round((1 - kq.tong / kq.goc) * 100) + '%'));
+  }
+  trai.appendChild(tong);
+  if (kq.lyDo && kq.lyDo.length) trai.appendChild(el('div', 'lyDo', '🏷 ' + kq.lyDo.join(' · ')));
+  hang.appendChild(trai);
+  var noiDung = c('loiNhan', D.ten, tenHien(ten), tomTat, tien(kq.tong)), nut = el('a', 'datPhong', c('datQuaZalo'));
+  nut.href = linkLienHe(noiDung);
+  nut.target = '_blank';
+  nut.rel = 'noopener';
+  if (NN !== 'en') nut.addEventListener('click', function () { chepDatPhong(noiDung); });
+  hang.appendChild(nut);
+  khoi.appendChild(hang);
+  var ct = el('details', 'chiTiet');
+  ct.appendChild(el('summary', null, c('chiTietGia')));
+  kq.dong.forEach(function (d) {
+    var r = el('div', 'dongGia' + (d[1] < 0 ? ' tru' : '') + (d[2] ? ' ' + d[2] : ''));
+    r.appendChild(el('span', null, d[0]));
+    r.appendChild(el('span', null, (d[1] < 0 ? '−' : '') + tien(Math.abs(d[1]))));
+    ct.appendChild(r);
+  });
+  var cuoi = el('div', 'dongGia tongCong');
+  cuoi.appendChild(el('span', null, c('tongCong')));
+  cuoi.appendChild(el('span', null, tien(kq.tong)));
+  ct.appendChild(cuoi);
+  khoi.appendChild(ct);
+  return khoi;
+}
+
+var THU_TU = { trong: 0, motPhan: 1, kin: 2 };
+
+/* Phòng không đủ chỗ cho số khách đã chọn: hiện mờ ở cuối danh sách, không báo giá. */
+function khongVua(ten, viTri) {
+  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten))), thuTu: 300 + viTri };
+}
+
+/* Ở thiếu đúng 1 đêm để được ưu đãi "từ N đêm chỉ tính giá ngày thường" và có đêm cuối tuần được hạ giá:
+   gợi ý đặt thêm đêm kế tiếp (nếu phòng còn trống), ghi tổng mới và phần chỉ phải trả thêm. */
+function goiYThemDem(ten, nhan, tra, soDem, soKhach, gia) {
+  var u = D.uuDai, moi = soDem + 1, kt = tra + D.gioTra * 60;
+  if (moi !== u.tuDemGiaThuong || moi > 30) return null;
+  var coHa = false;
+  for (var i = 0; i < moi; i++) { var m = nhan + i * 1440; if (cuoiTuanDem(m) && !laLe(m)) coHa = true; }
+  if (!coHa || trangThai(ten, kt, kt + 1440) !== 'trong') return null;
+  var g = giaDem(ten, nhan, moi, soKhach);
+  if (!g) return null;
+  var hop = el('div', 'themDem'), nut = el('button', null, c('nutThemDem'));
+  hop.appendChild(el('span', null, c('themDem', gio(D.gioTra) + ' ' + ngay(tra + 1440), moi, tien(g.tong), tien(g.tong - gia.tong))));
+  nut.type = 'button';
+  nut.addEventListener('click', function () {
+    byId('ngayTra').value = iso(tra + 1440);
+    kiemTra();
+    byId('ketQua').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  hop.appendChild(nut);
+  return hop;
+}
+
+function hienKetQua(ds, soTrong, moTa) {
+  var kq = byId('ketQua'), n = D.phong.length;
+  kq.textContent = '';
+  var tom = el('p', 'tom', soTrong === n ? c('caPhong', n) : soTrong === 0 ? c('khongTrong') : c('soTrong', soTrong, n));
+  tom.appendChild(el('small', null, moTa));
+  kq.appendChild(tom);
+  ds.sort(function (a, b) { return a.thuTu - b.thuTu; }).forEach(function (x) { kq.appendChild(x.o); });
+}
+
+function ghiChuGia() {
+  byId('ketQua').appendChild(el('p', 'ghiChu', c('ghiChuGia', D.ten)));
+}
+
+function kiemTraDem() {
+  if (!byId('ngayNhan').value || !byId('ngayTra').value) return c('loiChonNgayDem');
+  var nhan = phut(byId('ngayNhan').value), tra = phut(byId('ngayTra').value);
+  var soDem = Math.round((tra - nhan) / 1440), soKhach = +byId('soKhach').value || 2;
+  if (nhan < HOM_NAY) return c('loiNhanQua');
+  if (soDem < 1) return c('loiTraSau');
+  if (soDem > 30) return c('loi30');
+  var bd = nhan + D.gioNhan * 60, kt = tra + D.gioTra * 60, soTrong = 0;
+  var tomTat = c('tomTatDem', gio(D.gioNhan), ngay(nhan), gio(D.gioTra), ngay(tra), c('dem', soDem), c('khach', soKhach));
+  var ds = D.phong.map(function (ten, viTri) {
+    if (soKhach > sucChua(ten)) return khongVua(ten, viTri);
+    var tong = trangThai(ten, bd, kt), dem = [], demTrong = 0;
+    for (var i = 0; i < soDem; i++) {
+      var s = bd + i * 1440, t = trangThai(ten, s, i === soDem - 1 ? kt : s + 1440);
+      if (t === 'trong') demTrong++;
+      dem.push([s, t]);
+    }
+    var loai = tong === 'trong' ? 'trong' : demTrong ? 'motPhan' : 'kin';
+    if (loai === 'trong') soTrong++;
+    var o = thePhong(ten, loai, { trong: c('conTrong'), motPhan: c('trongDem', demTrong, soDem), kin: c('hetPhong') }[loai]);
+    if (tong !== 'trong' && soDem > 1) {
+      var hang = el('div', 'dem');
+      dem.forEach(function (d) { hang.appendChild(el('span', d[1] === 'trong' ? 'trong' : 'kin', ngay(d[0]))); });
+      o.noiDung.appendChild(hang);
+    }
+    var gia = loai === 'trong' ? giaDem(ten, nhan, soDem, soKhach) : null;
+    if (gia) o.noiDung.appendChild(khoiGia(ten, gia, tomTat));
+    var them = gia && goiYThemDem(ten, nhan, tra, soDem, soKhach, gia);
+    if (them) o.noiDung.appendChild(them);
+    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+  });
+  hienKetQua(ds, soTrong, c('tomDem', gio(D.gioNhan), ngay(nhan), gio(D.gioTra), ngay(tra), c('dem', soDem), c('khach', soKhach)));
+  ghiChuGia();
+}
+
+function kiemTraGio() {
+  if (!byId('ngayGio').value) return c('loiChonNgay');
+  var ngayM = phut(byId('ngayGio').value), tu = +byId('tuGio').value, den = +byId('denGio').value;
+  var quaDem = laQuaDem(tu, den), ra = quaDem ? Math.max(den, gioTraQuaDem(tu)) : den;
+  /* Phòng trống xét đúng giờ khách chọn; gói Qua đêm thì thanh giờ hiện tới trưa hôm sau để khách tự xem. */
+  var bd = ngayM + tu * 60, kt = ngayM + den * 60, soTrong = 0, soO = ra > 24 ? 36 : 24, soKhach = +byId('soKhach').value || 2;
+  if (den <= tu) return c('loiGioTra');
+  if (kt <= BAY_GIO) return c('loiKhungQua');
+  if (bd + 60 <= BAY_GIO) return c('loiGioNhanQua', gio(Math.floor((BAY_GIO - HOM_NAY) / 60)));
+  function mocNgay(h) { return h >= 24 ? gio(h - 24) + ' ' + ngay(ngayM + 1440) : gio(h); }
+  var ds = D.phong.map(function (ten, viTri) {
+    if (soKhach > sucChua(ten)) return khongVua(ten, viTri);
+    var tong = trangThai(ten, bd, kt);
+    var loai = tong === 'trong' ? 'trong' : 'kin';
+    if (loai === 'trong') soTrong++;
+    var o = thePhong(ten, loai, { trong: c('conTrong'), kin: c('daKin') }[loai]);
+    var thanh = el('div', 'gio'), moc = el('div', 'moc');
+    thanh.style.gridTemplateColumns = 'repeat(' + soO + ', 1fr)';
+    if (soO > 24) thanh.style.gap = '1px';
+    for (var h = 0; h < soO; h++) {
+      var s = ngayM + h * 60;
+      var o2 = el('i', (s + 60 <= BAY_GIO ? 'qua' : trangThai(ten, s, s + 60)) + (h >= tu && h < den ? ' chon' : ''));
+      o2.title = gio(h % 24) + (h >= 24 ? ' ' + c('homSau') : '');
+      thanh.appendChild(o2);
+    }
+    (soO > 24 ? [0, 6, 12, 18, 24, 30, 36] : [0, 6, 12, 18, 24]).forEach(function (h) {
+      moc.appendChild(el('span', null, NN === 'en' ? (h % 12 || 12) + (h % 24 < 12 ? 'AM' : 'PM') : (soO > 24 ? h % 24 : h) + 'h'));
+    });
+    o.noiDung.appendChild(thanh);
+    o.noiDung.appendChild(moc);
+    var gia = loai === 'kin' ? null : giaGio(ten, ngayM, tu, den, soKhach);
+    if (gia) {
+      var goi = gia.kieu === 'quaDem' ? c('quaDemTomTat', gia.tra - tu) : gia.kieu === '2n1d' ? c('tomTat2N1D') : '';
+      o.noiDung.appendChild(khoiGia(ten, gia, c('tomTatGio', ngay(ngayM), gio(tu), mocNgay(gia.tra), goi, c('khach', soKhach))));
+    }
+    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+  });
+  hienKetQua(ds, soTrong, (quaDem ? c('quaDemTieng', ra - tu) : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + mocNgay(ra) + ' · ' + c('khach', soKhach));
+  var cg = el('div', 'chuGiai');
+  [['trong', c('cgTrong')], ['dat', c('cgDat')], ['qua', c('cgQua')], ['chon', c('cgChon')]].forEach(function (x) {
+    var s = el('span');
+    s.appendChild(el('b', x[0]));
+    s.appendChild(document.createTextNode(x[1]));
+    cg.appendChild(s);
+  });
+  byId('ketQua').appendChild(cg);
+  ghiChuGia();
+}
+
+function kiemTra() {
+  var loi = cheDo === 'dem' ? kiemTraDem() : kiemTraGio();
+  byId('loi').hidden = !loi;
+  if (loi) {
+    byId('loi').textContent = loi;
+    byId('ketQua').textContent = '';
+  }
+}
+
+function khoiTao(duLieu) {
+  D = duLieu;
+  D.gia = D.gia || {};
+  D.anh = D.anh || {};
+  D.uuDai = D.uuDai || { lastMinute: 0, earlyBird: 0, earlyBirdNgay: 30, tuDemGiaThuong: 99, dai5: 0, dai7: 0, dai15: 0, phuThu: 0, toiDaKhach: 3, ngayLe: [] };
+  (D.uuDai.ngayLe || []).forEach(function (s) { LE[s] = 1; });
+  BAY_GIO = phut(D.bayGio);
+  HOM_NAY = Math.floor(BAY_GIO / 1440) * 1440;
+  LICH = D.lich.map(function (b) { return { phong: chuan(b.phong), bd: phut(b.bd), kt: phut(b.kt) }; });
+  var homNay = iso(HOM_NAY), ngayMai = iso(HOM_NAY + 1440);
+  ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = homNay; byId(id).value = homNay; });
+  byId('ngayTra').min = ngayMai;
+  byId('ngayTra').value = ngayMai;
+  for (var h = 0; h < 24; h++) byId('tuGio').add(new Option(gio(h), h));
+  /* Mặc định giờ tròn kế tiếp; trước 09:00 sáng thì lấy 09:00, sau 23:00 thì 09:00 hôm sau. */
+  var tiep = Math.floor((BAY_GIO - HOM_NAY) / 60) + 1;
+  if (tiep > 23) { byId('ngayGio').value = ngayMai; tiep = COMBO_TU; }
+  else if (tiep < COMBO_TU) tiep = COMBO_TU;
+  byId('tuGio').value = tiep;
+  dsGioDen(false);
+  var toiDa = Math.max.apply(null, D.phong.map(sucChua));
+  for (var n = 1; n <= toiDa; n++) byId('soKhach').add(new Option('', n));
+  byId('soKhach').value = Math.min(2, toiDa);
+  byId('tuGio').addEventListener('change', function () { dsGioDen(true); giaiThichGio(); });
+  byId('denGio').addEventListener('change', giaiThichGio);
+
+  byId('ngayNhan').addEventListener('change', function () {
+    if (!this.value) return;
+    var n = phut(this.value);
+    byId('ngayTra').min = iso(n + 1440);
+    if (!byId('ngayTra').value || phut(byId('ngayTra').value) <= n) byId('ngayTra').value = iso(n + 1440);
+  });
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      cheDo = b.getAttribute('data-che-do');
+      document.querySelectorAll('.seg button').forEach(function (x) {
+        x.classList.toggle('on', x === b);
+        x.setAttribute('aria-selected', x === b);
+      });
+      byId('formDem').hidden = cheDo !== 'dem';
+      byId('formGio').hidden = cheDo !== 'gio';
+      goiYKhach();
+      kiemTra();
+    });
+  });
+  byId('kiemTra').addEventListener('click', kiemTra);
+  byId('soKhach').addEventListener('change', kiemTra);
+  byId('dongHop').addEventListener('click', dongHop);
+  document.addEventListener('keydown', function (e) {
+    if (byId('hop').hidden) return;
+    var truot = byId('hopTruot');
+    if (e.key === 'Escape') dongHop();
+    if (e.key === 'ArrowRight') truot.scrollBy({ left: truot.clientWidth, behavior: 'smooth' });
+    if (e.key === 'ArrowLeft') truot.scrollBy({ left: -truot.clientWidth, behavior: 'smooth' });
+  });
+
+  byId('xemLich').href = D.xemLich;
+  byId('kiemTra').disabled = false;
+  apDungNgonNgu();
+  kiemTra();
+}
+
+/* Ô "Đến" chỉ có giờ sau giờ nhận, tới giờ trả muộn nhất (denToiDa). Đổi giờ nhận combo thì giữ giờ trả nếu còn hợp lệ;
+   giờ nhận của gói Qua đêm (hoặc combo không còn đủ 3 giờ trước 21:00) thì đặt giờ trả theo gói Qua đêm. */
+function dsGioDen(giu) {
+  var tu = +byId('tuGio').value, s = byId('denGio'), cu = +s.value, max = denToiDa(tu);
+  var quaDem = laQuaDem(tu, tu + 1), macDinh = quaDem || tu + 3 > COMBO_DEN ? gioTraQuaDem(tu) : tu + 3;
+  s.textContent = '';
+  for (var k = tu + 1; k <= max; k++) s.add(new Option(moc(k), k));
+  s.value = giu && !quaDem && cu > tu && cu <= max ? cu : macDinh;
+}
+
+/* Dòng nhắc dưới ô chọn giờ, chỉ hiện khi khách nhận giờ combo mà chọn trả lố qua 21:00 nhưng chưa tới giờ trả
+   của gói Qua đêm (vd 19:00 → 23:00): báo là đã thành gói Qua đêm và được ở tới mấy giờ. */
+function giaiThichGio() {
+  var tu = +byId('tuGio').value, den = +byId('denGio').value, p = byId('giaiThich'), ra = gioTraQuaDem(tu);
+  p.hidden = !(tu >= COMBO_TU && tu < QUA_DEM_TU && den > COMBO_DEN && den < ra);
+  if (!p.hidden) p.textContent = c('giaiSau21', gio(COMBO_DEN), gio(tu), moc(ra), ra - tu);
+}
+
+/* Dòng phụ thu dưới ô số khách: tab combo ghi cả mức combo giờ và qua đêm, tab 2 ngày 1 đêm ghi theo đêm. */
+function goiYKhach() {
+  var u = D.uuDai, s = '';
+  if (cheDo === 'gio' && u.phuThu) s = c('phuThuTu3Gio', tien(phuThuGio()), tien(u.phuThu));
+  else if (u.phuThu) s = c('phuThuTu3', tien(u.phuThu));
+  byId('goiYKhach').textContent = s + c('treEm');
+}
+
+/* Đổi chữ theo ngôn ngữ đang chọn. Phần cần dữ liệu (giờ nhận/trả, phụ thu, liên hệ) chỉ điền khi đã tải xong. */
+function apDungNgonNgu() {
+  document.documentElement.lang = NN;
+  document.title = c('tieuDeTrang');
+  document.querySelectorAll('[data-c]').forEach(function (e) { e.textContent = c(e.getAttribute('data-c')); });
+  document.querySelectorAll('.ngonNgu button').forEach(function (b) {
+    var on = b.getAttribute('data-nn') === NN;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  byId('hop').setAttribute('aria-label', c('anhPhong'));
+  byId('dongHop').setAttribute('aria-label', c('dong'));
+  var gy = byId('goiYGio');
+  gy.textContent = '';
+  gy.appendChild(el('span', null, c('goiYCombo', gio(COMBO_TU), gio(COMBO_DEN))));
+  gy.appendChild(el('span', null, c('goiYQuaDem', gio(QUA_DEM_TU), gio(COMBO_TU - 1), gio(QUA_DEM_MUON))));
+  if (!D) return;
+  byId('goiYDem').textContent = c('goiYDem', gio(D.gioNhan), gio(D.gioTra));
+  Array.from(byId('tuGio').options).forEach(function (o) { o.text = gio(+o.value); });
+  /* Nửa đêm ghi "00:00 hôm sau" (bản Anh 12:00AM next day) cho khỏi nhầm với 0 giờ hôm nay. */
+  Array.from(byId('denGio').options).forEach(function (o) { o.text = moc(+o.value); });
+  giaiThichGio();
+  var cn = D.bayGio.split('T'), t = cn[1].split(':'), d = cn[0].split('-');
+  byId('capNhat').textContent = NN === 'en'
+    ? (+t[0] % 12 || 12) + ':' + t[1] + (+t[0] < 12 ? 'AM' : 'PM') + ' ' + (+d[2]) + ' ' + CHU.en.thang[d[1] - 1] + ' ' + d[0]
+    : cn[1] + ' ' + d.slice().reverse().join('/');
+  Array.from(byId('soKhach').options).forEach(function (o) { o.text = c('khach', +o.value); });
+  goiYKhach();
+  byId('zalo').href = linkLienHe();
+  byId('soZalo').textContent = lienHe();
+}
+
+/* Ngôn ngữ: ?lang=en|vi trên link, rồi tới lựa chọn lần trước của khách, mặc định tiếng Việt. */
+NN = (function () {
+  var q = (location.search.match(/[?&]lang=(vi|en)\b/) || [])[1];
+  if (q) return q;
+  try { return localStorage.getItem('ngonNgu') === 'en' ? 'en' : 'vi'; } catch (e) { return 'vi'; }
+})();
+document.querySelectorAll('.ngonNgu button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    NN = b.getAttribute('data-nn');
+    try { localStorage.setItem('ngonNgu', NN); } catch (e) {}
+    apDungNgonNgu();
+    if (D) kiemTra();
+  });
+});
+apDungNgonNgu();
+
+byId('kiemTra').disabled = true;
+byId('ketQua').appendChild(el('p', 'tom', c('dangTai')));
+fetch(API, { cache: 'no-store' })
+  .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function (d) { byId('ketQua').textContent = ''; khoiTao(d); })
+  .catch(function () {
+    byId('ketQua').textContent = '';
+    byId('loi').hidden = false;
+    byId('loi').textContent = c('loiTai');
+  });
+</script>
+</body>
+</html>
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monaca Homestay · Tra cứu phòng trống</title>
+<meta name="description" content="Chọn ngày ở, xem ngay phòng nào của Monaca Homestay còn trống và giá cho đúng ngày bạn chọn.">
+<meta property="og:title" content="Monaca Homestay · Tra cứu phòng trống">
+<meta property="og:description" content="Chọn ngày ở, xem ngay phòng nào còn trống và giá cho đúng ngày bạn chọn.">
+<meta name="theme-color" content="#790013">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%85%3C%2Ftext%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://wsrv.nl">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dam: #55000D; --dau: #790013; --dauNhat: #9B1B2A; --nen: #FBF5F3; --nhat: #F6ECEB; --the: #FFFFFF;
+    --chu: #2B1A1C; --phu: #7D6A6C; --vien: #ECDCDC;
+    --xanh: #E2F2E6; --xanhChu: #1E6B3A; --vang: #FCEFD2; --vangChu: #85570A; --do: #F6E0E2; --doChu: #790013;
+    --oTrong: #BFE3CB; --oDat: #790013; --oQua: #EEE6E6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--nen); color: var(--chu); font: 15px/1.5 'Lexend', system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 16px; }
+  .hero { position: relative; background: linear-gradient(135deg, var(--dam), var(--dau) 60%, var(--dauNhat)); color: #fff; border-radius: 18px; padding: 18px 20px; }
+  .ngonNgu { position: absolute; top: 12px; right: 12px; display: flex; padding: 2px; border-radius: 999px; background: rgba(255,255,255,.16); }
+  .ngonNgu button { border: 0; padding: 3px 9px; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .04em; cursor: pointer; opacity: .8; }
+  .ngonNgu button.on { background: #fff; color: var(--dau); opacity: 1; }
+  .hero .logo { display: block; width: auto; height: 56px; margin: -6px 0 4px -4px; }
+  .hero h1 { margin: 2px 0; font-size: 22px; line-height: 1.25; font-weight: 700; }
+  .hero p { margin: 0; font-size: 13px; opacity: .85; }
+  .the, .phong { background: var(--the); border-radius: 16px; box-shadow: 0 1px 2px rgba(85,0,13,.06), 0 4px 14px rgba(85,0,13,.07); }
+  .the { padding: 16px; margin-top: 12px; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--nhat); }
+  .seg button { border: 0; padding: 9px 6px; border-radius: 9px; background: transparent; font: inherit; font-size: 14px; line-height: 1.3; font-weight: 600; color: var(--phu); cursor: pointer; }
+  .seg button.on { background: var(--dau); color: #fff; box-shadow: 0 1px 3px rgba(85,0,13,.25); }
+  .luoi { display: grid; gap: 10px; margin-top: 14px; }
+  .luoi.hai { grid-template-columns: 1fr 1fr; }
+  .luoi.ba { grid-template-columns: 1.4fr 1fr 1fr; }
+  label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--phu); }
+  input, select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--vien); border-radius: 10px; background: #fff; font: inherit; font-size: 15px; color: var(--chu); }
+  input[type="date"] { -webkit-appearance: none; appearance: none; display: block; min-height: 44px; text-align: left; }
+  input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+  input:focus, select:focus { outline: 2px solid var(--dau); outline-offset: 1px; }
+  .goiY { margin: 8px 0 0; font-size: 12px; color: var(--phu); }
   .nut { display: block; width: 100%; margin-top: 14px; padding: 13px; border: 0; border-radius: 12px; background: var(--dau); color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
   .nut:active { transform: translateY(1px); }
   .nut:disabled { opacity: .6; cursor: wait; }
