@@ -179,7 +179,7 @@ var CHU = {
     goiYDem: 'Nhận phòng từ {0} · trả phòng trước {1}',
     soKhachNhan: 'Số khách (từ 10 tuổi)',
     treEm: 'Trẻ em dưới 10 tuổi miễn phí',
-    phuThuTu3: ' · từ khách thứ 3 phụ thu {0}/đêm',
+    phuThuTu3: 'Từ khách thứ 3 phụ thu {0}/đêm - ',
     nutKiemTra: 'Kiểm tra phòng trống',
     nhanZalo: '💬 Nhắn Zalo đặt phòng',
     gioVN: 'Giờ Việt Nam · cập nhật',
@@ -240,7 +240,7 @@ var CHU = {
     goiYDem: 'Check-in from {0} · check-out by {1}',
     soKhachNhan: 'Guests (age 10+)',
     treEm: 'Children under 10 stay free',
-    phuThuTu3: ' · 3rd guest +{0}/night',
+    phuThuTu3: 'From the 3rd guest: +{0}/night - ',
     nutKiemTra: 'Check availability',
     nhanZalo: '💬 Message us on WhatsApp to book',
     gioVN: 'Vietnam time · updated',
@@ -713,7 +713,7 @@ function apDungNgonNgu() {
   byId('goiYDem').textContent = c('goiYDem', gio(D.gioNhan), gio(D.gioTra));
   Array.from(byId('denGio').options).forEach(function (o) { var k = +o.value; o.text = k > 24 ? gio(k - 24) + ' ' + c('homSau') : gio(k); });
   Array.from(byId('soKhach').options).forEach(function (o) { o.text = c('khach', +o.value); });
-  byId('goiYKhach').textContent = c('treEm') + (D.uuDai.phuThu ? c('phuThuTu3', tien(D.uuDai.phuThu)) : '') + '.';
+  byId('goiYKhach').textContent = (D.uuDai.phuThu ? c('phuThuTu3', tien(D.uuDai.phuThu)) : '') + c('treEm');
   byId('zalo').href = linkLienHe();
   byId('soZalo').textContent = lienHe();
 }
