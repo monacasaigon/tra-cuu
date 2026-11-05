@@ -190,7 +190,7 @@ var CHU = {
     goiYDem: 'Nhận phòng từ {0} · trả phòng trước {1}',
     soKhachNhan: 'Số khách (từ 10 tuổi)',
     treEm: 'Trẻ em dưới 10 tuổi miễn phí',
-    phuThuTu3: 'Từ khách thứ 3 phụ thu {0}/đêm',
+    phuThuTu3: 'Từ khách thứ 3 phụ thu {0}/đêm (trừ trẻ em dưới 10 tuổi miễn phí)',
     nutKiemTra: 'Kiểm tra phòng trống',
     nhanZalo: '💬 Nhắn Zalo đặt phòng',
     gioVN: 'Giờ Việt Nam · cập nhật',
@@ -228,9 +228,9 @@ var CHU = {
     oDem: 'Ở {0} đêm −{1}%',
     phuThuDem: 'Phụ thu khách thứ {0} × {1} đêm',
     phuThu: 'Phụ thu khách thứ {0} ({1}/khách)',
-    phuThuDau: 'Từ khách thứ 3 phụ thu:',
-    phuThuDongGio: '• Combo giờ: {0}/khách',
-    phuThuDongDem: '• Qua đêm: {0}/khách',
+    phuThuDau: 'Từ khách thứ 3 phụ thu (trừ trẻ em dưới 10 tuổi miễn phí):',
+    phuThuDongGio: '⏱ Combo giờ: {0}/khách',
+    phuThuDongDem: '🌙 Qua đêm: {0}/khách',
     toiDaKhach: '✕ Tối đa {0} khách',
     quaDemGoi: 'Qua đêm {2} tiếng ({0} → {1})',
     tron13: 'Trọn 13 giờ (giá qua đêm)',
@@ -267,7 +267,7 @@ var CHU = {
     goiYDem: 'Check-in after {0} · check-out before {1}',
     soKhachNhan: 'Guests (age 10+)',
     treEm: 'Children under 10 stay free',
-    phuThuTu3: 'From the 3rd guest: +{0}/night',
+    phuThuTu3: 'From the 3rd guest: +{0}/night (children under 10 stay free)',
     nutKiemTra: 'Check availability',
     nhanZalo: '💬 Message us on WhatsApp to book',
     gioVN: 'Vietnam time · updated',
@@ -309,9 +309,9 @@ var CHU = {
     oDem: '{0}-night stay −{1}%',
     phuThuDem: function (k, n) { return k + ' guest surcharge × ' + nhieu(n, 'night', 'nights'); },
     phuThu: '{0} guest surcharge ({1} per guest)',
-    phuThuDau: 'From the 3rd guest:',
-    phuThuDongGio: '• Hourly combo: +{0} per guest',
-    phuThuDongDem: '• Overnight: +{0} per guest',
+    phuThuDau: 'From the 3rd guest (children under 10 stay free):',
+    phuThuDongGio: '⏱ Hourly combo: +{0} per guest',
+    phuThuDongDem: '🌙 Overnight: +{0} per guest',
     toiDaKhach: '✕ Max {0} guests',
     quaDemGoi: function (a, b, n) { return 'Overnight, ' + nhieu(n, 'hour', 'hours') + ' (' + a + ' → ' + b + ')'; },
     tron13: 'Full 13 hours (overnight rate)',
@@ -884,7 +884,7 @@ function goiYKhach() {
   var u = D.uuDai, p = byId('goiYKhach'), dong = [];
   if (cheDo === 'gio' && u.phuThu) dong = [c('phuThuDau'), c('phuThuDongGio', tien(phuThuGio())), c('phuThuDongDem', tien(u.phuThu))];
   else if (u.phuThu) dong = [c('phuThuTu3', tien(u.phuThu))];
-  dong.push(c('treEm'));
+  if (!dong.length) dong.push(c('treEm'));
   p.textContent = '';
   dong.forEach(function (s) { p.appendChild(el('span', null, s)); });
 }
