@@ -437,8 +437,18 @@ function taoAnh(url, rong, ten, i) {
 
 function soThuTu(truot, tong) { return (Math.round(truot.scrollLeft / Math.max(1, truot.clientWidth)) + 1) + '/' + tong; }
 
+/* Bộ ảnh tiếng Anh nằm cạnh trang: <số phòng>-01.jpg, -02.jpg… (số ảnh của từng phòng ở ANH_EN).
+   Phòng không có trong ANH_EN thì bản tiếng Anh dùng ảnh trong Sheet như bản tiếng Việt. */
+var ANH_EN = { '101': 10, '201': 9, '202': 11, '301': 10 };
+function dsAnh(ten) {
+  var so = (String(ten).match(/\d+/) || [])[0], n = NN === 'en' && ANH_EN[so], ds = [];
+  if (!n) return D.anh[ten] || [];
+  for (var i = 1; i <= n; i++) ds.push(new URL(so + '-' + pad(i) + '.jpg', location.href).href);
+  return ds;
+}
+
 function khungAnh(ten) {
-  var ds = D.anh[ten] || [], g = D.gia[ten] || {}, khung = el('div', 'anh');
+  var ds = dsAnh(ten), g = D.gia[ten] || {}, khung = el('div', 'anh');
   if (!ds.length) return khung;
   var truot = el('div', 'truot'), dem = el('span', 'soAnh', '1/' + ds.length);
   ds.forEach(function (url, i) {
