@@ -448,9 +448,10 @@ function giaDem(ten, nhan, soDem, soKhach) {
    Gói Qua đêm khi trả sau 21:00, hoặc nhận từ 22:00 đến trước 09:00 sáng: ở 13 tiếng kể từ giờ nhận, tối đa đến
    13:00. Ở quá giờ trả thì cộng giờ thêm, hoặc tính giá 2 ngày 1 đêm (nhận trước 14:00 thì cộng giờ) nếu rẻ hơn.
    Cuối tuần theo đêm (đêm T6, T7); nhận lúc rạng sáng thuộc đêm hôm trước.
-   Trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm, Qua đêm + giờ thêm) thì giá thông thường
+   Combo ban ngày mà trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm) thì giá thông thường
    hiện gạch ngang để khách thấy phần lợi.
-   Last-minute chỉ ngày thường, khi giờ nhận cách lúc xem trang không quá 4 giờ, chỉ giảm giá gói (không giảm giờ thêm).
+   Last-minute chỉ ngày thường, khi giờ nhận cách lúc xem trang không quá 4 giờ (tính theo giá 2N1Đ thì 24 giờ như tab
+   2 ngày 1 đêm), chỉ giảm giá gói (không giảm giờ thêm).
    Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
 var COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
 function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
@@ -464,37 +465,51 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   var quaDem = laQuaDem(tu, den), soGio = den - tu, ra = gioTraQuaDem(tu);
   var ngayXet = quaDem && tu < COMBO_TU ? ngayM - 1440 : ngayM, ct = quaDem ? cuoiTuanDem(ngayXet) : cuoiTuanCombo(ngayXet);
   var b = ct ? g.cuoiTuan : g.thuong, x = b[4] || 0, ds, thuong;
-  function cach(goi, them, tra) { return b[goi] ? { goi: goi, them: them, gia: b[goi] + them * x, tra: tra } : null; }
+  /* Mỗi cách tính ghi lại giá gói và bảng giá đã dùng (laCT: cuối tuần/lễ) để nhãn và Last-minute tính đúng. */
+  function cach(goi, them, tra, laCT) {
+    if (laCT === undefined) laCT = ct;
+    var bang = laCT ? g.cuoiTuan : g.thuong;
+    return bang[goi] ? { goi: goi, them: them, gia: bang[goi] + them * x, tra: tra, goiGia: bang[goi], ct: laCT } : null;
+  }
   if (quaDem) {
     ds = [cach(2, Math.max(0, den - ra), Math.max(den, ra))];
     if (tu >= COMBO_TU) ds.push(cach(3, Math.max(0, D.gioNhan - tu), D.gioTra + 24));
     thuong = ds[0];
   } else {
-    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), cach(2, 0, den)];
+    /* Trọn 13 giờ ban ngày lấy mức rẻ hơn giữa giá qua đêm theo ngày và theo đêm hôm đó (Chủ nhật ban ngày là cuối tuần
+       nhưng đêm Chủ nhật là ngày thường), để ở ngắn hơn không bao giờ đắt hơn kéo dài thành gói Qua đêm. */
+    var tron = [cach(2, 0, den), cach(2, 0, den, cuoiTuanDem(ngayM))].filter(Boolean)
+      .sort(function (p, q) { return p.gia - q.gia; })[0];
+    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), tron];
     thuong = soGio >= 6 ? ds[1] : ds[0];
   }
   ds = ds.filter(Boolean);
   if (!ds.length) return null;
   thuong = thuong || ds[0];
   var tot = ds.reduce(function (a, v) { return v.gia < a.gia ? v : a; }, thuong);
+  /* Ở tới trưa hôm sau thì giá 2 ngày 1 đêm là gói tự nhiên: không gạch ngang một "giá thông thường" tự cộng giờ. */
+  if (tot.goi === 3) thuong = tot;
   var kieu = tot.goi === 3 ? '2n1d' : quaDem ? 'quaDem' : 'gio';
   function tenGoi(v) {
     return v.goi === 3 ? c('theoGia2N1D') : v.goi === 2 ? (quaDem ? c('quaDemGoi', moc(tu), moc(ra), ra - tu) : c('tron13'))
       : CHU[NN].goi[v.goi];
   }
   function tenDu(v) { return tenGoi(v) + (v.them ? c('congGioThem', v.them) : ''); }
-  var cuoi = ct ? c('cuoiTuanLe') : '', dong = [], lyDo = [], loi = thuong.gia - tot.gia;
+  function cuoi(v) { return v.ct ? c('cuoiTuanLe') : ''; }
+  var dong = [], lyDo = [], loi = thuong.gia - tot.gia;
   if (loi > 0) {
-    dong.push([c('giaThuong', tenDu(thuong)) + cuoi, thuong.gia, 'gach']);
+    dong.push([c('giaThuong', tenDu(thuong)) + cuoi(thuong), thuong.gia, 'gach']);
     dong.push([c('toiUu', tenDu(tot)), tot.gia, 'toiUu']);
     lyDo.push(c('lyDoToiUu', tien(loi)));
   } else {
-    dong.push([tenGoi(tot) + cuoi, b[tot.goi]]);
+    dong.push([tenGoi(tot) + cuoi(tot), tot.goiGia]);
     if (tot.them) dong.push([c('gioThem', tot.them, tien(x)), tot.them * x]);
   }
   var tong = tot.gia, goc = thuong.gia;
-  if (u.lastMinute && !ct && ngayM + tu * 60 - BAY_GIO <= 4 * 60) {
-    var lm = lamTron(b[tot.goi] * u.lastMinute / 100), tenLm = c('lmGio', u.lastMinute);
+  /* Tính theo giá 2 ngày 1 đêm thì Last-minute theo luật 2N1Đ (giờ nhận 14:00 trong 24 giờ tới) để hai tab ra cùng giá. */
+  var la2N1D = tot.goi === 3, conLai = ngayM + (la2N1D ? D.gioNhan : tu) * 60 - BAY_GIO;
+  if (u.lastMinute && !ct && conLai <= (la2N1D ? 24 : 4) * 60) {
+    var lm = lamTron(tot.goiGia * u.lastMinute / 100), tenLm = c(la2N1D ? 'lmDem' : 'lmGio', u.lastMinute);
     dong.push([tenLm, -lm]);
     lyDo.push(tenLm);
     tong -= lm;
