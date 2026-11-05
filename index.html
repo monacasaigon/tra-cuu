@@ -236,8 +236,8 @@ var CHU = {
     tabGio: '⏱ Hourly & overnight',
     tabDem: '🌙 2 days 1 night',
     ngayNhan: 'Check-in date', ngayTra: 'Check-out date', ngay: 'Date', tu: 'From', den: 'To',
-    goiYGio: 'Check-in from 21:00 is the Overnight package: you can stay 13 hours from check-in.',
-    goiYDem: 'Check-in from {0} · check-out by {1}',
+    goiYGio: 'Check-in from 9:00PM is the Overnight package: you can stay 13 hours from check-in.',
+    goiYDem: 'Check-in after {0} · check-out before {1}',
     soKhachNhan: 'Guests (age 10+)',
     treEm: 'Children under 10 stay free',
     phuThuTu3: 'From the 3rd guest: +{0}/night - ',
@@ -266,7 +266,7 @@ var CHU = {
     caPhong: 'All {0} rooms are available 🎉',
     khongTrong: 'Sorry, no room is free for this whole period',
     soTrong: '{0}/{1} rooms available',
-    tomDem: 'Check-in {0} {1} → check-out {2} {3} · {4} · {5}',
+    tomDem: 'Check-in after {0} {1} → check-out before {2} {3} · {4} · {5}',
     quaDemTieng: 'Overnight, {0} hours · ',
     cgTrong: 'Free', cgDat: 'Booked', cgQua: 'Past', cgChon: 'Your hours',
     ghiChuGia: 'Prices follow our current rates and offers. {0} will confirm when you message us on WhatsApp.',
@@ -285,7 +285,7 @@ var CHU = {
     tron13: 'Full 13 hours (overnight rate)',
     gioThem: function (n, gia) { return nhieu(n, 'extra hour', 'extra hours') + ' × ' + gia; },
     moTaQuaDem: '{0} hours · Overnight{1} · {2} → {3} next day',
-    tomTatDem: 'check-in {0} {1}, check-out {2} {3} ({4}), {5}',
+    tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
     tomTatGio: '{0} from {1} to {2}{3}, {4}',
     quaDemTomTat: ' (overnight, {0} hours)',
     loiNhan: 'Hi {0}, I\'d like to book {1}: {2}. Price shown on the website: {3}.',
@@ -311,7 +311,12 @@ function ngay(m) {
   return NN === 'en' ? t + ' ' + d.getUTCDate() + ' ' + CHU.en.thang[d.getUTCMonth()]
     : t + ' ' + pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1);
 }
-function gio(h) { return pad(h) + ':00'; }
+/* Giờ tròn: bản Việt 24 giờ (14:00), bản Anh 12 giờ (2:00PM). */
+function gio(h) {
+  if (NN !== 'en') return pad(h) + ':00';
+  var g = h % 24;
+  return (g % 12 || 12) + ':00' + (g < 12 ? 'AM' : 'PM');
+}
 function chuan(s) { return String(s).trim().toLowerCase(); }
 function tien(n) { return NN === 'en' ? Math.round(n).toLocaleString('en-US') + '₫' : Math.round(n).toLocaleString('vi-VN') + 'đ'; }
 /* Tên phòng trong Sheet là tiếng Việt ("Phòng 101 - …"); bản tiếng Anh chỉ đổi chữ "Phòng". */
@@ -440,10 +445,11 @@ function soThuTu(truot, tong) { return (Math.round(truot.scrollLeft / Math.max(1
 /* Bộ ảnh tiếng Anh nằm cạnh trang: <số phòng>-01.jpg, -02.jpg… (số ảnh của từng phòng ở ANH_EN).
    Phòng không có trong ANH_EN thì bản tiếng Anh dùng ảnh trong Sheet như bản tiếng Việt. */
 var ANH_EN = { '101': 10, '201': 9, '202': 11, '301': 10 };
+var GOC_TRANG = /^https?:/.test(location.href) ? location.href : 'https://monacasaigon.github.io/tra-cuu/';
 function dsAnh(ten) {
   var so = (String(ten).match(/\d+/) || [])[0], n = NN === 'en' && ANH_EN[so], ds = [];
   if (!n) return D.anh[ten] || [];
-  for (var i = 1; i <= n; i++) ds.push(new URL(so + '-' + pad(i) + '.jpg', location.href).href);
+  for (var i = 1; i <= n; i++) ds.push(new URL(so + '-' + pad(i) + '.jpg', GOC_TRANG).href);
   return ds;
 }
 
@@ -619,7 +625,9 @@ function kiemTraGio() {
       o2.title = gio(h % 24) + (h >= 24 ? ' ' + c('homSau') : '');
       thanh.appendChild(o2);
     }
-    (soO > 24 ? ['0h', '6h', '12h', '18h', '0h', '6h', '12h'] : ['0h', '6h', '12h', '18h', '24h']).forEach(function (m) { moc.appendChild(el('span', null, m)); });
+    (soO > 24 ? [0, 6, 12, 18, 24, 30, 36] : [0, 6, 12, 18, 24]).forEach(function (h) {
+      moc.appendChild(el('span', null, NN === 'en' ? (h % 12 || 12) + (h % 24 < 12 ? 'AM' : 'PM') : (soO > 24 ? h % 24 : h) + 'h'));
+    });
     o.noiDung.appendChild(thanh);
     o.noiDung.appendChild(moc);
     var gia = loai === 'kin' ? null : giaGio(ten, ngayM, tu, den, soKhach);
@@ -698,8 +706,6 @@ function khoiTao(duLieu) {
     if (e.key === 'ArrowLeft') truot.scrollBy({ left: -truot.clientWidth, behavior: 'smooth' });
   });
 
-  var cn = D.bayGio.split('T');
-  byId('capNhat').textContent = cn[1] + ' ' + cn[0].split('-').reverse().join('/');
   byId('xemLich').href = D.xemLich;
   byId('kiemTra').disabled = false;
   apDungNgonNgu();
@@ -720,7 +726,16 @@ function apDungNgonNgu() {
   byId('dongHop').setAttribute('aria-label', c('dong'));
   if (!D) return;
   byId('goiYDem').textContent = c('goiYDem', gio(D.gioNhan), gio(D.gioTra));
-  Array.from(byId('denGio').options).forEach(function (o) { var k = +o.value; o.text = k > 24 ? gio(k - 24) + ' ' + c('homSau') : gio(k); });
+  Array.from(byId('tuGio').options).forEach(function (o) { o.text = gio(+o.value); });
+  /* 24:00 là nửa đêm; bản Anh ghi 12:00AM next day cho khỏi nhầm với 0 giờ hôm nay. */
+  Array.from(byId('denGio').options).forEach(function (o) {
+    var k = +o.value;
+    o.text = k > 24 || (k === 24 && NN === 'en') ? gio(k - 24) + ' ' + c('homSau') : gio(k);
+  });
+  var cn = D.bayGio.split('T'), t = cn[1].split(':'), d = cn[0].split('-');
+  byId('capNhat').textContent = NN === 'en'
+    ? (+t[0] % 12 || 12) + ':' + t[1] + (+t[0] < 12 ? 'AM' : 'PM') + ' ' + (+d[2]) + ' ' + CHU.en.thang[d[1] - 1] + ' ' + d[0]
+    : cn[1] + ' ' + d.slice().reverse().join('/');
   Array.from(byId('soKhach').options).forEach(function (o) { o.text = c('khach', +o.value); });
   byId('goiYKhach').textContent = (D.uuDai.phuThu ? c('phuThuTu3', tien(D.uuDai.phuThu)) : '') + c('treEm');
   byId('zalo').href = linkLienHe();
