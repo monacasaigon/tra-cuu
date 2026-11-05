@@ -214,7 +214,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
   }
   /* Last-minute: giảm cho mọi đêm có giờ nhận phòng trong vòng 24 giờ kể từ lúc xem trang. */
   if (u.lastMinute && soLm) {
-    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '%';
+    var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '% (đặt phòng trước khi nhận phòng 24 tiếng)';
     dong.push([tenLm, -lm]);
     lyDo.push(tenLm);
     tong -= lm;
@@ -236,7 +236,8 @@ function giaDem(ten, nhan, soDem, soKhach) {
 
 /* Combo theo giờ: dưới 3 giờ tính Combo 3 giờ; dài hơn thì cộng giờ thêm cho tới khi đắt hơn gói lớn hơn
    (Combo 6 giờ, rồi giá qua đêm trọn 13 giờ). Nhận phòng từ 21h luôn tính Qua đêm.
-   Last-minute khi giờ nhận phòng cách lúc xem trang không quá 3 giờ; Early-bird như gói 2 ngày 1 đêm. */
+   Last-minute khi giờ nhận phòng cách lúc xem trang không quá 4 giờ, chỉ giảm giá gói (không giảm giờ thêm);
+   Early-bird như gói 2 ngày 1 đêm. */
 /* Gói Qua đêm được ở trọn 13 tiếng kể từ giờ nhận, dù khách chọn giờ trả sớm hơn. */
 function gioRa(tu, den) { return tu >= 21 ? Math.max(den, tu + 13) : den; }
 function giaGio(ten, ngayM, tu, den, soKhach) {
@@ -253,8 +254,8 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   var dong = [[tenGoi + (ct ? ' · cuối tuần/lễ' : ''), b[tot.goi]]];
   if (tot.them) dong.push([tot.them + ' giờ thêm × ' + tien(x), tot.them * x]);
   var tong = tot.gia, goc = tot.gia, lyDo = [];
-  if (u.lastMinute && ngayM + tu * 60 - BAY_GIO <= 3 * 60) {
-    var lm = lamTron(tong * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '%';
+  if (u.lastMinute && ngayM + tu * 60 - BAY_GIO <= 4 * 60) {
+    var lm = lamTron(b[tot.goi] * u.lastMinute / 100), tenLm = 'Last-minute −' + u.lastMinute + '% (đặt phòng trước giờ nhận phòng 4 tiếng)';
     dong.push([tenLm, -lm]);
     lyDo.push(tenLm);
     tong -= lm;
