@@ -224,6 +224,7 @@ var CHU = {
     lmDem: 'Last-minute −{0}% (đặt phòng trước khi nhận phòng 24 tiếng)',
     lmGio: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 4 tiếng)',
     eb: 'Early-bird −{0}%',
+    ebTruLe: 'Early-bird −{0}% (trừ đêm lễ)',
     oDem: 'Ở {0} đêm −{1}%',
     phuThuDem: 'Phụ thu khách thứ {0} × {1} đêm',
     phuThu: 'Phụ thu khách thứ {0} ({1}/khách)',
@@ -302,6 +303,7 @@ var CHU = {
     lmDem: 'Last-minute −{0}% (booked within 24 hours of check-in)',
     lmGio: 'Last-minute −{0}% (booked within 4 hours of check-in)',
     eb: 'Early-bird −{0}%',
+    ebTruLe: 'Early-bird −{0}% (except holiday nights)',
     oDem: '{0}-night stay −{1}%',
     phuThuDem: function (k, n) { return k + ' guest surcharge × ' + nhieu(n, 'night', 'nights'); },
     phuThu: '{0} guest surcharge ({1} per guest)',
@@ -398,11 +400,12 @@ function trangThai(phong, bd, kt) {
 function giaDem(ten, nhan, soDem, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[3]) return null;
-  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, lmGoc = 0, soLm = 0;
+  var chiThuong = soDem >= u.tuDemGiaThuong, dong = [], lyDo = [], goc = 0, tong = 0, lmGoc = 0, soLm = 0, leAp = 0;
   for (var i = 0; i < soDem; i++) {
     var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
     var ap = chiThuong && !laLe(m) ? g.thuong[3] : giaGoc;
     if (!ct && m + D.gioNhan * 60 - BAY_GIO <= 24 * 60) { lmGoc += ap; soLm++; }
+    if (laLe(m)) leAp += ap;
     goc += giaGoc;
     tong += ap;
     dong.push([c('demNgay', ngay(m)) + (ct ? c('cuoiTuanLe') : ''), giaGoc]);
@@ -418,12 +421,15 @@ function giaDem(ten, nhan, soDem, soKhach) {
     lyDo.push(tenLm);
     tong -= lm;
   }
-  var pct = 0, ly = [];
-  if (u.earlyBird && (nhan - HOM_NAY) / 1440 >= u.earlyBirdNgay) { pct += u.earlyBird; ly.push(c('eb', u.earlyBird)); }
+  /* Early-bird không áp dụng cho đêm lễ, Tết: chỉ giảm trên phần tiền các đêm thường (đêm lễ không có Last-minute
+     nên tong − leAp đúng bằng phần đêm thường). Ưu đãi ở dài vẫn giảm trên cả bill. */
+  var ly = [], coSoEb = tong - leAp;
+  var coEb = u.earlyBird && (nhan - HOM_NAY) / 1440 >= u.earlyBirdNgay && coSoEb > 0;
+  if (coEb) ly.push(c(leAp ? 'ebTruLe' : 'eb', u.earlyBird));
   var dai = soDem >= 15 ? u.dai15 : soDem >= 7 ? u.dai7 : soDem >= 5 ? u.dai5 : 0;
-  if (dai) { pct += dai; ly.push(c('oDem', soDem, dai)); }
-  if (pct) {
-    var giam = lamTron(tong * pct / 100);
+  if (dai) ly.push(c('oDem', soDem, dai));
+  if (ly.length) {
+    var giam = lamTron(tong * dai / 100 + (coEb ? coSoEb * u.earlyBird / 100 : 0));
     dong.push([ly.join(', '), -giam]);
     lyDo = lyDo.concat(ly);
     tong -= giam;
@@ -441,7 +447,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
    Trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm, Qua đêm + giờ thêm) thì giá thông thường
    hiện gạch ngang để khách thấy phần lợi.
    Last-minute chỉ ngày thường, khi giờ nhận cách lúc xem trang không quá 4 giờ, chỉ giảm giá gói (không giảm giờ thêm).
-   Early-bird như gói 2 ngày 1 đêm. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
+   Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
 var COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
 function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
 /* Giờ trả của gói Qua đêm: 13 tiếng sau giờ nhận, tối đa đến 13:00 (chỉ chạm khi nhận lúc rạng sáng). */
@@ -452,7 +458,7 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[0]) return null;
   var quaDem = laQuaDem(tu, den), soGio = den - tu, ra = gioTraQuaDem(tu);
-  var ct = quaDem ? cuoiTuanDem(tu < COMBO_TU ? ngayM - 1440 : ngayM) : cuoiTuanCombo(ngayM);
+  var ngayXet = quaDem && tu < COMBO_TU ? ngayM - 1440 : ngayM, ct = quaDem ? cuoiTuanDem(ngayXet) : cuoiTuanCombo(ngayXet);
   var b = ct ? g.cuoiTuan : g.thuong, x = b[4] || 0, ds, thuong;
   function cach(goi, them, tra) { return b[goi] ? { goi: goi, them: them, gia: b[goi] + them * x, tra: tra } : null; }
   if (quaDem) {
@@ -489,7 +495,7 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
     lyDo.push(tenLm);
     tong -= lm;
   }
-  if (u.earlyBird && (ngayM - HOM_NAY) / 1440 >= u.earlyBirdNgay) {
+  if (u.earlyBird && !laLe(ngayXet) && (ngayM - HOM_NAY) / 1440 >= u.earlyBirdNgay) {
     var eb = lamTron(tong * u.earlyBird / 100), tenEb = c('eb', u.earlyBird);
     dong.push([tenEb, -eb]);
     lyDo.push(tenEb);
