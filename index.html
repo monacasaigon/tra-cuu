@@ -218,6 +218,7 @@ var CHU = {
     phuThu: 'Phụ thu khách thứ 3',
     quaDemGoi: 'Qua đêm 13 tiếng ({0} → {1} hôm sau)',
     tron13: 'Trọn 13 giờ (giá qua đêm)',
+    theoGia2N1D: 'Tính theo giá 2 ngày 1 đêm',
     gioThem: '{0} giờ thêm × {1}',
     moTaQuaDem: '{0} tiếng · Qua đêm{1} · {2} → {3} hôm sau',
     tomTatDem: 'nhận {0} {1}, trả {2} {3} ({4}), {5}',
@@ -283,6 +284,7 @@ var CHU = {
     phuThu: '3rd guest surcharge',
     quaDemGoi: 'Overnight, 13 hours ({0} → {1} next day)',
     tron13: 'Full 13 hours (overnight rate)',
+    theoGia2N1D: 'Charged at the 2 days 1 night rate',
     gioThem: function (n, gia) { return nhieu(n, 'extra hour', 'extra hours') + ' × ' + gia; },
     moTaQuaDem: '{0} hours · Overnight{1} · {2} → {3} next day',
     tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
@@ -385,6 +387,8 @@ function giaDem(ten, nhan, soDem, soKhach) {
 
 /* Combo theo giờ: dưới 3 giờ tính Combo 3 giờ; dài hơn thì cộng giờ thêm cho tới khi đắt hơn gói lớn hơn
    (Combo 6 giờ, rồi giá qua đêm trọn 13 giờ). Nhận phòng từ 21h luôn tính Qua đêm.
+   Lượt qua 0 giờ xét cuối tuần theo đêm (đêm thứ 6, thứ 7) như gói qua đêm, và không bao giờ đắt hơn
+   gói 2 ngày 1 đêm của đêm đó (nhận trước 14:00 thì cộng giờ thêm). Lượt ban ngày xét cuối tuần theo ngày.
    Last-minute khi giờ nhận phòng cách lúc xem trang không quá 4 giờ, chỉ giảm giá gói (không giảm giờ thêm);
    Early-bird như gói 2 ngày 1 đêm. */
 /* Gói Qua đêm được ở trọn 13 tiếng kể từ giờ nhận, dù khách chọn giờ trả sớm hơn. */
@@ -392,13 +396,17 @@ function gioRa(tu, den) { return tu >= 21 ? Math.max(den, tu + 13) : den; }
 function giaGio(ten, ngayM, tu, den, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[0]) return null;
-  var soGio = den - tu, quaDem = tu >= 21, ct = quaDem ? cuoiTuanDem(ngayM) : cuoiTuanCombo(ngayM);
+  var soGio = den - tu, quaDem = tu >= 21, ct = quaDem || den > 24 ? cuoiTuanDem(ngayM) : cuoiTuanCombo(ngayM);
   var b = ct ? g.cuoiTuan : g.thuong, x = b[4], tot = null;
   (quaDem ? [[2, 13]] : [[0, 3], [1, 6], [2, 13]]).forEach(function (l) {
     var them = Math.max(0, soGio - l[1]), gia = b[l[0]] + them * x;
     if (!tot || gia < tot.gia) tot = { goi: l[0], them: them, gia: gia };
   });
-  var ra = gioRa(tu, den), tenGoi = quaDem ? c('quaDemGoi', gio(tu), gio(tu - 11))
+  if (den > 24 && b[3]) {
+    var som = Math.max(0, 14 - tu), gia2 = b[3] + som * x;
+    if (gia2 < tot.gia) tot = { goi: 3, them: som, gia: gia2 };
+  }
+  var ra = gioRa(tu, den), tenGoi = tot.goi === 3 ? c('theoGia2N1D') : quaDem ? c('quaDemGoi', gio(tu), gio(tu - 11))
     : tot.goi === 2 ? c('tron13') : CHU[NN].goi[tot.goi];
   var dong = [[tenGoi + (ct ? c('cuoiTuanLe') : ''), b[tot.goi]]];
   if (tot.them) dong.push([c('gioThem', tot.them, tien(x)), tot.them * x]);
