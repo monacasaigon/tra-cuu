@@ -833,13 +833,7 @@ function khoiTao(duLieu) {
   });
   document.querySelectorAll('.seg button').forEach(function (b) {
     b.addEventListener('click', function () {
-      cheDo = b.getAttribute('data-che-do');
-      document.querySelectorAll('.seg button').forEach(function (x) {
-        x.classList.toggle('on', x === b);
-        x.setAttribute('aria-selected', x === b);
-      });
-      byId('formDem').hidden = cheDo !== 'dem';
-      byId('formGio').hidden = cheDo !== 'gio';
+      chonCheDo(b.getAttribute('data-che-do'));
       goiYKhach();
       kiemTra();
     });
@@ -857,8 +851,75 @@ function khoiTao(duLieu) {
 
   byId('xemLich').href = D.xemLich;
   byId('kiemTra').disabled = false;
+  dienTuLink();
   apDungNgonNgu();
   kiemTra();
+}
+
+/* Đổi tab giống khi khách bấm nút tab: 'gio' = combo giờ và qua đêm, 'dem' = 2 ngày 1 đêm. */
+function chonCheDo(m) {
+  cheDo = m;
+  document.querySelectorAll('.seg button').forEach(function (x) {
+    var on = x.getAttribute('data-che-do') === m;
+    x.classList.toggle('on', on);
+    x.setAttribute('aria-selected', on);
+  });
+  byId('formDem').hidden = cheDo !== 'dem';
+  byId('formGio').hidden = cheDo !== 'gio';
+}
+
+/* Điền sẵn form từ link (thanh đặt phòng trên website gửi qua iframe), chạy một lần sau khi tải dữ liệu:
+   ?mode=dem&in=2026-11-20&out=2026-11-22&guests=2
+   ?mode=gio&date=2026-11-20&from=14&to=17&guests=2   (to từ 24 trở lên là hôm sau, vd 36 = 12:00 trưa hôm sau)
+   Thiếu mode thì đoán theo tham số có mặt. Giá trị sai, thiếu hoặc đã qua thì bỏ qua, giữ mặc định của hôm nay. */
+function dienTuLink() {
+  try {
+    var q = new URLSearchParams(location.search);
+    function ngayLink(k) {
+      var s = q.get(k);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s || '')) return null;
+      var m = phut(s);
+      return iso(m) === s && m >= HOM_NAY ? m : null;
+    }
+    function soLink(k, nho, lon) {
+      var s = q.get(k);
+      if (!/^\d{1,3}$/.test(s || '')) return null;
+      var n = +s;
+      return n >= nho && n <= lon ? n : null;
+    }
+    var m = q.get('mode');
+    if (m !== 'dem' && m !== 'gio') m = q.has('in') || q.has('out') ? 'dem' : q.has('date') || q.has('from') ? 'gio' : null;
+    if (m) chonCheDo(m);
+
+    if (m === 'dem') {
+      var nhan = ngayLink('in'), tra = ngayLink('out');
+      if (nhan === null) nhan = phut(byId('ngayNhan').value);
+      byId('ngayNhan').value = iso(nhan);
+      byId('ngayTra').min = iso(nhan + 1440);
+      byId('ngayTra').value = iso(tra !== null && tra > nhan ? tra : nhan + 1440);
+    }
+
+    if (m === 'gio') {
+      var ngayM = ngayLink('date'), tu = soLink('from', 0, 23);
+      if (ngayM === null) ngayM = phut(byId('ngayGio').value);
+      if (tu === null) tu = +byId('tuGio').value;
+      /* Giờ nhận đã qua (vd hôm nay mà giờ đã trôi) thì giữ ngày giờ mặc định, bỏ luôn giờ trả trên link. */
+      var dung = ngayM + tu * 60 + 60 > BAY_GIO;
+      if (dung) {
+        byId('ngayGio').value = iso(ngayM);
+        byId('tuGio').value = tu;
+      }
+      dsGioDen(false);
+      var den = dung ? soLink('to', 1, 48) : null;
+      if (den !== null && Array.from(byId('denGio').options).some(function (o) { return +o.value === den; })) byId('denGio').value = den;
+      giaiThichGio();
+    }
+
+    var khach = q.get('guests'), s = byId('soKhach');
+    if (/^\d{1,3}$/.test(khach || '') && s.options.length) {
+      s.value = Math.max(+s.options[0].value, Math.min(+khach, +s.options[s.options.length - 1].value));
+    }
+  } catch (e) {}
 }
 
 /* Ô "Đến" chỉ có giờ sau giờ nhận, tới giờ trả muộn nhất (denToiDa). Đổi giờ nhận combo thì giữ giờ trả nếu còn hợp lệ;
