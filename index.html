@@ -801,15 +801,32 @@ function kiemTra() {
   }
 }
 
-function khoiTao(duLieu) {
+/* Nạp dữ liệu từ Sheet vào các biến dùng chung. Gọi khi khởi tạo và khi bản mới về thay cho bản lưu đệm. */
+var CHUOI_DL = '';
+function khongGio(d) { return JSON.stringify(d, function (k, v) { return k === 'bayGio' ? undefined : v; }); }
+function napDuLieu(duLieu) {
+  CHUOI_DL = khongGio(duLieu);
   D = duLieu;
   D.gia = D.gia || {};
   D.anh = D.anh || {};
   D.uuDai = D.uuDai || { lastMinute: 0, earlyBird: 0, earlyBirdNgay: 30, tuDemGiaThuong: 99, dai5: 0, dai7: 0, dai15: 0, phuThu: 0, toiDaKhach: 3, ngayLe: [] };
+  LE = {};
   (D.uuDai.ngayLe || []).forEach(function (s) { LE[s] = 1; });
   BAY_GIO = phut(D.bayGio);
   HOM_NAY = Math.floor(BAY_GIO / 1440) * 1440;
   LICH = D.lich.map(function (b) { return { phong: chuan(b.phong), bd: phut(b.bd), kt: phut(b.kt) }; });
+}
+
+/* Bản mới từ Sheet về sau khi trang đã hiện từ bản lưu đệm: lịch hoặc giá có đổi thì tính lại kết quả, không thì chỉ cập nhật giờ. */
+function capNhatDuLieu(moi) {
+  var doi = khongGio(moi) !== CHUOI_DL;
+  napDuLieu(moi);
+  apDungNgonNgu();
+  if (doi) kiemTra();
+}
+
+function khoiTao(duLieu) {
+  napDuLieu(duLieu);
   var homNay = iso(HOM_NAY), ngayMai = iso(HOM_NAY + 1440);
   ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = homNay; byId(id).value = homNay; });
   byId('ngayTra').min = ngayMai;
@@ -1000,12 +1017,30 @@ document.querySelectorAll('.ngonNgu button').forEach(function (b) {
 });
 apDungNgonNgu();
 
+/* Sheet trả dữ liệu mất vài giây, nên trình duyệt lưu đệm bản gần nhất 10 phút: trang hiện kết quả ngay từ bản lưu
+   rồi tự cập nhật khi bản mới về. ?warm=1: chỉ tải sẵn dữ liệu vào bản lưu (website gọi ngầm khi khách bắt đầu chọn ngày). */
+var KHO = 'monacaLich', HAN_KHO = 600000, CHI_TAI_SAN = /[?&]warm=1\b/.test(location.search);
+function docKho() {
+  try { var x = JSON.parse(localStorage.getItem(KHO) || 'null'); return x && Date.now() - x.t < HAN_KHO ? x.d : null; } catch (e) { return null; }
+}
+function ghiKho(d) { try { localStorage.setItem(KHO, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} }
+
 byId('kiemTra').disabled = true;
-byId('ketQua').appendChild(el('p', 'tom', c('dangTai')));
+var banLuu = CHI_TAI_SAN ? null : docKho();
+if (banLuu) {
+  try { khoiTao(banLuu); } catch (e) { D = null; banLuu = null; byId('ketQua').textContent = ''; }
+}
+if (!banLuu && !CHI_TAI_SAN) byId('ketQua').appendChild(el('p', 'tom', c('dangTai')));
 fetch(API, { cache: 'no-store' })
   .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(function (d) { byId('ketQua').textContent = ''; khoiTao(d); })
+  .then(function (d) {
+    ghiKho(JSON.parse(JSON.stringify(d)));
+    if (CHI_TAI_SAN) return;
+    if (D) capNhatDuLieu(d);
+    else { byId('ketQua').textContent = ''; khoiTao(d); }
+  })
   .catch(function () {
+    if (CHI_TAI_SAN || D) return;
     byId('ketQua').textContent = '';
     byId('loi').hidden = false;
     byId('loi').textContent = c('loiTai');
