@@ -553,13 +553,15 @@ function taoAnh(url, rong, ten, i) {
 function soThuTu(truot, tong) { return (Math.round(truot.scrollLeft / Math.max(1, truot.clientWidth)) + 1) + '/' + tong; }
 
 /* Bộ ảnh tiếng Anh nằm cạnh trang: <số phòng>-01.jpg, -02.jpg… (số ảnh của từng phòng ở ANH_EN).
+   ANH_BO_EN là ảnh không dùng: 202-06 là bản chữ tiếng Việt của 202-07.
    Phòng không có trong ANH_EN thì bản tiếng Anh dùng ảnh trong Sheet như bản tiếng Việt. */
 var ANH_EN = { '101': 10, '201': 9, '202': 11, '301': 10 };
+var ANH_BO_EN = { '202': [6] };
 var GOC_TRANG = /^https?:/.test(location.href) ? location.href : 'https://monacasaigon.github.io/tra-cuu/';
 function dsAnh(ten) {
   var so = (String(ten).match(/\d+/) || [])[0], n = NN === 'en' && ANH_EN[so], ds = [];
   if (!n) return D.anh[ten] || [];
-  for (var i = 1; i <= n; i++) ds.push(new URL(so + '-' + pad(i) + '.jpg', GOC_TRANG).href);
+  for (var i = 1; i <= n; i++) if ((ANH_BO_EN[so] || []).indexOf(i) < 0) ds.push(new URL(so + '-' + pad(i) + '.jpg', GOC_TRANG).href);
   return ds;
 }
 
