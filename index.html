@@ -10,6 +10,17 @@
 <meta name="theme-color" content="#790013">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%85%3C%2Ftext%3E%3C%2Fsvg%3E">
 <link rel="preconnect" href="https://wsrv.nl">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<script>
+/* Gọi Sheet ngay khi mở trang, trước khi tải font: Sheet trả dữ liệu mất vài giây, khách chọn ngày trong lúc chờ. */
+var API = 'https://script.google.com/macros/s/AKfycbyHN4mRMvgDdwTQwvVwj015MBfmh0Ui5Z0zR1iXGwd3dWdYGHDssv0HttQcF34slNp3/exec?format=json';
+var TAI_LICH = null;
+try {
+  TAI_LICH = fetch(API, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  TAI_LICH.catch(function () {});
+} catch (e) {}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -169,7 +180,6 @@
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
-var API = 'https://script.google.com/macros/s/AKfycbyHN4mRMvgDdwTQwvVwj015MBfmh0Ui5Z0zR1iXGwd3dWdYGHDssv0HttQcF34slNp3/exec?format=json';
 var D, BAY_GIO, HOM_NAY, LICH, LE = {}, cheDo = 'gio', NN = 'vi';
 
 /* Chữ trên trang theo ngôn ngữ (NN). {0}, {1}… là chỗ điền số liệu; tiếng Anh dùng hàm khi cần số ít / số nhiều. */
@@ -221,8 +231,9 @@ var CHU = {
     cuoiTuanLe: ' · cuối tuần/lễ',
     uuDaiTuDem: 'Ưu đãi từ {0} đêm: chỉ tính giá ngày thường',
     lyDoTuDem: 'Từ {0} đêm: giá ngày thường',
-    lmDem: 'Last-minute −{0}% (đặt phòng trước khi nhận phòng 24 tiếng)',
+    lmDem: 'Last-minute −{0}% (đêm nay và đêm mai)',
     lmGio: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 4 tiếng)',
+    lmQuaDem: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 12 tiếng)',
     eb: 'Early-bird −{0}%',
     ebTruLe: 'Early-bird −{0}% (trừ đêm lễ)',
     oDem: 'Ở {0} đêm −{1}%',
@@ -233,7 +244,7 @@ var CHU = {
     phuThuDongDem: '🌙 Qua đêm: {0}/khách',
     toiDaKhach: '✕ Tối đa {0} khách',
     quaDemGoi: 'Qua đêm {2} tiếng ({0} → {1})',
-    tron13: 'Trọn 13 giờ (giá qua đêm)',
+    tron13: 'Combo 13 tiếng',
     theoGia2N1D: 'Tính theo giá 2 ngày 1 đêm',
     gioThem: '{0} giờ thêm × {1}',
     congGioThem: ' + {0} giờ thêm',
@@ -302,8 +313,9 @@ var CHU = {
     cuoiTuanLe: ' · weekend/holiday',
     uuDaiTuDem: '{0}+ nights: weekday rates only',
     lyDoTuDem: '{0}+ nights: weekday rates',
-    lmDem: 'Last-minute −{0}% (booked within 24 hours of check-in)',
+    lmDem: 'Last-minute −{0}% (tonight and tomorrow night)',
     lmGio: 'Last-minute −{0}% (booked within 4 hours of check-in)',
+    lmQuaDem: 'Last-minute −{0}% (booked within 12 hours of check-in)',
     eb: 'Early-bird −{0}%',
     ebTruLe: 'Early-bird −{0}% (except holiday nights)',
     oDem: '{0}-night stay −{1}%',
@@ -314,7 +326,7 @@ var CHU = {
     phuThuDongDem: '🌙 Overnight: +{0} per guest',
     toiDaKhach: '✕ Max {0} guests',
     quaDemGoi: function (a, b, n) { return 'Overnight, ' + nhieu(n, 'hour', 'hours') + ' (' + a + ' → ' + b + ')'; },
-    tron13: 'Full 13 hours (overnight rate)',
+    tron13: '13-hour combo',
     theoGia2N1D: 'Charged at the 2 days 1 night rate',
     gioThem: function (n, gia) { return nhieu(n, 'extra hour', 'extra hours') + ' × ' + gia; },
     congGioThem: function (n) { return ' + ' + nhieu(n, 'extra hour', 'extra hours'); },
@@ -408,7 +420,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
   for (var i = 0; i < soDem; i++) {
     var m = nhan + i * 1440, ct = cuoiTuanDem(m), giaGoc = (ct ? g.cuoiTuan : g.thuong)[3];
     var ap = chiThuong && !laLe(m) ? g.thuong[3] : giaGoc;
-    if (!ct && m + D.gioNhan * 60 - BAY_GIO <= 24 * 60) { lmGoc += ap; soLm++; }
+    if (!ct && m <= HOM_NAY + 1440) { lmGoc += ap; soLm++; }
     if (laLe(m)) leAp += ap;
     goc += giaGoc;
     tong += ap;
@@ -418,7 +430,8 @@ function giaDem(ten, nhan, soDem, soKhach) {
     dong.push([c('uuDaiTuDem', u.tuDemGiaThuong), tong - goc]);
     lyDo.push(c('lyDoTuDem', u.tuDemGiaThuong));
   }
-  /* Last-minute: giảm cho mọi đêm ngày thường (không phải đêm T6, T7, lễ) có giờ nhận phòng trong vòng 24 giờ kể từ lúc xem trang. */
+  /* Last-minute: giảm cho đêm nay và đêm mai nếu là đêm ngày thường (không phải đêm T6, T7, lễ).
+     Vd hôm nay thứ 2 đặt thì đêm thứ 2 và đêm thứ 3 đều được giảm. */
   if (u.lastMinute && soLm) {
     var lm = lamTron(lmGoc * u.lastMinute / 100), tenLm = c('lmDem', u.lastMinute);
     dong.push([tenLm, -lm]);
@@ -444,21 +457,26 @@ function giaDem(ten, nhan, soDem, soKhach) {
 }
 
 /* Combo giờ ban ngày: nhận từ 09:00, trả trước 21:00. Dưới 3 giờ tính Combo 3 giờ; dài hơn thì trang so Combo 3 giờ,
-   Combo 6 giờ (cộng giờ thêm) và giá qua đêm trọn 13 giờ, lấy giá rẻ nhất. Cuối tuần theo ngày (T7, CN).
+   Combo 6 giờ (cộng giờ thêm) và "Combo 13 tiếng" (giá gói Qua đêm), lấy giá rẻ nhất. Cuối tuần theo ngày (T7, CN),
+   kể cả Combo 13 tiếng: Chủ nhật ban ngày làm tròn lên thì lấy giá qua đêm cuối tuần, thứ 6 ban ngày lấy giá ngày thường.
    Gói Qua đêm khi trả sau 21:00, hoặc nhận từ 22:00 đến trước 09:00 sáng: ở 13 tiếng kể từ giờ nhận, tối đa đến
    13:00. Ở quá giờ trả thì cộng giờ thêm, hoặc tính giá 2 ngày 1 đêm (nhận trước 14:00 thì cộng giờ) nếu rẻ hơn.
-   Cuối tuần theo đêm (đêm T6, T7); nhận lúc rạng sáng thuộc đêm hôm trước.
+   Cuối tuần theo đêm (đêm T6, T7): qua đêm thứ 6 giá cuối tuần, qua đêm Chủ nhật giá ngày thường; nhận lúc rạng sáng
+   thuộc đêm hôm trước.
    Combo ban ngày mà trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm) thì giá thông thường
    hiện gạch ngang để khách thấy phần lợi.
-   Last-minute chỉ ngày thường, khi giờ nhận cách lúc xem trang không quá 4 giờ (tính theo giá 2N1Đ thì 24 giờ như tab
-   2 ngày 1 đêm), chỉ giảm giá gói (không giảm giờ thêm).
+   Last-minute chỉ ngày (đêm) thường theo đúng luật cuối tuần ở trên: qua đêm khi giờ nhận cách lúc xem trang không quá
+   12 tiếng, combo giờ ban ngày không quá 4 tiếng (tính theo giá 2N1Đ thì đêm nay và đêm mai như tab 2 ngày 1 đêm);
+   chỉ giảm giá gói (không giảm giờ thêm).
    Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
 var COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
 function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
 /* Giờ trả của gói Qua đêm: 13 tiếng sau giờ nhận, tối đa đến 13:00 (chỉ chạm khi nhận lúc rạng sáng). */
 function gioTraQuaDem(tu) { return Math.min(tu + 13, QUA_DEM_MUON + (tu < COMBO_TU ? 0 : 24)); }
 /* Ô "Đến": nhận rạng sáng thì tới 13:00 cùng ngày; còn lại tới giờ trả của gói 2 ngày 1 đêm hôm sau (12:00). */
-function denToiDa(tu) { return tu < COMBO_TU ? QUA_DEM_MUON : D.gioTra + 24; }
+/* Trước khi dữ liệu về, giờ trả 2 ngày 1 đêm lấy tạm 12:00 (mặc định của Sheet) để dựng ô "Đến". */
+var GIO_TRA_TAM = 12;
+function denToiDa(tu) { return tu < COMBO_TU ? QUA_DEM_MUON : (D ? D.gioTra : GIO_TRA_TAM) + 24; }
 function giaGio(ten, ngayM, tu, den, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[0]) return null;
@@ -476,11 +494,8 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
     if (tu >= COMBO_TU) ds.push(cach(3, Math.max(0, D.gioNhan - tu), D.gioTra + 24));
     thuong = ds[0];
   } else {
-    /* Trọn 13 giờ ban ngày lấy mức rẻ hơn giữa giá qua đêm theo ngày và theo đêm hôm đó (Chủ nhật ban ngày là cuối tuần
-       nhưng đêm Chủ nhật là ngày thường), để ở ngắn hơn không bao giờ đắt hơn kéo dài thành gói Qua đêm. */
-    var tron = [cach(2, 0, den), cach(2, 0, den, cuoiTuanDem(ngayM))].filter(Boolean)
-      .sort(function (p, q) { return p.gia - q.gia; })[0];
-    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), tron];
+    /* Combo 13 tiếng ban ngày lấy giá qua đêm theo ngày (Chủ nhật ban ngày: cuối tuần; thứ 6 ban ngày: ngày thường). */
+    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), cach(2, 0, den)];
     thuong = soGio >= 6 ? ds[1] : ds[0];
   }
   ds = ds.filter(Boolean);
@@ -506,10 +521,12 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
     if (tot.them) dong.push([c('gioThem', tot.them, tien(x)), tot.them * x]);
   }
   var tong = tot.gia, goc = thuong.gia;
-  /* Tính theo giá 2 ngày 1 đêm thì Last-minute theo luật 2N1Đ (giờ nhận 14:00 trong 24 giờ tới) để hai tab ra cùng giá. */
-  var la2N1D = tot.goi === 3, conLai = ngayM + (la2N1D ? D.gioNhan : tu) * 60 - BAY_GIO;
-  if (u.lastMinute && !ct && conLai <= (la2N1D ? 24 : 4) * 60) {
-    var lm = lamTron(tot.goiGia * u.lastMinute / 100), tenLm = c(la2N1D ? 'lmDem' : 'lmGio', u.lastMinute);
+  /* Last-minute, không áp cho cuối tuần/lễ: tính theo giá 2N1Đ thì như tab 2 ngày 1 đêm (đêm nay và đêm mai);
+     qua đêm khi giờ nhận cách lúc xem trang không quá 12 tiếng; combo giờ ban ngày không quá 4 tiếng. */
+  var la2N1D = tot.goi === 3, conLai = ngayM + tu * 60 - BAY_GIO;
+  var coLm = la2N1D ? ngayXet <= HOM_NAY + 1440 : conLai <= (quaDem ? 12 : 4) * 60;
+  if (u.lastMinute && !ct && coLm) {
+    var lm = lamTron(tot.goiGia * u.lastMinute / 100), tenLm = c(la2N1D ? 'lmDem' : quaDem ? 'lmQuaDem' : 'lmGio', u.lastMinute);
     dong.push([tenLm, -lm]);
     lyDo.push(tenLm);
     tong -= lm;
@@ -793,6 +810,7 @@ function kiemTraGio() {
 }
 
 function kiemTra() {
+  if (!D) return;   // dữ liệu chưa về: khoiTao tự kiểm tra khi về, theo đúng ngày giờ khách đã chọn
   var loi = cheDo === 'dem' ? kiemTraDem() : kiemTraGio();
   byId('loi').hidden = !loi;
   if (loi) {
@@ -825,22 +843,43 @@ function capNhatDuLieu(moi) {
   if (doi) kiemTra();
 }
 
-function khoiTao(duLieu) {
-  napDuLieu(duLieu);
-  var homNay = iso(HOM_NAY), ngayMai = iso(HOM_NAY + 1440);
-  ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = homNay; byId(id).value = homNay; });
-  byId('ngayTra').min = ngayMai;
-  byId('ngayTra').value = ngayMai;
-  for (var h = 0; h < 24; h++) byId('tuGio').add(new Option(gio(h), h));
-  /* Mặc định giờ tròn kế tiếp; trước 09:00 sáng thì lấy 09:00, sau 23:00 thì 09:00 hôm sau. */
-  var tiep = Math.floor((BAY_GIO - HOM_NAY) / 60) + 1;
-  if (tiep > 23) { byId('ngayGio').value = ngayMai; tiep = COMBO_TU; }
+/* Form gắn ngay khi mở trang theo đồng hồ máy khách (giờ Việt Nam = UTC+7), không chờ dữ liệu từ Sheet,
+   để khách chọn ngày giờ trong lúc dữ liệu đang tải. Dữ liệu về thì không đặt lại những gì khách đã chọn. */
+var KHACH_SUA = false, NGAY_FORM = null;
+function bayGioMay() { return phut(new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 16)); }
+
+/* Ngày giờ mặc định: hôm nay; combo giờ lấy giờ tròn kế tiếp, trước 09:00 sáng thì 09:00, sau 23:00 thì 09:00 hôm sau. */
+function ganMacDinh(bayGio) {
+  var homNay = Math.floor(bayGio / 1440) * 1440, ngayMai = homNay + 1440;
+  ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = iso(homNay); byId(id).value = iso(homNay); });
+  byId('ngayTra').min = iso(ngayMai);
+  byId('ngayTra').value = iso(ngayMai);
+  var tiep = Math.floor((bayGio - homNay) / 60) + 1;
+  if (tiep > 23) { byId('ngayGio').value = iso(ngayMai); tiep = COMBO_TU; }
   else if (tiep < COMBO_TU) tiep = COMBO_TU;
   byId('tuGio').value = tiep;
   dsGioDen(false);
-  var toiDa = Math.max.apply(null, D.phong.map(sucChua));
-  for (var n = 1; n <= toiDa; n++) byId('soKhach').add(new Option('', n));
-  byId('soKhach').value = Math.min(2, toiDa);
+  NGAY_FORM = homNay;
+}
+
+/* Ô số khách 1…n, giữ số đã chọn (mặc định 2). */
+function dsSoKhach(n) {
+  var s = byId('soKhach'), cu = +s.value || 2;
+  if (s.options.length === n) return;
+  s.textContent = '';
+  for (var k = 1; k <= n; k++) s.add(new Option(c('khach', k), k));
+  s.value = Math.min(cu, n);
+}
+
+function ganForm() {
+  BAY_GIO = bayGioMay();
+  HOM_NAY = Math.floor(BAY_GIO / 1440) * 1440;
+  for (var h = 0; h < 24; h++) byId('tuGio').add(new Option(gio(h), h));
+  ganMacDinh(BAY_GIO);
+  dsSoKhach(Math.max.apply(null, [3].concat(Object.keys(SUC_CHUA).map(function (k) { return SUC_CHUA[k]; }))));
+  ['ngayNhan', 'ngayTra', 'ngayGio', 'tuGio', 'denGio', 'soKhach'].forEach(function (id) {
+    byId(id).addEventListener('change', function (e) { if (e.isTrusted) KHACH_SUA = true; });
+  });
   byId('tuGio').addEventListener('change', function () { dsGioDen(true); giaiThichGio(); });
   byId('denGio').addEventListener('change', giaiThichGio);
 
@@ -867,10 +906,19 @@ function khoiTao(duLieu) {
     if (e.key === 'ArrowRight') truot.scrollBy({ left: truot.clientWidth, behavior: 'smooth' });
     if (e.key === 'ArrowLeft') truot.scrollBy({ left: -truot.clientWidth, behavior: 'smooth' });
   });
-
-  byId('xemLich').href = D.xemLich;
-  byId('kiemTra').disabled = false;
   dienTuLink();
+  apDungNgonNgu();
+}
+
+function khoiTao(duLieu) {
+  napDuLieu(duLieu);
+  /* Ngày theo Sheet khác ngày theo máy khách (máy lệch giờ) mà khách chưa tự chọn gì thì đặt lại mặc định theo Sheet. */
+  if (!KHACH_SUA && HOM_NAY !== NGAY_FORM) { ganMacDinh(BAY_GIO); dienTuLink(); }
+  else if (D.gioTra !== GIO_TRA_TAM) dsGioDen(true);
+  ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = iso(HOM_NAY); });
+  byId('ngayTra').min = iso(Math.max(HOM_NAY, byId('ngayNhan').value ? phut(byId('ngayNhan').value) : 0) + 1440);
+  dsSoKhach(Math.max.apply(null, D.phong.map(sucChua)));
+  byId('xemLich').href = D.xemLich;
   apDungNgonNgu();
   kiemTra();
 }
@@ -961,6 +1009,7 @@ function giaiThichGio() {
 
 /* Dòng phụ thu dưới ô số khách: tab combo ghi cả mức combo giờ và qua đêm, tab 2 ngày 1 đêm ghi theo đêm. */
 function goiYKhach() {
+  if (!D) return;
   var u = D.uuDai, p = byId('goiYKhach'), dong = [];
   if (cheDo === 'gio' && u.phuThu) dong = [c('phuThuDau'), c('phuThuDongGio', tien(phuThuGio())), c('phuThuDongDem', tien(u.phuThu))];
   else if (u.phuThu) dong = [c('phuThuTu3', tien(u.phuThu))];
@@ -985,17 +1034,17 @@ function apDungNgonNgu() {
   gy.textContent = '';
   gy.appendChild(el('span', null, c('goiYCombo', gio(COMBO_TU), gio(COMBO_DEN))));
   gy.appendChild(el('span', null, c('goiYQuaDem', gio(QUA_DEM_TU), gio(COMBO_TU - 1), gio(QUA_DEM_MUON))));
-  if (!D) return;
-  byId('goiYDem').textContent = c('goiYDem', gio(D.gioNhan), gio(D.gioTra));
   Array.from(byId('tuGio').options).forEach(function (o) { o.text = gio(+o.value); });
   /* Nửa đêm ghi "00:00 hôm sau" (bản Anh 12:00AM next day) cho khỏi nhầm với 0 giờ hôm nay. */
   Array.from(byId('denGio').options).forEach(function (o) { o.text = moc(+o.value); });
   giaiThichGio();
+  Array.from(byId('soKhach').options).forEach(function (o) { o.text = c('khach', +o.value); });
+  if (!D) return;
+  byId('goiYDem').textContent = c('goiYDem', gio(D.gioNhan), gio(D.gioTra));
   var cn = D.bayGio.split('T'), t = cn[1].split(':'), d = cn[0].split('-');
   byId('capNhat').textContent = NN === 'en'
     ? (+t[0] % 12 || 12) + ':' + t[1] + (+t[0] < 12 ? 'AM' : 'PM') + ' ' + (+d[2]) + ' ' + CHU.en.thang[d[1] - 1] + ' ' + d[0]
     : cn[1] + ' ' + d.slice().reverse().join('/');
-  Array.from(byId('soKhach').options).forEach(function (o) { o.text = c('khach', +o.value); });
   goiYKhach();
   byId('zalo').href = linkLienHe();
   byId('soZalo').textContent = lienHe();
@@ -1020,19 +1069,24 @@ apDungNgonNgu();
 /* Sheet trả dữ liệu mất vài giây, nên trình duyệt lưu đệm bản gần nhất 10 phút: trang hiện kết quả ngay từ bản lưu
    rồi tự cập nhật khi bản mới về. ?warm=1: chỉ tải sẵn dữ liệu vào bản lưu (website gọi ngầm khi khách bắt đầu chọn ngày). */
 var KHO = 'monacaLich', HAN_KHO = 600000, CHI_TAI_SAN = /[?&]warm=1\b/.test(location.search);
+/* Giờ trong bản lưu là lúc tải về: cộng thêm thời gian đã trôi để "bây giờ" (Last-minute, giờ đã qua) không bị lùi. */
 function docKho() {
-  try { var x = JSON.parse(localStorage.getItem(KHO) || 'null'); return x && Date.now() - x.t < HAN_KHO ? x.d : null; } catch (e) { return null; }
+  try {
+    var x = JSON.parse(localStorage.getItem(KHO) || 'null'), troi = x ? Date.now() - x.t : HAN_KHO;
+    if (!(troi < HAN_KHO)) return null;
+    x.d.bayGio = new Date((phut(x.d.bayGio) + Math.floor(Math.max(0, troi) / 60000)) * 60000).toISOString().slice(0, 16);
+    return x.d;
+  } catch (e) { return null; }
 }
 function ghiKho(d) { try { localStorage.setItem(KHO, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} }
 
-byId('kiemTra').disabled = true;
+if (!CHI_TAI_SAN) { try { ganForm(); } catch (e) {} }
 var banLuu = CHI_TAI_SAN ? null : docKho();
 if (banLuu) {
   try { khoiTao(banLuu); } catch (e) { D = null; banLuu = null; byId('ketQua').textContent = ''; }
 }
 if (!banLuu && !CHI_TAI_SAN) byId('ketQua').appendChild(el('p', 'tom', c('dangTai')));
-fetch(API, { cache: 'no-store' })
-  .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+(TAI_LICH || Promise.reject(new Error('fetch')))
   .then(function (d) {
     ghiKho(JSON.parse(JSON.stringify(d)));
     if (CHI_TAI_SAN) return;
