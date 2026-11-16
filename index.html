@@ -244,6 +244,7 @@ var CHU = {
     phuThuDongDem: '🌙 Qua đêm: {0}/khách',
     toiDaKhach: '✕ Tối đa {0} khách',
     quaDemGoi: 'Qua đêm {2} tiếng ({0} → {1})',
+    quaDemSom: 'Combo qua đêm 13 tiếng, check-out tối đa đến {0} (khi đặt gói này, bạn có thể check-in bất cứ lúc nào sau 00:00)',
     tron13: 'Combo 13 tiếng',
     theoGia2N1D: 'Tính theo giá 2 ngày 1 đêm',
     gioThem: '{0} giờ thêm × {1}',
@@ -252,6 +253,7 @@ var CHU = {
     toiUu: '✓ Trang tự chọn giá tốt hơn: {0}',
     lyDoToiUu: 'Trang đã tự chọn giá tốt hơn cho bạn, lợi {0}',
     moTaQuaDem: '{0} tiếng · Qua đêm{1} · {2} → {3}',
+    moTaQuaDemSom: 'Combo qua đêm 13 tiếng{0} · {1} → {2}',
     moTa2N1D: 'Giá 2 ngày 1 đêm · {0} → {1}',
     tomTat2N1D: ' (giá 2 ngày 1 đêm)',
     themDem: '💡 Đặt thêm 1 đêm (trả phòng {0}): cả {1} đêm tính giá ngày thường, tổng {2} — chỉ thêm {3}.',
@@ -326,6 +328,7 @@ var CHU = {
     phuThuDongDem: '🌙 Overnight: +{0} per guest',
     toiDaKhach: '✕ Max {0} guests',
     quaDemGoi: function (a, b, n) { return 'Overnight, ' + nhieu(n, 'hour', 'hours') + ' (' + a + ' → ' + b + ')'; },
+    quaDemSom: 'Overnight combo (13 hours), check-out by {0} at the latest (with this package you can check in any time after midnight)',
     tron13: '13-hour combo',
     theoGia2N1D: 'Charged at the 2 days 1 night rate',
     gioThem: function (n, gia) { return nhieu(n, 'extra hour', 'extra hours') + ' × ' + gia; },
@@ -334,6 +337,7 @@ var CHU = {
     toiUu: '✓ Better price picked for you: {0}',
     lyDoToiUu: 'We picked a better price for you: you save {0}',
     moTaQuaDem: '{0} hours · Overnight{1} · {2} → {3}',
+    moTaQuaDemSom: 'Overnight combo (13 hours){0} · {1} → {2}',
     moTa2N1D: '2 days 1 night rate · {0} → {1}',
     tomTat2N1D: ' (2 days 1 night rate)',
     themDem: '💡 Add 1 more night (check-out {0}): all {1} nights at weekday rates, total {2} — only {3} more.',
@@ -505,8 +509,11 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   /* Ở tới trưa hôm sau thì giá 2 ngày 1 đêm là gói tự nhiên: không gạch ngang một "giá thông thường" tự cộng giờ. */
   if (tot.goi === 3) thuong = tot;
   var kieu = tot.goi === 3 ? '2n1d' : quaDem ? 'quaDem' : 'gio';
+  /* Nhận sau 00:00 thì gói Qua đêm bị chặn ở giờ trả muộn nhất 13:00 (ít hơn 13 tiếng): vẫn gọi là combo qua đêm 13 tiếng,
+     ghi rõ check-out tối đa 13:00 thay vì ghi số tiếng thực ở. */
+  var som = quaDem && ra - tu < 13;
   function tenGoi(v) {
-    return v.goi === 3 ? c('theoGia2N1D') : v.goi === 2 ? (quaDem ? c('quaDemGoi', moc(tu), moc(ra), ra - tu) : c('tron13'))
+    return v.goi === 3 ? c('theoGia2N1D') : v.goi === 2 ? (quaDem ? (som ? c('quaDemSom', gio(QUA_DEM_MUON)) : c('quaDemGoi', moc(tu), moc(ra), ra - tu)) : c('tron13'))
       : CHU[NN].goi[v.goi];
   }
   function tenDu(v) { return tenGoi(v) + (v.them ? c('congGioThem', v.them) : ''); }
@@ -545,7 +552,7 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   }
   var congGio = tot.them ? c('congGio', tot.them) : '';
   var moTa = kieu === '2n1d' ? c('moTa2N1D', moc(tu), moc(tot.tra))
-    : kieu === 'quaDem' ? c('moTaQuaDem', tot.tra - tu, congGio, moc(tu), moc(tot.tra))
+    : kieu === 'quaDem' ? (som ? c('moTaQuaDemSom', congGio, moc(tu), moc(tot.tra)) : c('moTaQuaDem', tot.tra - tu, congGio, moc(tu), moc(tot.tra)))
     : c('soGio', soGio) + ' · ' + (tot.goi === 2 ? c('tron13') : CHU[NN].goi[tot.goi] + congGio);
   return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: moTa + ' · ' + c('khach', soKhach), tra: tot.tra, kieu: kieu };
 }
