@@ -118,7 +118,6 @@ try {
   .zalo { display: block; margin-top: 16px; padding: 12px; border: 2px solid var(--dau); border-radius: 14px; background: var(--the); color: var(--dau); text-align: center; font-weight: 700; text-decoration: none; }
   .zalo small { display: block; font-size: 12px; font-weight: 400; opacity: .85; }
   footer { margin: 14px 0 6px; text-align: center; font-size: 12px; color: var(--phu); }
-  footer a { color: var(--dau); }
 
   .hop { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: #120607; }
   .hopDau { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; color: #fff; font-size: 14px; }
@@ -172,7 +171,7 @@ try {
   </section>
   <section id="ketQua" aria-live="polite"></section>
   <a class="zalo" id="zalo" href="https://zalo.me/0367674477" target="_blank" rel="noopener"><span data-c="nhanZalo">💬 Nhắn Zalo đặt phòng</span><small id="soZalo">Zalo/ĐT: 036 767 4477</small></a>
-  <footer><span data-c="gioVN">Giờ Việt Nam · cập nhật</span> <span id="capNhat"></span> · <a id="xemLich" data-c="xemLich" target="_blank" rel="noopener">Xem lịch đầy đủ ↗</a></footer>
+  <footer><span data-c="gioVN">Giờ Việt Nam · cập nhật</span> <span id="capNhat"></span></footer>
 </div>
 <div class="hop" id="hop" role="dialog" aria-modal="true" aria-label="Ảnh phòng" hidden>
   <div class="hopDau"><span><b id="hopTen"></b> · <span id="hopDem"></span></span><button type="button" id="dongHop" aria-label="Đóng">×</button></div>
@@ -204,7 +203,6 @@ var CHU = {
     nutKiemTra: 'Kiểm tra phòng trống',
     nhanZalo: '💬 Nhắn Zalo đặt phòng',
     gioVN: 'Giờ Việt Nam · cập nhật',
-    xemLich: 'Xem lịch đầy đủ ↗',
     anhPhong: 'Ảnh phòng', dong: 'Đóng', anhTruoc: 'Ảnh trước', anhSau: 'Ảnh sau', anhSo: '{0} – ảnh {1}',
     dangTai: 'Đang tải lịch phòng…',
     loiTai: 'Chưa tải được lịch phòng. Bạn tải lại trang giúp mình, hoặc nhắn Zalo để hỏi phòng trống nhé.',
@@ -284,7 +282,6 @@ var CHU = {
     nutKiemTra: 'Check availability',
     nhanZalo: '💬 Message us on WhatsApp to book',
     gioVN: 'Vietnam time · updated',
-    xemLich: 'Full calendar ↗',
     anhPhong: 'Room photos', dong: 'Close', anhTruoc: 'Previous photo', anhSau: 'Next photo', anhSo: '{0} – photo {1}',
     dangTai: 'Loading availability…',
     loiTai: 'Couldn\'t load the room calendar. Please reload the page, or message us on WhatsApp to ask about availability.',
@@ -925,7 +922,6 @@ function khoiTao(duLieu) {
   ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = iso(HOM_NAY); });
   byId('ngayTra').min = iso(Math.max(HOM_NAY, byId('ngayNhan').value ? phut(byId('ngayNhan').value) : 0) + 1440);
   dsSoKhach(Math.max.apply(null, D.phong.map(sucChua)));
-  byId('xemLich').href = D.xemLich;
   apDungNgonNgu();
   kiemTra();
 }
