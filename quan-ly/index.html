@@ -222,10 +222,11 @@ function homNay() { return dauNgay(phut(DL.bayGio)); }
 function gioGon(m) { var h = Math.floor(m / 60), p = m % 60; return h + 'h' + (p ? pad(p) : ''); }
 function khoang(a, b) { return gioGon(a) + '–' + gioGon(b); }
 
-/* Chỉ hai loại: lượt khách đặt trên Airbnb (đồng bộ về, ghi chú "Airbnb (tự đồng bộ)") và tự khoá — mọi lượt chủ nhà tự
-   nhập, kể cả ngày tự chặn trên Airbnb được đồng bộ về ("Airbnb chặn (tự đồng bộ)"). */
+/* Chỉ hai loại: lượt khách đặt trên Airbnb — ghi chú có chữ "Airbnb" (chủ nhà tự ghi "Airbnb" hoặc đồng bộ về
+   "Airbnb (tự đồng bộ)") — và tự khoá: mọi lượt còn lại, kể cả ngày tự chặn trên Airbnb ("Airbnb chặn (tự đồng bộ)"). */
 var GHI_AIRBNB = 'Airbnb (tự đồng bộ)', GHI_CHAN = 'Airbnb chặn (tự đồng bộ)';
-function loai(r) { return String(r.ghiChu).indexOf(GHI_AIRBNB) >= 0 ? 'airbnb' : 'tu'; }
+function loai(r) { var g = String(r.ghiChu); return /airbnb/i.test(g) && g.indexOf('chặn') < 0 ? 'airbnb' : 'tu'; }
+function laDongBoAirbnb(r) { return String(r.ghiChu).indexOf(GHI_AIRBNB) >= 0; }
 var TEN_LOAI = { airbnb: 'Airbnb · khách đặt', tu: 'Tự khoá' };
 
 /* Mỗi phòng một màu [đậm, nhạt]: 101 đỏ tươi, 201 xanh dương cyan, 202 xanh lá, 301 nâu. */
@@ -437,6 +438,7 @@ function ghiChuKhoi(k) {
   var ghi = [];
   k.dong.forEach(function (r) {
     var g = String(r.ghiChu).replace(GHI_AIRBNB, '').replace(GHI_CHAN, 'chặn trên Airbnb').trim();
+    if (k.loai === 'airbnb' && /^airbnb$/i.test(g)) g = '';   // nhãn loại đã ghi Airbnb rồi
     if (g && ghi.indexOf(g) < 0) ghi.push(g);
   });
   return ghi.join(' · ') + (k.dong.length > 1 ? (ghi.length ? ' · ' : '') + 'gộp ' + k.dong.length + ' lệnh' : '');
@@ -460,7 +462,8 @@ function moForm(g, lo, thay) {
   dau.appendChild(el('h3', null, moi ? 'Khoá thêm' : lo === 'airbnb' ? 'Sửa giờ lượt Airbnb' : 'Sửa khoá'));
   dau.appendChild(nut('← Quay lại', 'nutNho', function () { if (NGAY_MO) moNgay(NGAY_MO.p, NGAY_MO.ngay); else dongPhu(); }));
   box.appendChild(dau);
-  if (lo === 'airbnb') box.appendChild(el('p', 'canhBao', 'Lượt khách đặt trên Airbnb: chỉ chỉnh giờ nhận/trả thực tế. Đổi ngày ở đây thì đồng bộ Airbnb không còn theo dõi được lượt này.'));
+  var dongBo = thay.some(laDongBoAirbnb);
+  if (dongBo) box.appendChild(el('p', 'canhBao', 'Lượt khách đặt trên Airbnb (đồng bộ về): chỉ chỉnh giờ nhận/trả thực tế. Đổi ngày ở đây thì đồng bộ Airbnb không còn theo dõi được lượt này.'));
   var f = el('form');
   f.innerHTML =
     '<div class="hang"><label class="rong">Phòng<select name="phong"></select></label></div>' +
@@ -479,7 +482,7 @@ function moForm(g, lo, thay) {
   e.ngayTra.value = g.ngayTra;
   e.gioTra.value = g.gioTra;
   e.ghiChu.value = g.ghiChu || '';
-  if (lo === 'airbnb') { e.phong.disabled = true; e.ghiChu.readOnly = true; }
+  if (dongBo) { e.phong.disabled = true; e.ghiChu.readOnly = true; }
   else {
     var goiY = f.querySelector('.goiY');
     ['Khách đặt trực tiếp', 'Khách đặt combo giờ', 'Bảo trì', 'Nghỉ'].forEach(function (s) {
@@ -514,7 +517,7 @@ function moForm(g, lo, thay) {
     var chong = (KHOI[p] || []).filter(function (k) { return k.loai !== lo && k.bd < kt && k.kt > bd; });
     if (chong.length) kq.appendChild(el('div', 'canhBao', '⚠ Trùng giờ với ' + chong.map(function (k) { return TEN_LOAI[k.loai] + ' ' + moc(k.bd) + ' → ' + moc(k.kt); }).join('; ') + '. Vẫn lưu được.'));
     kq.appendChild(el('p', 'nhoNhe', 'Khoá ' + gioGon(kt - bd) + ': ' + moc(bd) + ' → ' + moc(kt)));
-    keHoach = { phong: p, bd: bd, kt: kt, thay: dsThay, ghiChu: lo === 'airbnb' ? g.ghiChu : e.ghiChu.value.trim() };
+    keHoach = { phong: p, bd: bd, kt: kt, thay: dsThay, ghiChu: dongBo ? g.ghiChu : e.ghiChu.value.trim() };
   }
   f.addEventListener('input', tinh);
   f.addEventListener('change', tinh);
