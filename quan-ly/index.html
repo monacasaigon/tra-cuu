@@ -14,7 +14,7 @@
 <title>Monaca · Quản lý lịch phòng</title>
 <style>
   /* Trang nội bộ: ưu tiên dễ đọc (nền trắng, chữ đen, chữ to). Mỗi phòng một màu (--mp đậm, --mn nhạt), đặt theo phòng
-     ở mauPhong(). Lượt Airbnb tô đặc, tự khoá tô sọc; phần xám nhạt trên thanh là giờ còn trống. */
+     ở mauPhong(). Lượt Airbnb tô màu đậm, tự khoá tô màu nhạt của phòng; phần xám nhạt trên thanh là giờ còn trống. */
   :root {
     --nen: #F3F4F6; --the: #FFFFFF; --chu: #111111; --phu: #4B5563; --vach: #CBD5E1; --trongThanh: #E5E7EB;
     --homNay: #F59E0B; --dau: #1F2937; --mp: #6B7280; --mn: #F3F4F6;
@@ -45,7 +45,7 @@
   .chuGiai i { width: 22px; height: 10px; border-radius: 2px; display: inline-block; --mp: #374151; --mn: #D1D5DB; }
   .chuGiai i.trong { background: var(--trongThanh); border: 1px solid var(--vach); }
   .airbnb { background: var(--mp); }
-  .tu { background: repeating-linear-gradient(135deg, var(--mp) 0 4px, var(--mn) 4px 7px); }
+  .tu { background: var(--mn); background: color-mix(in srgb, var(--mp) 40%, #fff); }
 
   /* Lịch tháng của một phòng */
   .luoi { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
@@ -106,7 +106,7 @@
   .conTrong.het { color: #B91C1C; }
   .conTrong small { display: block; font-weight: 600; font-size: 14px; color: var(--chu); }
   .luot { background: var(--the); border: 1px solid var(--vach); border-left: 8px solid var(--mp); border-radius: 8px; padding: 9px 11px; margin-bottom: 8px; }
-  .luot.l-tu { border-left-style: dashed; }
+  .luot.l-tu { border-left-color: var(--mn); border-left-color: color-mix(in srgb, var(--mp) 40%, #fff); }
   .luot.dang { opacity: .6; }
   .luot .nhanLoai { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--phu); }
   .luot .gioLuot { font-weight: 700; font-size: 15px; margin: 2px 0; }
@@ -166,8 +166,8 @@
     <button class="nutNho" id="veHomNay" type="button">Hôm nay</button>
   </div>
   <div class="chuGiai">
-    <span><i class="airbnb"></i>Tô đặc: khách đặt Airbnb</span>
-    <span><i class="tu"></i>Tô sọc: tự khoá</span>
+    <span><i class="airbnb"></i>Màu đậm: khách đặt Airbnb</span>
+    <span><i class="tu"></i>Màu nhạt: tự khoá</span>
     <span><i class="trong"></i>Xám nhạt: còn trống (thanh 0h → 24h)</span>
   </div>
   <div id="lich"><p class="dangTai">Đang tải lịch…</p></div>
@@ -238,8 +238,9 @@ function datMau(nutHtml, p) {
   return nutHtml;
 }
 
-/* Khối khoá của từng phòng: các lượt cùng loại chồng lên nhau gộp thành một khối (tự khoá gộp cả khi nối liền nhau),
-   để trang chỉ hiện một lệnh khoá cho cùng một khoảng thời gian. */
+/* Khối khoá của từng phòng: mọi lượt chồng giờ lên nhau, khác loại cũng vậy, gộp thành một khối để trang chỉ hiện một
+   lệnh cho cùng một khoảng thời gian. Tự khoá nối liền tự khoá cũng gộp; hai lượt Airbnb nối tiếp (khách trước trả 13:00,
+   khách sau nhận 13:00) thì giữ riêng. Khối có lượt Airbnb thì tính là Airbnb. k.ds giữ từng lượt để vẽ thanh đúng loại. */
 function tinhKhoi() {
   KHOI = {};
   DL.phong.forEach(function (p) { KHOI[p] = []; });
@@ -249,17 +250,24 @@ function tinhKhoi() {
     .sort(function (a, b) { return a.bd - b.bd || a.kt - b.kt; });
   var cuoi = {};
   ds.forEach(function (l) {
-    var khoa = l.r.phong + '|' + l.loai, k = cuoi[khoa];
-    if (k && (l.loai === 'tu' ? l.bd <= k.kt : l.bd < k.kt)) { k.kt = Math.max(k.kt, l.kt); k.dong.push(l.r); }
-    else { k = { phong: l.r.phong, loai: l.loai, bd: l.bd, kt: l.kt, dong: [l.r] }; KHOI[l.r.phong].push(k); cuoi[khoa] = k; }
+    var k = cuoi[l.r.phong];
+    if (k && (l.bd < k.kt || (l.bd === k.kt && l.loai === 'tu' && k.loai === 'tu'))) {
+      k.kt = Math.max(k.kt, l.kt); k.dong.push(l.r); k.ds.push(l);
+      if (l.loai === 'airbnb') k.loai = 'airbnb';
+    } else {
+      k = { phong: l.r.phong, loai: l.loai, bd: l.bd, kt: l.kt, dong: [l.r], ds: [l] };
+      KHOI[l.r.phong].push(k);
+      cuoi[l.r.phong] = k;
+    }
   });
 }
+function dongTu(k) { return k.dong.filter(function (r) { return loai(r) === 'tu'; }); }
 /* Phần các khối nằm trong ngày [ngay, ngay + 1440), tính bằng phút trong ngày. */
 function trongNgay(p, ngay) {
   var kq = [];
   (KHOI[p] || []).forEach(function (k) {
     var a = Math.max(k.bd, ngay), b = Math.min(k.kt, ngay + 1440);
-    if (b > a) kq.push({ k: k, a: a - ngay, b: b - ngay });
+    if (b > a) kq.push({ k: k, a: a - ngay, b: b - ngay, ngay: ngay });
   });
   return kq;
 }
@@ -282,12 +290,25 @@ function moTaNgay(doan) {
   return { cls: 'mot', chu: 'Trống ' + gioGon(tong), tong: tong, trong: trong };
 }
 function dangLuu(k) { return k.dong.some(function (r) { return r.dang; }); }
+/* Vẽ từng lượt trong khối theo đúng loại: Airbnb màu đậm, tự khoá màu nhạt chỉ ở phần Airbnb chưa phủ. */
 function veThanh(thanh, doan, laQua, doc) {
   doan.forEach(function (d) {
-    var i = el('i', d.k.loai + (laQua ? ' qua' : '') + (dangLuu(d.k) ? ' dang' : ''));
-    if (doc) { i.style.top = (d.a / 14.4) + '%'; i.style.height = ((d.b - d.a) / 14.4) + '%'; }
-    else { i.style.left = (d.a / 14.4) + '%'; i.style.width = ((d.b - d.a) / 14.4) + '%'; }
-    thanh.appendChild(i);
+    var cat = function (l) { return [Math.max(l.bd, d.ngay) - d.ngay, Math.min(l.kt, d.ngay + 1440) - d.ngay]; };
+    var phu = d.k.ds.filter(function (l) { return l.loai === 'airbnb'; }).map(cat);
+    d.k.ds.forEach(function (l) {
+      var manh = [cat(l)];
+      if (l.loai === 'tu') phu.forEach(function (c) {
+        manh = [].concat.apply([], manh.map(function (m) { return [[m[0], Math.min(m[1], c[0])], [Math.max(m[0], c[1]), m[1]]]; }));
+      });
+      manh.forEach(function (m) {
+        var a = m[0], b = m[1];
+        if (b <= a) return;
+        var i = el('i', l.loai + (laQua ? ' qua' : '') + (l.r.dang ? ' dang' : ''));
+        if (doc) { i.style.top = (a / 14.4) + '%'; i.style.height = ((b - a) / 14.4) + '%'; }
+        else { i.style.left = (a / 14.4) + '%'; i.style.width = ((b - a) / 14.4) + '%'; }
+        thanh.appendChild(i);
+      });
+    });
   });
 }
 
@@ -417,6 +438,11 @@ function moNgay(p, ngay) {
     } else {
       if (k.dong.length === 1) hangNut.appendChild(nut('Sửa giờ', 'nutNho', function () { moFormKhoi(k); }));
       hangNut.appendChild(nut('Xoá', 'nutNho', function () { xoaKhoi(k); }));
+      /* Lượt Airbnb có lệnh tự khoá trùng bên trong: cho bỏ phần tự khoá thừa để dữ liệu cũng còn 1 lệnh. */
+      var tu = dongTu(k);
+      if (tu.length) hangNut.appendChild(nut('Bỏ tự khoá trùng', 'nutNho', function () {
+        xoaKhoi({ loai: 'tu', phong: k.phong, bd: k.bd, kt: k.kt, dong: tu, boTrung: true });
+      }));
     }
     if (dangLuu(k)) hangNut.appendChild(el('span', 'nhoNhe', 'đang lưu…'));
     the.appendChild(hangNut);
@@ -438,10 +464,11 @@ function ghiChuKhoi(k) {
   var ghi = [];
   k.dong.forEach(function (r) {
     var g = String(r.ghiChu).replace(GHI_AIRBNB, '').replace(GHI_CHAN, 'chặn trên Airbnb').trim();
-    if (k.loai === 'airbnb' && /^airbnb$/i.test(g)) g = '';   // nhãn loại đã ghi Airbnb rồi
+    if (loai(r) === 'airbnb' && /^airbnb$/i.test(g)) g = '';   // nhãn loại đã ghi Airbnb rồi
     if (g && ghi.indexOf(g) < 0) ghi.push(g);
   });
-  return ghi.join(' · ') + (k.dong.length > 1 ? (ghi.length ? ' · ' : '') + 'gộp ' + k.dong.length + ' lệnh' : '');
+  var tu = dongTu(k).length, tron = k.loai === 'airbnb' && tu ? ' (có ' + tu + ' lệnh tự khoá trùng)' : '';
+  return ghi.join(' · ') + (k.dong.length > 1 ? (ghi.length ? ' · ' : '') + 'gộp ' + k.dong.length + ' lệnh' + tron : '');
 }
 
 function dongPhu() { byId('phu').hidden = true; NGAY_MO = null; if (DL && CHON !== 'tat') ve(); }
@@ -471,7 +498,7 @@ function moForm(g, lo, thay) {
     '<label>Giờ<input type="time" name="gioNhan" required></label></div>' +
     '<div class="hang"><label>Đến ngày<input type="date" name="ngayTra" required></label>' +
     '<label>Giờ<input type="time" name="gioTra" required></label></div>' +
-    '<div class="hang"><label class="rong">Ghi chú (không bắt buộc, KHÔNG ghi tên/SĐT khách)<input type="text" name="ghiChu" maxlength="200" placeholder="vd Khách đặt trực tiếp"></label></div>' +
+    '<div class="hang"><label class="rong">Ghi chú (không bắt buộc, ghi được tên/SĐT khách — chỉ xem trong nội bộ)<input type="text" name="ghiChu" maxlength="200" placeholder="vd Khách đặt trực tiếp · Chị Lan 09xx"></label></div>' +
     '<div class="goiY"></div><div class="kq"></div>' +
     '<button type="submit" class="nutLon">' + (moi ? 'Khoá' : 'Lưu') + '</button>';
   var e = f.elements;
@@ -502,20 +529,22 @@ function moForm(g, lo, thay) {
       var doi = true;
       while (doi) {
         doi = false;
-        (KHOI[p] || []).forEach(function (k) {
-          if (k.loai !== 'tu' || k.bd > kt || k.kt < bd) return;
-          k.dong.forEach(function (r) {
-            if (dsThay.indexOf(r) >= 0) return;
-            dsThay.push(r); gop.push(r);
-            if (k.bd < bd) { bd = k.bd; doi = true; }
-            if (k.kt > kt) { kt = k.kt; doi = true; }
-          });
+        DL.dong.forEach(function (r) {
+          if (r.phong !== p || !r.bd || !r.kt || loai(r) !== 'tu' || dsThay.indexOf(r) >= 0) return;
+          var a = phut(r.bd), b = phut(r.kt);
+          if (a > kt || b < bd) return;
+          dsThay.push(r); gop.push(r);
+          if (a < bd) { bd = a; doi = true; }
+          if (b > kt) { kt = b; doi = true; }
         });
       }
     }
     if (gop.length) kq.appendChild(el('div', 'ghiChuGop', 'Gộp với ' + gop.length + ' lệnh tự khoá đang có thành 1 lệnh: ' + moc(bd) + ' → ' + moc(kt)));
-    var chong = (KHOI[p] || []).filter(function (k) { return k.loai !== lo && k.bd < kt && k.kt > bd; });
-    if (chong.length) kq.appendChild(el('div', 'canhBao', '⚠ Trùng giờ với ' + chong.map(function (k) { return TEN_LOAI[k.loai] + ' ' + moc(k.bd) + ' → ' + moc(k.kt); }).join('; ') + '. Vẫn lưu được.'));
+    var chong = DL.dong.filter(function (r) {
+      return r.phong === p && r.bd && r.kt && loai(r) !== lo && dsThay.indexOf(r) < 0 && phut(r.bd) < kt && phut(r.kt) > bd;
+    });
+    if (chong.length) kq.appendChild(el('div', 'canhBao', '⚠ Trùng giờ với ' + chong.map(function (r) { return TEN_LOAI[loai(r)] + ' ' + moc(phut(r.bd)) + ' → ' + moc(phut(r.kt)); }).join('; ') +
+      '. Vẫn lưu được; trang sẽ hiện chung thành 1 mục.'));
     kq.appendChild(el('p', 'nhoNhe', 'Khoá ' + gioGon(kt - bd) + ': ' + moc(bd) + ' → ' + moc(kt)));
     keHoach = { phong: p, bd: bd, kt: kt, thay: dsThay, ghiChu: dongBo ? g.ghiChu : e.ghiChu.value.trim() };
   }
@@ -554,12 +583,14 @@ function luuKhoa(h) {
 }
 
 function xoaKhoi(k) {
-  var hoi = (k.loai === 'airbnb' ? 'Xoá lượt Airbnb ' : 'Mở khoá ') + tenGon(k.phong) + ': ' + moc(k.bd) + ' → ' + moc(k.kt) + '?' +
-    (k.dong.length > 1 ? '\n(Gồm ' + k.dong.length + ' lệnh đã gộp.)' : '');
+  var hoi = k.boTrung
+    ? 'Bỏ ' + k.dong.length + ' lệnh tự khoá trùng trong lượt Airbnb ' + tenGon(k.phong) + ' (' + moc(k.bd) + ' → ' + moc(k.kt) + ')?\nLượt Airbnb giữ nguyên nên phòng vẫn kín như cũ.'
+    : (k.loai === 'airbnb' ? 'Xoá lượt Airbnb ' : 'Mở khoá ') + tenGon(k.phong) + ': ' + moc(k.bd) + ' → ' + moc(k.kt) + '?' +
+      (k.dong.length > 1 ? '\n(Gồm ' + k.dong.length + ' lệnh đã gộp.)' : '');
   if (k.loai === 'airbnb') hoi += '\n\nXoá ở đây chỉ mở phòng trên trang tra cứu, lượt đặt trên Airbnb vẫn giữ nguyên.';
   var coBanChan = k.dong.some(function (r) { return String(r.ghiChu).indexOf(GHI_CHAN) >= 0; });
-  if (coBanChan) hoi += '\n\nCó ngày đã chặn trên Airbnb: nhớ mở chặn trên Airbnb nữa, nếu không lần đồng bộ sau sẽ không tự khoá lại nhưng Airbnb vẫn chặn.';
-  xacNhan(hoi, k.loai === 'airbnb' ? 'Xoá' : 'Mở khoá', function () {
+  if (coBanChan && !k.boTrung) hoi += '\n\nCó ngày đã chặn trên Airbnb: nhớ mở chặn trên Airbnb nữa, nếu không lần đồng bộ sau sẽ không tự khoá lại nhưng Airbnb vẫn chặn.';
+  xacNhan(hoi, k.boTrung ? 'Bỏ lệnh trùng' : k.loai === 'airbnb' ? 'Xoá' : 'Mở khoá', function () {
     var dsXoa = k.dong.slice();
     DL.dong = DL.dong.filter(function (x) { return dsXoa.indexOf(x) < 0; });
     doiDuLieu();
