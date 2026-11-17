@@ -305,7 +305,13 @@ function moTaNgay(doan) {
   var trong = khoangTrong(doan), tong = trong.reduce(function (s, x) { return s + x[1] - x[0]; }, 0);
   if (!doan.length) return { cls: '', chu: '', tong: 1440, trong: trong };
   if (tong <= 0) return { cls: 'kin', chu: 'Kín', tong: 0, trong: [] };
-  return { cls: 'mot', chu: 'Trống ' + gioGon(tong), tong: tong, trong: trong };
+  return { cls: 'mot', chu: 'Trống ' + trong.map(moTaKhoang).join(', '), tong: tong, trong: trong };
+}
+/* Một khoảng trống trong ngày: "trước 13h", "từ 17h", "từ 11h đến 19h". */
+function moTaKhoang(x) {
+  if (x[0] <= 0) return 'trước ' + gioGon(x[1]);
+  if (x[1] >= 1440) return 'từ ' + gioGon(x[0]);
+  return 'từ ' + gioGon(x[0]) + ' đến ' + gioGon(x[1]);
 }
 function dangLuu(k) { return k.dong.some(function (r) { return r.dang; }); }
 /* Vẽ từng lượt trong khối theo đúng loại: Airbnb màu đậm, tự khoá màu nhạt chỉ ở phần Airbnb chưa phủ. */
