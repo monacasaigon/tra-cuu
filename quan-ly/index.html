@@ -127,6 +127,21 @@
   .ghiChuGop { background: #DBEAFE; color: #1E3A8A; border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-bottom: 10px; }
   .loiForm { background: #FEE2E2; color: #991B1B; border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-bottom: 10px; }
   .nhoNhe { font-size: 13px; color: var(--phu); margin: 0 0 10px; }
+
+  /* Flash sale */
+  header .nutNho.fsNut { background: linear-gradient(135deg, #E11D48, #F97316); border-color: transparent; font-weight: 700; }
+  .fsO { position: absolute; top: 4px; right: 5px; font-size: 13px; line-height: 1; }
+  .bang td button { position: relative; }
+  .bang td button .fsO { top: 1px; right: 1px; font-size: 10px; }
+  .luot.fsThe { border-left-color: #E11D48; }
+  .fsGia { font-size: 14px; margin: 4px 0; }
+  .fsGia b, .goiYGia b { color: #E11D48; }
+  .fsNgay { background: #FFE4E6; color: #9F1239; border-radius: 8px; padding: 8px 10px; font-size: 14px; margin-bottom: 10px; }
+  .chonPhongFs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  form .chonPhongFs label { flex-direction: row; align-items: center; gap: 6px; border: 2px solid var(--mp); color: var(--mp); border-radius: 8px;
+    padding: 6px 10px; font-weight: 700; font-size: 14px; }
+  form .chonPhongFs input { width: auto; padding: 0; }
+  .goiYGia { font-size: 12px; font-weight: 500; color: var(--phu); min-height: 16px; }
   .toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); background: #111827; color: #fff; padding: 11px 16px;
     border-radius: 8px; z-index: 50; max-width: 92vw; font-size: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
   .dangTai { text-align: center; color: var(--phu); padding: 40px 0; }
@@ -143,6 +158,7 @@
 <header>
   <h1>🗓 Monaca · Quản lý lịch phòng</h1>
   <span class="trangThai canKhoa" id="trangThai" aria-live="polite"></span>
+  <button class="nutNho canKhoa fsNut" id="nutFlash" type="button">⚡ Flash sale</button>
   <button class="nutNho canKhoa" id="nutDongBo" type="button" title="Đọc lịch Airbnb ngay">↻ Đồng bộ Airbnb</button>
   <button class="nutNho canKhoa" id="nutTaiLai" type="button">Tải lại</button>
   <a class="nutNho canKhoa" id="linkSheet" target="_blank" rel="noopener">Mở Sheet ↗</a>
@@ -329,6 +345,8 @@ function ve() {
   var lich = byId('lich');
   lich.textContent = '';
   if (CHON === 'tat') veTongQuan(lich); else veThangPhong(lich, CHON);
+  var n = dsFlash().length;
+  byId('nutFlash').textContent = '⚡ Flash sale' + (n ? ' (' + n + ')' : '');
 }
 
 function veThangPhong(lich, p) {
@@ -342,6 +360,7 @@ function veThangPhong(lich, p) {
       (NGAY_MO && NGAY_MO.p === p && NGAY_MO.ngay === m ? ' chon' : ''));
     o.type = 'button';
     o.appendChild(el('span', 'so', String(new Date(m * 60000).getUTCDate())));
+    if (flashNgay(p, m).length) o.appendChild(el('span', 'fsO', '⚡'));
     var thanh = el('span', 'thanh');
     veThanh(thanh, doan, m < hn, false);
     o.appendChild(thanh);
@@ -376,6 +395,7 @@ function veTongQuan(lich) {
       var thanh = el('span', 'thanh');
       veThanh(thanh, doan, m < hn, true);
       b.appendChild(thanh);
+      if (flashNgay(p, m).length) b.appendChild(el('span', 'fsO', '⚡'));
       (function (phong, ngay) { b.addEventListener('click', function () { moNgay(phong, ngay); }); })(p, m);
       td.appendChild(b);
       hang.appendChild(td);
@@ -420,6 +440,12 @@ function moNgay(p, ngay) {
     ct.appendChild(el('small', null, mt.trong.map(function (x) { return khoang(x[0], x[1]); }).join(' · ')));
   }
   box.appendChild(ct);
+  flashNgay(p, ngay).forEach(function (f) {
+    var fs = el('div', 'fsNgay', '⚡ ' + (f.ten || 'Flash sale') + ': ' + giaFlashGon(f) + ' · kết thúc ' + moc(phut(f.het)));
+    fs.style.cursor = 'pointer';
+    fs.addEventListener('click', moFlash);
+    box.appendChild(fs);
+  });
 
   var daCo = [];
   doan.forEach(function (d) {
@@ -612,6 +638,196 @@ function xacNhan(noiDung, chuNut, dongY) {
   byId('phu').hidden = false;
 }
 
+/* ------------------------------ Flash sale ------------------------------
+   Chủ nhà nhập đúng giá muốn bán cho từng gói (Combo 3 giờ, Combo 6 giờ, Qua đêm, 2N1Đ; để trống = gói đó không sale),
+   cho các phòng và ngày ở đã chọn, tới giờ kết thúc. Trang tra cứu hiện nổi bật giá này kèm % giảm so với giá niêm yết,
+   không cộng thêm ưu đãi nào khác; giờ lẻ cộng thêm và phụ thu khách vẫn tính như thường. Lưu trong Script Properties
+   (FLASH_SALE), ghi qua hàng đợi như các thao tác khác nên màn hình đổi ngay. */
+var TEN_GOI = ['Combo 3 giờ', 'Combo 6 giờ', 'Qua đêm', '2 ngày 1 đêm'];
+function tien(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+function bayGioMay() { return phut(new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 16)); }
+function dsFlash() {
+  var bg = bayGioMay(), hn = iso(dauNgay(bg));
+  return ((DL && DL.flash) || []).filter(function (f) { return phut(f.het) > bg && f.den >= hn; })
+    .sort(function (a, b) { return a.tu < b.tu ? -1 : a.tu > b.tu ? 1 : 0; });
+}
+function flashNgay(p, m) {
+  var s = iso(m);
+  return dsFlash().filter(function (f) { return f.phong.indexOf(p) >= 0 && s >= f.tu && s <= f.den; });
+}
+function giaFlashGon(f) {
+  return f.gia.map(function (g, i) { return g == null ? '' : TEN_GOI[i] + ' ' + tien(g); }).filter(Boolean).join(' · ');
+}
+function ngayFlash(f) { return f.tu === f.den ? ngayNgan(phut(f.tu)) : ngayNgan(phut(f.tu)) + ' → ' + ngayNgan(phut(f.den)); }
+function conLaiChu(het) {
+  var p = Math.max(0, phut(het) - bayGioMay()), n = Math.floor(p / 1440), h = Math.floor(p % 1440 / 60);
+  return n ? n + ' ngày ' + h + ' giờ' : h ? h + ' giờ ' + (p % 60) + ' phút' : (p % 60) + ' phút';
+}
+/* % giảm của giá flash sale so với giá niêm yết (ngày thường, cuối tuần) của các phòng đã chọn. */
+function soVoiNiemYet(phong, goi, gia) {
+  var ds = [];
+  phong.forEach(function (p) {
+    var g = DL.gia && DL.gia[p];
+    if (!g) return;
+    [[g.thuong[goi], ''], [g.cuoiTuan[goi], 'cuối tuần ']].forEach(function (x) {
+      if (!x[0] || (x[1] && x[0] === g.thuong[goi])) return;
+      var pt = Math.round((1 - gia / x[0]) * 100);
+      var s = x[1] + tien(x[0]) + ' → ' + (pt > 0 ? '−' + pt + '%' : 'không rẻ hơn, trang tra cứu sẽ bỏ qua');
+      if (ds.indexOf(s) < 0) ds.push((phong.length > 1 ? tenGon(p) + ': ' : '') + s);
+    });
+  });
+  return ds.length ? 'So với niêm yết ' + ds.join(' · ') : '';
+}
+
+function moFlash() {
+  NGAY_MO = null;
+  var box = byId('ngang');
+  box.style.setProperty('--mp', '#E11D48');
+  box.style.setProperty('--mn', '#FFE4E6');
+  box.textContent = '';
+  var dau = el('div', 'dongX');
+  dau.appendChild(el('h3', null, '⚡ Flash sale'));
+  dau.appendChild(nut('✕', 'nutNho', dongPhu));
+  box.appendChild(dau);
+  box.appendChild(el('p', 'nhoNhe', 'Trang tra cứu hiện nổi bật đúng giá bạn đặt kèm % giảm so với giá niêm yết, không cộng thêm ưu đãi khác ' +
+    '(giờ lẻ cộng thêm và phụ thu khách vẫn tính như thường). Hết giờ kết thúc thì tự tắt.'));
+  var ds = el('div', 'fsDs'), cac = dsFlash();
+  if (!cac.length) ds.appendChild(el('p', 'nhoNhe', 'Chưa có flash sale nào đang chạy.'));
+  cac.forEach(function (f) { ds.appendChild(theFlash(f)); });
+  box.appendChild(ds);
+  box.appendChild(nut('+ Tạo flash sale', 'nutLon', function () { moFormFlash(null); }));
+  byId('phu').hidden = false;
+}
+function theFlash(f) {
+  var the = el('div', 'luot fsThe' + (f.dang ? ' dang' : ''));
+  the.appendChild(el('div', 'nhanLoai', '⚡ ' + (f.ten || 'Flash sale')));
+  the.appendChild(el('div', 'gioLuot', f.phong.map(tenGon).join(', ') + ' · ngày ở ' + ngayFlash(f)));
+  var gia = el('div', 'fsGia');
+  f.gia.forEach(function (g, i) {
+    if (g == null) return;
+    var d = el('div');
+    d.appendChild(document.createTextNode(TEN_GOI[i] + ': '));
+    d.appendChild(el('b', null, tien(g)));
+    var so = soVoiNiemYet(f.phong, i, g);
+    if (so) d.appendChild(el('div', 'goiYGia', so));
+    gia.appendChild(d);
+  });
+  the.appendChild(gia);
+  the.appendChild(el('div', 'ghi', 'Kết thúc ' + moc(phut(f.het)) + ' · còn ' + conLaiChu(f.het)));
+  var hang = el('div', 'nut');
+  hang.appendChild(nut('Sửa', 'nutNho', function () { moFormFlash(f); }));
+  hang.appendChild(nut('Xoá', 'nutNho', function () { xoaFlash(f); }));
+  if (f.dang) hang.appendChild(el('span', 'nhoNhe', 'đang lưu…'));
+  the.appendChild(hang);
+  return the;
+}
+/* Ô giá nhận 350000, 350.000 hoặc 350 (hiểu là 350.000đ). */
+function docGia(s) {
+  var n = Number(String(s).replace(/[^0-9]/g, ''));
+  return n ? (n < 1000 ? n * 1000 : n) : null;
+}
+function moFormFlash(f) {
+  var moi = !f, box = byId('ngang'), hn = iso(homNay());
+  f = f || { id: Math.random().toString(16).slice(2, 10), phong: CHON !== 'tat' ? [CHON] : [], tu: hn, den: hn,
+    gia: [null, null, null, null], het: hn + 'T23:59', ten: '' };
+  box.textContent = '';
+  var dau = el('div', 'dongX');
+  dau.appendChild(el('h3', null, moi ? '⚡ Tạo flash sale' : '⚡ Sửa flash sale'));
+  dau.appendChild(nut('← Quay lại', 'nutNho', moFlash));
+  box.appendChild(dau);
+  var form = el('form');
+  form.innerHTML =
+    '<div class="hang"><div class="rong"><label>Phòng</label><div class="chonPhongFs"></div></div></div>' +
+    '<div class="hang"><label>Ngày ở từ<input type="date" name="tu" required></label>' +
+    '<label>Đến hết ngày<input type="date" name="den" required></label></div>' +
+    '<p class="nhoNhe">2 ngày 1 đêm và qua đêm tính theo đêm nhận phòng (nhận rạng sáng thuộc đêm hôm trước); combo giờ theo ngày.</p>' +
+    '<p class="nhoNhe"><b>Giá flash sale</b> (đ, để trống = gói đó không sale; gõ 350 hiểu là 350.000đ)</p>' +
+    '<div class="hang">' + TEN_GOI.map(function (t, i) {
+      return '<label>' + t + '<input type="text" inputmode="numeric" autocomplete="off" name="g' + i + '" placeholder="không sale">' +
+        '<span class="goiYGia" data-goi="' + i + '"></span></label>';
+    }).join('') + '</div>' +
+    '<div class="hang"><label>Kết thúc sale ngày<input type="date" name="hetNgay" required></label>' +
+    '<label>Lúc<input type="time" name="hetGio" required></label></div>' +
+    '<div class="hang"><label class="rong">Tiêu đề trên trang tra cứu (tuỳ chọn)<input type="text" name="ten" maxlength="60" ' +
+    'placeholder="để trống = FLASH SALE"></label></div>';
+  var chon = form.querySelector('.chonPhongFs');
+  DL.phong.forEach(function (p) {
+    var l = datMau(el('label'), p), cb = el('input');
+    cb.type = 'checkbox';
+    cb.value = p;
+    cb.checked = f.phong.indexOf(p) >= 0;
+    l.appendChild(cb);
+    l.appendChild(document.createTextNode(tenGon(p)));
+    chon.appendChild(l);
+  });
+  var e = form.elements;
+  e.tu.value = f.tu; e.den.value = f.den;
+  e.tu.min = e.den.min = e.hetNgay.min = hn;
+  e.hetNgay.value = f.het.slice(0, 10); e.hetGio.value = f.het.slice(11);
+  e.ten.value = f.ten || '';
+  TEN_GOI.forEach(function (t, i) { if (f.gia[i] != null) e['g' + i].value = f.gia[i].toLocaleString('vi-VN'); });
+  function phongChon() { return [].filter.call(chon.querySelectorAll('input'), function (x) { return x.checked; }).map(function (x) { return x.value; }); }
+  function goiY() {
+    var ph = phongChon();
+    form.querySelectorAll('.goiYGia').forEach(function (s) {
+      var i = +s.getAttribute('data-goi'), g = docGia(e['g' + i].value);
+      s.textContent = '';
+      if (g) {
+        s.appendChild(el('b', null, '= ' + tien(g)));
+        var so = soVoiNiemYet(ph, i, g);
+        if (so) s.appendChild(document.createTextNode(' · ' + so));
+      } else if (ph.length && DL.gia && DL.gia[ph[0]]) {
+        s.textContent = 'Niêm yết ' + tien(DL.gia[ph[0]].thuong[i]);
+      }
+    });
+  }
+  form.addEventListener('input', goiY);
+  form.addEventListener('change', goiY);
+  form.addEventListener('submit', function (ev) { ev.preventDefault(); });
+  goiY();
+  box.appendChild(form);
+  var loi = el('div', 'canhBao');
+  loi.hidden = true;
+  box.appendChild(loi);
+  box.appendChild(nut(moi ? 'Bật flash sale' : 'Lưu thay đổi', 'nutLon', function () {
+    var ph = phongChon(), gia = TEN_GOI.map(function (t, i) { return docGia(e['g' + i].value); });
+    var het = e.hetNgay.value + 'T' + e.hetGio.value, sai = '';
+    if (!ph.length) sai = 'Chọn ít nhất một phòng.';
+    else if (!e.tu.value || !e.den.value || e.den.value < e.tu.value) sai = 'Ngày ở "đến" phải từ ngày "từ" trở đi.';
+    else if (e.den.value < hn) sai = 'Ngày ở đã qua.';
+    else if (gia.every(function (g) { return g == null; })) sai = 'Nhập giá flash sale cho ít nhất một gói.';
+    else if (gia.some(function (g) { return g != null && g < 1000; })) sai = 'Giá flash sale không hợp lệ.';
+    else if (!e.hetNgay.value || !e.hetGio.value || phut(het) <= bayGioMay()) sai = 'Giờ kết thúc phải sau bây giờ.';
+    loi.hidden = !sai;
+    loi.textContent = sai;
+    if (sai) return;
+    luuFlash({ id: f.id, phong: ph, tu: e.tu.value, den: e.den.value, gia: gia, het: het, ten: e.ten.value.trim() });
+  }));
+  if (!moi) box.appendChild(nut('Xoá flash sale này', 'nutLon phu2', function () { xoaFlash(f); }));
+  byId('phu').hidden = false;
+}
+function sauKhiLuuFlash(ds) {
+  DL.flash = ds;
+  if (!byId('phu').hidden && byId('ngang').querySelector('.fsDs')) moFlash();
+}
+function luuFlash(fs) {
+  DL.flash = (DL.flash || []).filter(function (x) { return x.id !== fs.id; }).concat([Object.assign({ dang: true }, fs)]);
+  luuDem();
+  ve();
+  moFlash();
+  xepHang(function () { return { hanh: 'luuFlash', fs: fs }; }, sauKhiLuuFlash);
+}
+function xoaFlash(f) {
+  xacNhan('Xoá flash sale ' + (f.ten ? '"' + f.ten + '" ' : '') + '(' + f.phong.map(tenGon).join(', ') + ', ngày ở ' + ngayFlash(f) + ')?\n' +
+    'Trang tra cứu sẽ thôi hiện giá flash sale này.', 'Xoá flash sale', function () {
+    DL.flash = (DL.flash || []).filter(function (x) { return x.id !== f.id; });
+    luuDem();
+    ve();
+    moFlash();
+    xepHang(function () { return { hanh: 'xoaFlash', id: f.id }; }, sauKhiLuuFlash);
+  });
+}
+
 /* ------------------------------ Gọi máy chủ ------------------------------ */
 /* POST dạng text/plain để trình duyệt không gửi preflight (Apps Script không trả lời OPTIONS). */
 function goiApi(than) {
@@ -724,6 +940,7 @@ byId('nutDongBo').addEventListener('click', function () {
   goiApi({ hanh: 'dongBo' }).then(function (kq) { napDL(kq.dl); veLai(); bao(kq.kq, 6000); }, function (e) { bao('Lỗi: ' + e.message, 7000); })
     .then(function () { n.disabled = false; n.textContent = '↻ Đồng bộ Airbnb'; });
 });
+byId('nutFlash').addEventListener('click', function () { if (DL) moFlash(); });
 byId('phu').addEventListener('click', function (e) { if (e.target === byId('phu')) dongPhu(); });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !byId('phu').hidden) dongPhu(); });
 /* Quay lại trang (vd từ app khác trên điện thoại) thì tải lại cho chắc. */
