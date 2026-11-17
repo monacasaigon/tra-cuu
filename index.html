@@ -703,6 +703,21 @@ function veFlash() {
   });
   if (!lon) return;   // không có giá nào rẻ hơn niêm yết: không hiện băng
   tu = Math.max(tu, HOM_NAY);
+  /* "Chỉ từ": giá thấp nhất của gói đầu tiên có flash sale. Đợt sale có hôm nay thì so thêm giá niêm yết sau Last-minute
+     của phòng/gói không có flash sale (đúng luật Last-minute, phòng còn trống): rẻ hơn thì ghi giá đó, thêm phòng đó vào băng. */
+  var goiTu = -1, giaTu = 0;
+  for (var goi = 0; goi < 4 && goiTu < 0; goi++) {
+    if (gia[goi] == null) continue;
+    goiTu = goi;
+    giaTu = gia[goi];
+    var lm = tu === HOM_NAY ? lmHomNay(goi) : null;
+    if (lm && lm.gia < giaTu) {
+      giaTu = lm.gia;
+      coPhong[lm.ten] = 1;
+      lon = Math.max(lon, D.uuDai.lastMinute);
+      nho = Math.min(nho, D.uuDai.lastMinute);
+    }
+  }
   var phong = D.phong.filter(function (p) { return coPhong[p]; });
   var ngayChu = tu === den ? (tu === HOM_NAY ? c('fsHomNay', ngayGon(tu)) : tu === HOM_NAY + 1440 ? c('fsNgayMai', ngayGon(tu)) : ngay(tu))
     : tu === HOM_NAY ? c('fsDenNgay', ngayGon(den)) : ngayGon(tu) + ' → ' + ngayGon(den);
@@ -715,13 +730,11 @@ function veFlash() {
   if (lon) dau.appendChild(el('span', 'fsPhan', (lon === nho ? '' : c('fsGiamDen') + ' ') + '−' + lon + '%'));
   b.appendChild(dau);
   b.appendChild(el('div', 'fsMoTa', ngayChu + ' · ' + phongChu));
-  for (var goi = 0; goi < 4; goi++) {
-    if (gia[goi] == null) continue;
+  if (goiTu >= 0) {
     var dong = el('div', 'fsGia', c('fsChiTu'));
-    dong.appendChild(el('b', null, Math.round(gia[goi] / 1000) + 'k'));
-    dong.appendChild(document.createTextNode(CHU[NN].fsDonVi[goi]));
+    dong.appendChild(el('b', null, Math.round(giaTu / 1000) + 'k'));
+    dong.appendChild(document.createTextNode(CHU[NN].fsDonVi[goiTu]));
     b.appendChild(dong);
-    break;
   }
   var dn = el('span', null, c('fsKetThuc'));
   dn.appendChild(demNguoc(het));
@@ -730,6 +743,37 @@ function veFlash() {
   b.appendChild(cuoi);
   b.addEventListener('click', function () { xemFlash({ tu: iso(tu), gia: gia }); });
   hop.appendChild(b);
+}
+/* Giá Last-minute rẻ nhất hôm nay của gói goi (0 Combo 3 giờ, 1 Combo 6 giờ, 2 Qua đêm, 2N1Đ) ở các phòng không có flash
+   sale cho gói đó, theo đúng luật Last-minute của trang (chỉ ngày/đêm thường; combo nhận trong 4 tiếng tới và xong trước
+   21:00, qua đêm nhận 22:00 tối nay khi còn trong 12 tiếng, 2N1Đ đêm nay) và phòng còn trống: { ten, gia } hoặc null. */
+function lmHomNay(goi) {
+  var lm = D.uuDai.lastMinute, bg = bayGioMay(), tot = null;
+  if (!lm) return null;
+  D.phong.forEach(function (ten) {
+    var g = D.gia[ten], niemYet = g && g.thuong[goi];
+    if (!niemYet) return;
+    var fs = flashCho(ten, HOM_NAY, goi);
+    if (fs && fs.gia < niemYet) return;   // gói này đang flash sale: không tính Last-minute
+    var ok = false;
+    if (goi <= 1) {
+      var dai = goi === 0 ? 3 : 6;
+      if (!cuoiTuanCombo(HOM_NAY)) {
+        for (var h = Math.max(COMBO_TU, Math.floor((bg - HOM_NAY) / 60) + 1); h <= Math.min(Math.floor((bg - HOM_NAY + 240) / 60), COMBO_DEN - dai); h++) {
+          if (trangThai(ten, HOM_NAY + h * 60, HOM_NAY + (h + dai) * 60) === 'trong') { ok = true; break; }
+        }
+      }
+    } else if (goi === 2) {
+      var nhan = HOM_NAY + QUA_DEM_TU * 60;
+      ok = !cuoiTuanDem(HOM_NAY) && nhan > bg && nhan - bg <= 12 * 60 && trangThai(ten, nhan, nhan + 13 * 60) === 'trong';
+    } else {
+      ok = !cuoiTuanDem(HOM_NAY) && trangThai(ten, HOM_NAY + D.gioNhan * 60, HOM_NAY + 1440 + D.gioTra * 60) === 'trong';
+    }
+    if (!ok) return;
+    var p = niemYet - lamTron(niemYet * lm / 100);
+    if (!tot || p < tot.gia) tot = { ten: ten, gia: p };
+  });
+  return tot;
 }
 /* Bấm băng flash sale: chọn tab có gói đang sale, đặt ngày ở đầu tiên còn lại rồi kiểm tra. */
 function xemFlash(f) {
@@ -911,10 +955,16 @@ function khoiGia(ten, kq, tomTat) {
 }
 
 var THU_TU = { trong: 0, motPhan: 1, kin: 2 };
+/* Thứ tự hiện phòng: còn trống trước, rồi trống một phần, rồi kín. Trong cùng nhóm, phòng giảm nhiều % hơn (đúng số %
+   ghi trên thẻ: flash sale, Last-minute, Early-bird…) lên trước; bằng nhau thì theo thứ tự phòng. */
+function thuTuPhong(loai, viTri, gia) {
+  var pt = gia && gia.goc > gia.tong ? Math.round((1 - gia.tong / gia.goc) * 100) : 0;
+  return THU_TU[loai] * 100000 + (100 - pt) * 100 + viTri;
+}
 
 /* Phòng không đủ chỗ cho số khách đã chọn: hiện mờ ở cuối danh sách, không báo giá. */
 function khongVua(ten, viTri) {
-  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten))), thuTu: 300 + viTri };
+  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten))), thuTu: 300000 + viTri };
 }
 
 /* Ở thiếu đúng 1 đêm để được ưu đãi "từ N đêm chỉ tính giá ngày thường" và có đêm cuối tuần được hạ giá:
@@ -982,7 +1032,7 @@ function kiemTraDem() {
     if (gia && gia.fs.length) danhDauFlash(o);
     var them = gia && goiYThemDem(ten, nhan, tra, soDem, soKhach, gia);
     if (them) o.noiDung.appendChild(them);
-    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+    return { o: o, thuTu: thuTuPhong(loai, viTri, gia) };
   });
   hienKetQua(ds, soTrong, c('tomDem', gio(D.gioNhan), ngay(nhan), gio(D.gioTra), ngay(tra), c('dem', soDem), c('khach', soKhach)));
   ghiChuGia();
@@ -1024,7 +1074,7 @@ function kiemTraGio() {
       o.noiDung.appendChild(khoiGia(ten, gia, c('tomTatGio', ngay(ngayM), gio(tu), mocNgay(gia.tra), goi, c('khach', soKhach))));
       if (gia.fs.length) danhDauFlash(o);
     }
-    return { o: o, thuTu: THU_TU[loai] * 100 + viTri };
+    return { o: o, thuTu: thuTuPhong(loai, viTri, gia) };
   });
   hienKetQua(ds, soTrong, (quaDem ? c('quaDemTieng', ra - tu) : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + mocNgay(ra) + ' · ' + c('khach', soKhach));
   var cg = el('div', 'chuGiai');
