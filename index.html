@@ -139,6 +139,44 @@ try {
   .themDem span { flex: 1; }
   .themDem button { flex: none; padding: 8px 12px; border: 0; border-radius: 9px; background: var(--vangChu); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 
+  /* Lịch trống của một phòng: nút trên ảnh phòng mở lịch 1 tháng, mỗi ngày một thanh giờ trống 0h → 24h. */
+  .nutLich { position: absolute; top: 10px; right: 10px; z-index: 1; padding: 6px 11px; border: 0; border-radius: 999px; background: rgba(255,255,255,.95);
+    color: var(--dau); font: inherit; font-size: 12px; font-weight: 700; line-height: 1.2; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.22); }
+  .phong.vuaChon { animation: vuaChon 1.8s ease-out; }
+  @keyframes vuaChon { 0%, 55% { box-shadow: 0 0 0 3px var(--dau); } }
+  .lich { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(43,26,28,.45); }
+  .lichHop { width: 100%; max-width: 440px; max-height: 100%; overflow-y: auto; padding: 16px; border-radius: 18px; background: var(--the); box-shadow: 0 12px 40px rgba(0,0,0,.25); outline: none; }
+  .lichDau { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .lichDau h2 { margin: 0; font-size: 17px; line-height: 1.3; }
+  .lichDau p { margin: 2px 0 0; font-size: 12px; color: var(--phu); }
+  .lichDong { flex: none; width: 36px; height: 36px; margin: -8px -8px 0 0; border: 0; border-radius: 50%; background: none; color: var(--chu); font-size: 28px; line-height: 1; cursor: pointer; }
+  .lichThang { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 6px; font-weight: 700; }
+  .lichThang button { width: 34px; height: 34px; border: 1px solid var(--vien); border-radius: 50%; background: #fff; color: var(--chu); font: inherit; font-size: 18px; line-height: 1; cursor: pointer; }
+  .lichThang button:disabled { opacity: .3; cursor: default; }
+  .lichLuoi { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .thuL { padding: 2px 0 4px; text-align: center; font-size: 11px; font-weight: 600; color: var(--phu); }
+  .ngayL { display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 50px; padding: 6px 1px 5px; border: 1px solid transparent; border-radius: 10px;
+    background: none; color: var(--chu); font: inherit; text-align: center; }
+  button.ngayL { cursor: pointer; }
+  button.ngayL:hover { background: var(--nhat); }
+  .ngayL b { font-size: 14px; line-height: 1.1; }
+  .ngayL.kin b { color: #B9A9AB; font-weight: 400; text-decoration: line-through; }
+  .ngayL.qua { min-height: 0; padding: 3px 1px; }
+  .ngayL.qua b { color: #D3C8C9; font-weight: 400; }
+  .ngayL.homNay b { color: var(--dau); }
+  .ngayL.dangChon { border-color: var(--dau); }
+  .thanhL { position: relative; display: block; width: 100%; max-width: 40px; height: 5px; border-radius: 3px; background: #ECE2E3; overflow: hidden; }
+  .thanhL span, .lichChu i { position: absolute; top: 0; bottom: 0; background: #47A56C; }
+  .ngayL small { font-size: 10px; line-height: 1.15; font-weight: 600; color: var(--xanhChu); }
+  .lichChu { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 2px 0; font-size: 11px; color: var(--phu); }
+  .lichChu span { display: flex; align-items: center; gap: 5px; }
+  .lichChu i { position: static; display: inline-block; width: 16px; height: 5px; border-radius: 3px; }
+  .lichChu s { color: #B9A9AB; }
+  @media (max-width: 480px) {
+    .lich { align-items: flex-end; padding: 0; }
+    .lichHop { max-width: none; max-height: 92%; border-radius: 18px 18px 0 0; padding: 14px 12px calc(16px + env(safe-area-inset-bottom)); }
+  }
+
   .zalo { display: block; margin-top: 16px; padding: 12px; border: 2px solid var(--dau); border-radius: 14px; background: var(--the); color: var(--dau); text-align: center; font-weight: 700; text-decoration: none; }
   .zalo small { display: block; font-size: 12px; font-weight: 400; opacity: .85; }
   footer { margin: 14px 0 6px; text-align: center; font-size: 12px; color: var(--phu); }
@@ -201,6 +239,14 @@ try {
 <div class="hop" id="hop" role="dialog" aria-modal="true" aria-label="Ảnh phòng" hidden>
   <div class="hopDau"><span><b id="hopTen"></b> · <span id="hopDem"></span></span><button type="button" id="dongHop" aria-label="Đóng">×</button></div>
   <div class="truot" id="hopTruot"></div>
+</div>
+<div class="lich" id="lich" hidden>
+  <div class="lichHop" id="lichHop" role="dialog" aria-modal="true" aria-labelledby="lichTen" tabindex="-1">
+    <div class="lichDau"><div><h2 id="lichTen"></h2><p id="lichGoiY"></p></div><button type="button" class="lichDong" id="dongLich" aria-label="Đóng">×</button></div>
+    <div class="lichThang"><button type="button" id="lichTruoc">‹</button><span id="lichThang"></span><button type="button" id="lichSau">›</button></div>
+    <div class="lichLuoi" id="lichLuoi"></div>
+    <div class="lichChu" id="lichChu"></div>
+  </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
@@ -290,6 +336,9 @@ var CHU = {
     quaDemTomTat: ' (qua đêm {0} tiếng)',
     loiNhan: 'Chào {0}, mình muốn đặt {1}: {2}. Giá trên trang: {3}.',
     daChep: 'Đã chép nội dung đặt phòng, bạn dán vào khung chat Zalo nhé.',
+    nutLich: '📅 Lịch trống', lichTieuDe: 'Lịch trống phòng {0}', lichGoiY: 'Bấm vào ngày còn trống để xem giá',
+    lichTu: 'từ {0}', lichTruoc: 'trước {0}', lichTuDen: 'từ {0} đến {1}', lichCaNgay: 'trống cả ngày', lichTrongKhoang: 'trống {0}', lichKin: 'đã kín',
+    lichCgTrong: 'Giờ còn trống', lichCgKin: 'Đã kín', thangTruoc: 'Tháng trước', thangSau: 'Tháng sau',
   },
   en: {
     thu: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
@@ -377,6 +426,10 @@ var CHU = {
     tomTatGio: '{0} from {1} to {2}{3}, {4}',
     quaDemTomTat: ' (overnight, {0} hours)',
     loiNhan: 'Hi {0}, I\'d like to book {1}: {2}. Price shown on the website: {3}.',
+    thangDu: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    nutLich: '📅 Availability', lichTieuDe: 'Room {0} availability', lichGoiY: 'Tap an available day to see the price',
+    lichTu: 'from {0}', lichTruoc: 'before {0}', lichTuDen: '{0}–{1}', lichCaNgay: 'free all day', lichTrongKhoang: 'free {0}', lichKin: 'booked',
+    lichCgTrong: 'Free hours', lichCgKin: 'Booked', thangTruoc: 'Previous month', thangSau: 'Next month',
   },
 };
 function c(k) {
@@ -903,9 +956,16 @@ function chepDatPhong(noiDung) {
   try { navigator.clipboard.writeText(noiDung).then(function () { bao(true); }, function () { bao(false); }); } catch (e) { bao(false); }
 }
 
-function thePhong(ten, loai, nhan) {
-  var o = el('div', 'phong' + (loai === 'kin' ? ' het' : '')), nd = el('div', 'noiDung'), dau = el('div', 'dauPhong');
-  o.appendChild(khungAnh(ten));
+function thePhong(ten, loai, nhan, khongLich) {
+  var o = el('div', 'phong' + (loai === 'kin' ? ' het' : '')), nd = el('div', 'noiDung'), dau = el('div', 'dauPhong'), anh = khungAnh(ten);
+  o.dataset.phong = ten;
+  if (!khongLich) {
+    var nut = el('button', 'nutLich', c('nutLich'));
+    nut.type = 'button';
+    nut.addEventListener('click', function () { moLich(ten, nut); });
+    anh.appendChild(nut);
+  }
+  o.appendChild(anh);
   dau.appendChild(el('span', 'tenPhong', tenHien(ten)));
   dau.appendChild(el('span', 'chip ' + loai, nhan));
   nd.appendChild(dau);
@@ -964,7 +1024,158 @@ function thuTuPhong(loai, viTri, gia) {
 
 /* Phòng không đủ chỗ cho số khách đã chọn: hiện mờ ở cuối danh sách, không báo giá. */
 function khongVua(ten, viTri) {
-  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten))), thuTu: 300000 + viTri };
+  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten)), true), thuTu: 300000 + viTri };
+}
+
+/* ------------------------- Lịch trống của một phòng -------------------------
+   Nút "📅 Lịch trống" trên ảnh phòng mở lịch 1 tháng của riêng phòng đó: mỗi ngày một thanh 0h → 24h (phần xanh là giờ còn
+   trống) và giờ trống ghi như lịch nội bộ (trước 13h, từ 17h, từ 11h đến 19h); ngày kín gạch ngang. Không phân biệt khách đặt hay chủ nhà tự khoá.
+   Khoảng trống ngắn hơn 3 tiếng (không đủ gói nhỏ nhất) và giờ đã qua không tính là trống.
+   Bấm vào ngày còn trống: trang chuyển sang ngày đó và hiện giá của phòng (chonNgayLich). */
+var LICH_PHONG = null, LICH_THANG = 0, LICH_NUT = null;   // phòng đang mở lịch, tháng đang xem (phút đầu mùng 1), nút đã bấm
+function dauThang(m, n) { var d = new Date(m * 60000); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + (n || 0), 1) / 60000; }
+function tenThang(m) {
+  var d = new Date(m * 60000);
+  return NN === 'en' ? CHU.en.thangDu[d.getUTCMonth()] + ' ' + d.getUTCFullYear() : 'Tháng ' + (d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
+}
+/* Giờ sớm nhất còn đặt được: giờ tròn kế tiếp (như ô "Từ" mặc định của hôm nay). */
+function gioDatSomNhat() { return Math.floor((BAY_GIO - HOM_NAY) / 60) + 1; }
+/* Các khoảng trống của phòng trong [tu, den) (phút), dài từ 3 tiếng, không tính giờ đã qua. */
+function khoangTrongPhong(ten, tu, den) {
+  var p = chuan(ten), con = Math.max(tu, HOM_NAY + gioDatSomNhat() * 60), ra = [];
+  LICH.filter(function (b) { return b.phong === p && b.kt > con && b.bd < den; })
+    .sort(function (a, b) { return a.bd - b.bd; })
+    .forEach(function (b) { if (b.bd > con) ra.push([con, b.bd]); con = Math.max(con, b.kt); });
+  if (con < den) ra.push([con, den]);
+  return ra.filter(function (k) { return k[1] - k[0] >= 180; });
+}
+/* Phần trống trong ngày m (phút tính từ 0:00 của ngày đó), bỏ mẩu dưới 1 tiếng. */
+function trongTrongNgay(ds, m) {
+  var ra = [];
+  ds.forEach(function (k) { var a = Math.max(k[0], m), b = Math.min(k[1], m + 1440); if (b - a >= 60) ra.push([a - m, b - m]); });
+  return ra;
+}
+/* Giờ gọn trên ô ngày: bản Việt 17h, 17h30; bản Anh 5pm, 5:30pm. */
+function gioGon(p) {
+  var h = Math.floor(p / 60) % 24, ph = p % 60;
+  if (NN === 'en') return (h % 12 || 12) + (ph ? ':' + pad(ph) : '') + (h < 12 ? 'am' : 'pm');
+  return h + 'h' + (ph ? pad(ph) : '');
+}
+/* Cách ghi như lịch nội bộ: "trước 13h", "từ 17h", "từ 11h đến 19h". */
+function nhanKhoang(k) {
+  if (k[0] <= 0) return c('lichTruoc', gioGon(k[1]));
+  if (k[1] >= 1440) return c('lichTu', gioGon(k[0]));
+  return c('lichTuDen', gioGon(k[0]), gioGon(k[1]));
+}
+
+function moLich(ten, nut) {
+  var chon = byId(cheDo === 'dem' ? 'ngayNhan' : 'ngayGio').value, dau = dauThang(HOM_NAY);
+  LICH_PHONG = ten;
+  LICH_NUT = nut || null;
+  LICH_THANG = Math.min(Math.max(chon ? dauThang(phut(chon)) : dau, dau), dauThang(dau, 11));
+  veLich();
+  byId('lich').hidden = false;
+  document.body.style.overflow = 'hidden';
+  byId('lichHop').focus();
+}
+
+function dongLich(giuCho) {
+  byId('lich').hidden = true;
+  document.body.style.overflow = '';
+  if (!giuCho && LICH_NUT && document.body.contains(LICH_NUT)) LICH_NUT.focus();
+  LICH_PHONG = LICH_NUT = null;
+}
+
+function veLich() {
+  var ten = LICH_PHONG, luoi = byId('lichLuoi'), dau = LICH_THANG, sau = dauThang(dau, 1), homNay = dauThang(HOM_NAY);
+  var ds = khoangTrongPhong(ten, dau, sau + 2 * 1440), chon = byId(cheDo === 'dem' ? 'ngayNhan' : 'ngayGio').value;
+  byId('lichTen').textContent = c('lichTieuDe', tenNgan(ten));
+  byId('lichGoiY').textContent = c('lichGoiY');
+  byId('lichThang').textContent = tenThang(dau);
+  byId('lichTruoc').disabled = dau <= homNay;
+  byId('lichSau').disabled = dau >= dauThang(homNay, 11);
+  luoi.textContent = '';
+  [1, 2, 3, 4, 5, 6, 0].forEach(function (i) { luoi.appendChild(el('span', 'thuL', CHU[NN].thu[i])); });
+  for (var i = (thu(dau) + 6) % 7; i > 0; i--) luoi.appendChild(el('span'));
+  for (var m = dau; m < sau; m += 1440) {
+    var k = m < HOM_NAY ? [] : trongTrongNgay(ds, m), co = k.length > 0;
+    var o = el(co ? 'button' : 'span', 'ngayL' + (m < HOM_NAY ? ' qua' : co ? '' : ' kin') + (m === HOM_NAY ? ' homNay' : '')
+      + (iso(m) === chon ? ' dangChon' : ''));
+    o.appendChild(el('b', null, new Date(m * 60000).getUTCDate()));
+    if (co) {
+      var thanh = el('i', 'thanhL'), caNgay = k.length === 1 && k[0][0] <= 0 && k[0][1] >= 1440;
+      k.forEach(function (x) {
+        var s = el('span');
+        s.style.left = x[0] / 14.4 + '%';
+        s.style.width = (x[1] - x[0]) / 14.4 + '%';
+        thanh.appendChild(s);
+      });
+      o.appendChild(thanh);
+      if (!caNgay) k.slice(0, 2).forEach(function (x) { o.appendChild(el('small', null, nhanKhoang(x))); });
+      o.type = 'button';
+      o.setAttribute('aria-label', ngay(m) + ': ' + (caNgay ? c('lichCaNgay') : c('lichTrongKhoang', k.map(nhanKhoang).join(', '))));
+      o.addEventListener('click', chonNgayLich.bind(null, ten, m));
+    } else if (m >= HOM_NAY) o.setAttribute('aria-label', ngay(m) + ': ' + c('lichKin'));
+    luoi.appendChild(o);
+  }
+  var chu = byId('lichChu'), a = el('span'), b = el('span');
+  chu.textContent = '';
+  a.appendChild(el('i'));
+  a.appendChild(document.createTextNode(c('lichCgTrong')));
+  b.appendChild(el('s', null, '15'));
+  b.appendChild(document.createTextNode(c('lichCgKin')));
+  chu.appendChild(a);
+  chu.appendChild(b);
+}
+
+/* Khung giờ tượng trưng khi khách bấm một ngày (tab combo giờ): giữ khung đang chọn nếu ngày đó còn trống; không thì
+   combo 3 giờ sớm nhất còn trống trong giờ combo, rồi gói Qua đêm từ 22:00, rồi giờ trống đầu tiên của ngày (tối đa 3 giờ).
+   Khách tự chỉnh lại giờ sau khi thấy giá. */
+function khungTuongTrung(ten, m) {
+  var som = m === HOM_NAY ? gioDatSomNhat() : 0, tu = +byId('tuGio').value, den = +byId('denGio').value, h;
+  function trong(a, b) { return trangThai(ten, m + a * 60, m + b * 60) === 'trong'; }
+  if (tu >= som && den > tu && den <= denToiDa(tu) && trong(tu, den)) return [tu, den];
+  for (h = Math.max(COMBO_TU, som); h + 3 <= COMBO_DEN; h++) if (trong(h, h + 3)) return [h, h + 3];
+  if (som <= QUA_DEM_TU && trong(QUA_DEM_TU, gioTraQuaDem(QUA_DEM_TU))) return [QUA_DEM_TU, gioTraQuaDem(QUA_DEM_TU)];
+  for (h = som; h < 24; h++) {
+    if (!trong(h, h + 1)) continue;
+    var d = h + 1, max = Math.min(h + 3, denToiDa(h));
+    while (d < max && trong(h, d + 1)) d++;
+    return [h, d];
+  }
+  return [Math.max(som, Math.min(tu, 23)), Math.max(som, Math.min(tu, 23)) + 3];
+}
+
+/* Bấm một ngày trên lịch: tab 2 ngày 1 đêm mà đêm đó còn trống thì nhận phòng ngày đó (giữ số đêm khách đang chọn,
+   bớt dần nếu các đêm sau đã kín); còn lại chuyển sang tab combo giờ với khung giờ tượng trưng. Rồi kiểm tra và cuộn tới
+   thẻ của phòng đó. */
+function chonNgayLich(ten, m) {
+  dongLich(true);
+  KHACH_SUA = true;
+  var nhan = m + D.gioNhan * 60;
+  if (cheDo === 'dem' && trangThai(ten, nhan, m + 1440 + D.gioTra * 60) === 'trong') {
+    var a = byId('ngayNhan').value, b = byId('ngayTra').value, soDem = a && b ? Math.round((phut(b) - phut(a)) / 1440) : 1;
+    soDem = Math.min(30, Math.max(1, soDem || 1));
+    while (soDem > 1 && trangThai(ten, nhan, m + soDem * 1440 + D.gioTra * 60) !== 'trong') soDem--;
+    byId('ngayNhan').value = iso(m);
+    byId('ngayTra').min = iso(m + 1440);
+    byId('ngayTra').value = iso(m + soDem * 1440);
+  } else {
+    if (cheDo !== 'gio') { chonCheDo('gio'); goiYKhach(); }
+    var k = khungTuongTrung(ten, m);
+    byId('ngayGio').value = iso(m);
+    byId('tuGio').value = String(k[0]);
+    dsGioDen(false);
+    byId('denGio').value = String(k[1]);
+    giaiThichGio();
+  }
+  kiemTra();
+  var the = Array.from(byId('ketQua').querySelectorAll('.phong')).filter(function (o) { return o.dataset.phong === ten; })[0];
+  (the || byId('ketQua')).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (the) {
+    the.classList.add('vuaChon');
+    setTimeout(function () { the.classList.remove('vuaChon'); }, 1800);
+  }
 }
 
 /* Ở thiếu đúng 1 đêm để được ưu đãi "từ N đêm chỉ tính giá ngày thường" và có đêm cuối tuần được hạ giá:
@@ -1120,6 +1331,7 @@ function capNhatDuLieu(moi) {
   napDuLieu(moi);
   apDungNgonNgu();
   if (doi) kiemTra();
+  if (doi && LICH_PHONG) veLich();
 }
 
 /* Form gắn ngay khi mở trang theo đồng hồ máy khách (giờ Việt Nam = UTC+7), không chờ dữ liệu từ Sheet,
@@ -1178,6 +1390,12 @@ function ganForm() {
   byId('kiemTra').addEventListener('click', kiemTra);
   byId('soKhach').addEventListener('change', kiemTra);
   byId('dongHop').addEventListener('click', dongHop);
+  byId('dongLich').addEventListener('click', function () { dongLich(); });
+  byId('lich').addEventListener('click', function (e) { if (e.target === this) dongLich(); });
+  [['lichTruoc', -1], ['lichSau', 1]].forEach(function (x) {
+    byId(x[0]).addEventListener('click', function () { LICH_THANG = dauThang(LICH_THANG, x[1]); veLich(); });
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !byId('lich').hidden) dongLich(); });
   document.addEventListener('keydown', function (e) {
     if (byId('hop').hidden) return;
     var truot = byId('hopTruot');
@@ -1308,6 +1526,10 @@ function apDungNgonNgu() {
   });
   byId('hop').setAttribute('aria-label', c('anhPhong'));
   byId('dongHop').setAttribute('aria-label', c('dong'));
+  byId('dongLich').setAttribute('aria-label', c('dong'));
+  byId('lichTruoc').setAttribute('aria-label', c('thangTruoc'));
+  byId('lichSau').setAttribute('aria-label', c('thangSau'));
+  if (LICH_PHONG) veLich();
   var gy = byId('goiYGio');
   gy.textContent = '';
   gy.appendChild(el('span', null, c('goiYCombo', gio(COMBO_TU), gio(COMBO_DEN))));
