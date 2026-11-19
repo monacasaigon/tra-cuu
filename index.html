@@ -331,6 +331,7 @@ var CHU = {
     tomTat2N1D: ' (giá 2 ngày 1 đêm)',
     themDem: '💡 Đặt thêm 1 đêm (trả phòng {0}): cả {1} đêm tính giá ngày thường, tổng {2} — chỉ thêm {3}.',
     nutThemDem: 'Thêm 1 đêm',
+    lechGio: '💡 Chỉ lệch {0}: trống {1} → {2}', nutLechGio: 'Xem giá giờ này',
     tomTatDem: 'nhận {0} {1}, trả {2} {3} ({4}), {5}',
     tomTatGio: '{0} từ {1} đến {2}{3}, {4}',
     quaDemTomTat: ' (qua đêm {0} tiếng)',
@@ -422,6 +423,7 @@ var CHU = {
     tomTat2N1D: ' (2 days 1 night rate)',
     themDem: '💡 Add 1 more night (check-out {0}): all {1} nights at weekday rates, total {2} — only {3} more.',
     nutThemDem: 'Add 1 night',
+    lechGio: '💡 Only {0} off: free {1} → {2}', nutLechGio: 'See this time',
     tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
     tomTatGio: '{0} from {1} to {2}{3}, {4}',
     quaDemTomTat: ' (overnight, {0} hours)',
@@ -1015,16 +1017,68 @@ function khoiGia(ten, kq, tomTat) {
 }
 
 var THU_TU = { trong: 0, motPhan: 1, kin: 2 };
-/* Thứ tự hiện phòng: còn trống trước, rồi trống một phần, rồi kín. Trong cùng nhóm, phòng giảm nhiều % hơn (đúng số %
-   ghi trên thẻ: flash sale, Last-minute, Early-bird…) lên trước; bằng nhau thì theo thứ tự phòng. */
-function thuTuPhong(loai, viTri, gia) {
+/* Thứ tự hiện phòng: còn trống trước, rồi trống một phần, rồi kín. Phòng còn trống: giảm nhiều % hơn (đúng số % ghi trên
+   thẻ: flash sale, Last-minute, Early-bird…) lên trước. Phòng chưa trống trọn khung: phòng gần giờ khách chọn nhất lên trước
+   (gan = doGan: lệch ít phút hơn, rồi trống nhiều giờ hơn). Bằng nhau thì theo thứ tự phòng. */
+function thuTuPhong(loai, viTri, gia, gan) {
   var pt = gia && gia.goc > gia.tong ? Math.round((1 - gia.tong / gia.goc) * 100) : 0;
-  return THU_TU[loai] * 100000 + (100 - pt) * 100 + viTri;
+  return [THU_TU[loai], 100 - pt, gan ? gan.lech : 0, gan ? -gan.tong : 0, viTri];
+}
+function soSanhThuTu(a, b) {
+  for (var i = 0; i < a.thuTu.length; i++) if (a.thuTu[i] !== b.thuTu[i]) return a.thuTu[i] - b.thuTu[i];
+  return 0;
+}
+
+/* Độ gần của một phòng với khung khách chọn [bd, kt): số phút khách phải dời giờ để vừa một khoảng trống đủ dài, hoặc phải
+   rút ngắn nếu chỉ trống được một phần khung (lấy cách lệch ít nhất); tong = số phút trống quanh đó (1 ngày trước, 2 ngày
+   sau, không tính giờ đã qua). khe = khoảng trống đủ dài gần nhất khi cách tốt nhất là dời giờ. */
+function doGan(ten, bd, kt) {
+  var p = chuan(ten), L = kt - bd, tu = Math.max(BAY_GIO, bd - 1440), den = kt + 2880, con = tu, trong = [];
+  LICH.filter(function (b) { return b.phong === p && b.kt > tu && b.bd < den; })
+    .sort(function (a, b) { return a.bd - b.bd; })
+    .forEach(function (b) { if (b.bd > con) trong.push([con, b.bd]); con = Math.max(con, b.kt); });
+  if (con < den) trong.push([con, den]);
+  var kq = { lech: 1e9, tong: 0, khe: null };
+  trong.forEach(function (g) {
+    kq.tong += g[1] - g[0];
+    var lech, giao = Math.min(g[1], kt) - Math.max(g[0], bd);
+    if (g[1] - g[0] >= L) lech = Math.max(0, g[0] - bd, kt - g[1]);
+    else if (giao > 0) lech = L - giao;
+    else return;
+    if (lech < kq.lech) { kq.lech = lech; kq.khe = g[1] - g[0] >= L ? g : null; }
+  });
+  return kq;
+}
+
+/* Phòng kín khung đã chọn nhưng chỉ lệch tối đa 3 tiếng: gợi ý giờ tròn gần nhất cùng độ dài còn trống, bấm là xem giá
+   giờ đó. Trả về null nếu không có giờ hợp lệ trên ô chọn giờ (giờ nhận 0–23 cùng ngày, giờ trả trong giới hạn). */
+function goiYLechGio(ten, ngayM, tu, den, gan) {
+  if (!gan.khe || gan.lech > 180) return null;
+  var L = (den - tu) * 60, g = gan.khe, bd = ngayM + tu * 60, a, b;
+  if (g[0] > bd) { a = Math.ceil((g[0] - ngayM) / 60) * 60 + ngayM; b = a + L; if (b > g[1]) return null; }
+  else { b = Math.floor((g[1] - ngayM) / 60) * 60 + ngayM; a = b - L; if (a < g[0]) return null; }
+  var tu2 = (a - ngayM) / 60, den2 = (b - ngayM) / 60;
+  if (tu2 < 0 || tu2 > 23 || den2 > denToiDa(tu2) || a + 60 <= BAY_GIO || trangThai(ten, a, b) !== 'trong') return null;
+  var hop = el('div', 'themDem'), nut = el('button', null, c('nutLechGio'));
+  hop.appendChild(el('span', null, c('lechGio', c('tieng', Math.abs(tu2 - tu)), gio(tu2), moc(den2))));
+  nut.type = 'button';
+  nut.addEventListener('click', function () {
+    KHACH_SUA = true;
+    byId('tuGio').value = String(tu2);
+    dsGioDen(false);
+    byId('denGio').value = String(den2);
+    giaiThichGio();
+    kiemTra();
+    var the = Array.from(byId('ketQua').querySelectorAll('.phong')).filter(function (o) { return o.dataset.phong === ten; })[0];
+    (the || byId('ketQua')).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  hop.appendChild(nut);
+  return hop;
 }
 
 /* Phòng không đủ chỗ cho số khách đã chọn: hiện mờ ở cuối danh sách, không báo giá. */
 function khongVua(ten, viTri) {
-  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten)), true), thuTu: 300000 + viTri };
+  return { o: thePhong(ten, 'kin', c('toiDaKhach', sucChua(ten)), true), thuTu: [9, 0, 0, 0, viTri] };
 }
 
 /* ------------------------- Lịch trống của một phòng -------------------------
@@ -1206,7 +1260,7 @@ function hienKetQua(ds, soTrong, moTa) {
   var tom = el('p', 'tom', soTrong === n ? c('caPhong', n) : soTrong === 0 ? c('khongTrong') : c('soTrong', soTrong, n));
   tom.appendChild(el('small', null, moTa));
   kq.appendChild(tom);
-  ds.sort(function (a, b) { return a.thuTu - b.thuTu; }).forEach(function (x) { kq.appendChild(x.o); });
+  ds.sort(soSanhThuTu).forEach(function (x) { kq.appendChild(x.o); });
 }
 
 function ghiChuGia() {
@@ -1243,7 +1297,7 @@ function kiemTraDem() {
     if (gia && gia.fs.length) danhDauFlash(o);
     var them = gia && goiYThemDem(ten, nhan, tra, soDem, soKhach, gia);
     if (them) o.noiDung.appendChild(them);
-    return { o: o, thuTu: thuTuPhong(loai, viTri, gia) };
+    return { o: o, thuTu: thuTuPhong(loai, viTri, gia, loai === 'trong' ? null : doGan(ten, bd, kt)) };
   });
   hienKetQua(ds, soTrong, c('tomDem', gio(D.gioNhan), ngay(nhan), gio(D.gioTra), ngay(tra), c('dem', soDem), c('khach', soKhach)));
   ghiChuGia();
@@ -1279,13 +1333,18 @@ function kiemTraGio() {
     });
     o.noiDung.appendChild(thanh);
     o.noiDung.appendChild(moc);
-    var gia = loai === 'kin' ? null : giaGio(ten, ngayM, tu, den, soKhach);
+    var gia = loai === 'kin' ? null : giaGio(ten, ngayM, tu, den, soKhach), gan = null;
     if (gia) {
       var goi = gia.kieu === 'quaDem' ? c('quaDemTomTat', gia.tra - tu) : gia.kieu === '2n1d' ? c('tomTat2N1D') : '';
       o.noiDung.appendChild(khoiGia(ten, gia, c('tomTatGio', ngay(ngayM), gio(tu), mocNgay(gia.tra), goi, c('khach', soKhach))));
       if (gia.fs.length) danhDauFlash(o);
     }
-    return { o: o, thuTu: thuTuPhong(loai, viTri, gia) };
+    if (loai === 'kin') {
+      gan = doGan(ten, bd, kt);
+      var lech = goiYLechGio(ten, ngayM, tu, den, gan);
+      if (lech) o.noiDung.appendChild(lech);
+    }
+    return { o: o, thuTu: thuTuPhong(loai, viTri, gia, gan) };
   });
   hienKetQua(ds, soTrong, (quaDem ? c('quaDemTieng', ra - tu) : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + mocNgay(ra) + ' · ' + c('khach', soKhach));
   var cg = el('div', 'chuGiai');
