@@ -114,6 +114,13 @@
   .luot .nut { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
   .nutLon { width: 100%; border: 0; border-radius: 10px; padding: 13px; background: var(--dau); color: #fff; font-weight: 700; margin-top: 6px; font-size: 15px; }
   .nutLon.phu2 { background: var(--the); color: var(--dau); border: 2px solid var(--dau); }
+  .nutLon.chinhNgay { margin: 0 0 12px; background: var(--mp); }
+
+  /* Chỉnh giờ kín trong một ngày */
+  .khungKin { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 8px; }
+  .khungKin label { flex: 1 1 0; min-width: 0; }
+  .khungKin .nutNho { height: 44px; justify-content: center; }
+  .thanh i.kinXem { background: var(--mp); }
 
   /* Form khoá / sửa */
   form .hang { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
@@ -454,6 +461,8 @@ function moNgay(p, ngay) {
     fs.addEventListener('click', moFlash);
     box.appendChild(fs);
   });
+  /* Chỉnh đúng giờ kín của riêng ngày này, không phụ thuộc lệnh nào (lệnh kéo dài nhiều ngày cũng chỉ đổi phần trong ngày). */
+  if (ngay >= hn) box.appendChild(nut('✎ Chỉnh giờ kín trong ngày này', 'nutLon chinhNgay', function () { moChinhNgay(p, ngay); }));
 
   var daCo = [];
   doan.forEach(function (d) {
@@ -513,6 +522,206 @@ function ghiChuKhoi(k) {
 }
 
 function dongPhu() { byId('phu').hidden = true; NGAY_MO = null; if (DL && CHON !== 'tat') ve(); }
+
+/* ------------------------------ Chỉnh giờ kín trong một ngày ------------------------------
+   Chủ nhà ghi đúng các khung giờ phòng kín trong một ngày. Trang tự cắt mọi dòng phủ qua ngày đó: phần trước và sau ngày giữ
+   nguyên (dòng đồng bộ Airbnb giữ nhãn đồng bộ, lần đồng bộ sau vẫn nhận ra), giờ vẫn kín giữ ở dòng cũ, giờ mới kín thì nối
+   vào dòng liền kề (dòng đồng bộ chỉ nối khi không đổi ngày) hoặc thêm một lệnh tự khoá. Gửi một lần (hanh 'suaNgay'). */
+function gopKhoang(ds) {
+  var kq = [];
+  ds.filter(function (x) { return x[1] > x[0]; }).sort(function (a, b) { return a[0] - b[0]; }).forEach(function (x) {
+    var c = kq[kq.length - 1];
+    if (c && x[0] <= c[1]) c[1] = Math.max(c[1], x[1]); else kq.push([x[0], x[1]]);
+  });
+  return kq;
+}
+function giaoKhoang(a, ds) {
+  return ds.map(function (x) { return [Math.max(a[0], x[0]), Math.min(a[1], x[1])]; }).filter(function (x) { return x[1] > x[0]; });
+}
+function truKhoang(ds, bo) {
+  var kq = [];
+  ds.forEach(function (x) {
+    var con = [[x[0], x[1]]];
+    bo.forEach(function (b) {
+      con = [].concat.apply([], con.map(function (c) { return [[c[0], Math.min(c[1], b[0])], [Math.max(c[0], b[1]), c[1]]]; }))
+        .filter(function (c) { return c[1] > c[0]; });
+    });
+    kq = kq.concat(con);
+  });
+  return kq;
+}
+
+/* kin: các khoảng kín mong muốn trong ngày (phút từ 0h, đã gộp). Trả về { sua: [{ r, moi: {a, b} | null }], them: [{ a, b, ghiChu }] }. */
+function keHoachNgay(p, ngay, kin, ghiMoi) {
+  var d0 = ngay, d1 = ngay + 1440, K = kin.map(function (x) { return [d0 + x[0], d0 + x[1]]; });
+  var ds = DL.dong.filter(function (r) {
+    return r.phong === p && r.bd && r.kt && phut(r.kt) > phut(r.bd) && phut(r.bd) <= d1 && phut(r.kt) >= d0;
+  });
+  /* Phần trong ngày mỗi dòng giữ lại = phần vẫn kín. Dòng nào phải đổi thì bỏ luôn giờ đã có dòng khác giữ (vd ngày chặn
+     trùng lượt khách đặt), ưu tiên giữ ở lượt Airbnb, rồi dòng đồng bộ, rồi tự khoá; dòng không đổi thì để nguyên. */
+  var tt = ds.map(function (r) {
+    var A = phut(r.bd), B = phut(r.kt), trong = [Math.max(A, d0), Math.min(B, d1)];
+    var co = trong[1] > trong[0], giu = co ? giaoKhoang(trong, K) : [];
+    return { r: r, A: A, B: B, giu: giu, doi: co && !(giu.length === 1 && giu[0][0] === trong[0] && giu[0][1] === trong[1]) };
+  });
+  var C = gopKhoang([].concat.apply([], tt.filter(function (x) { return !x.doi; }).map(function (x) { return x.giu; })));
+  tt.filter(function (x) { return x.doi; })
+    .sort(function (x, y) { return (loai(x.r) === 'airbnb' ? 0 : laDongBo(x.r) ? 1 : 2) - (loai(y.r) === 'airbnb' ? 0 : laDongBo(y.r) ? 1 : 2); })
+    .forEach(function (x) { x.giu = truKhoang(x.giu, C); C = gopKhoang(C.concat(x.giu)); });
+  var manh = [];
+  tt.forEach(function (x) {
+    var m = x.giu.slice();
+    if (x.A < d0) m.push([x.A, d0]);
+    if (x.B > d1) m.push([d1, x.B]);
+    gopKhoang(m).forEach(function (k) { manh.push({ r: x.r, a: k[0], b: k[1] }); });
+  });
+  /* Dòng đồng bộ chỉ được nối dài khi ngày nhận/trả không đổi, để đồng bộ Airbnb lần sau vẫn nhận ra dòng. */
+  function noiDuoc(x, a, b) {
+    if (!laDongBo(x.r)) return true;
+    return dauNgay(a) >= dauNgay(phut(x.r.bd)) && dauNgay(b) <= dauNgay(phut(x.r.kt));
+  }
+  var moi = [];
+  truKhoang(K, C).forEach(function (u) {
+    var truoc = manh.filter(function (x) { return x.b === u[0] && noiDuoc(x, x.a, u[1]); })[0];
+    var sau = manh.filter(function (x) { return x.a === u[1] && noiDuoc(x, u[0], x.b); })[0];
+    if (truoc) truoc.b = u[1];
+    else if (sau) sau.a = u[0];
+    else moi.push(u);
+  });
+  var sua = [], them = [];
+  ds.forEach(function (r) {
+    var cua = manh.filter(function (x) { return x.r === r; });
+    if (cua.length === 1 && cua[0].a === phut(r.bd) && cua[0].b === phut(r.kt)) return;   // dòng không đổi
+    sua.push({ r: r, moi: cua[0] || null });
+    cua.slice(1).forEach(function (x) { them.push({ a: x.a, b: x.b, ghiChu: r.ghiChu }); });
+  });
+  moi.forEach(function (u) { them.push({ a: u[0], b: u[1], ghiChu: ghiMoi }); });
+  return { sua: sua, them: them };
+}
+
+function gioMoc(m) { return m >= 1440 ? '24:00' : gioPhut(m); }
+
+function moChinhNgay(p, ngay) {
+  var box = datMau(byId('ngang'), p);
+  var kin = gopKhoang(trongNgay(p, ngay).map(function (d) { return [d.a, d.b]; }));
+  box.textContent = '';
+  var dau = el('div', 'dongX');
+  dau.appendChild(el('h3', null, 'Chỉnh giờ kín trong ngày'));
+  dau.appendChild(nut('← Quay lại', 'nutNho', function () { moNgay(p, ngay); }));
+  box.appendChild(dau);
+  box.appendChild(el('p', 'phuDe', p + ' · ' + ngayDu(ngay)));
+  box.appendChild(el('p', 'ghiChuGop', 'Ghi đúng các khung giờ phòng bị kín trong ngày này. Chỉ đổi trong ngày này: ngày trước và ngày sau giữ nguyên, ' +
+    'lượt và ngày chặn Airbnb vẫn đồng bộ như cũ.'));
+  var d24 = el('div', 'dong24'), thanh = el('div', 'thanh'), mocGio = el('div', 'moc'), tt = el('div', 'conTrong');
+  ['0h', '6h', '12h', '18h', '24h'].forEach(function (s) { mocGio.appendChild(el('span', null, s)); });
+  d24.appendChild(thanh);
+  d24.appendChild(mocGio);
+  box.appendChild(d24);
+  box.appendChild(tt);
+  var f = el('form'), goiY = el('div', 'goiY'), ds = el('div'), loi = el('div', 'loiForm');
+  [['Kín cả ngày', [[0, 1440]]], ['Trống cả ngày', []]].forEach(function (x) {
+    goiY.appendChild(nut(x[0], null, function () { kin = x[1].map(function (k) { return k.slice(); }); veDs(); }));
+  });
+  f.appendChild(goiY);
+  f.appendChild(ds);
+  f.appendChild(nut('+ Thêm khung kín', 'nutNho', function () {
+    var cuoi = kin.length ? kin[kin.length - 1][1] : 840, a = Math.min(cuoi, 1260);
+    kin.push([a, Math.min(a + 180, 1440)]);
+    veDs();
+  }));
+  var ghi = el('label', 'rong');
+  ghi.style.marginTop = '12px';
+  ghi.appendChild(document.createTextNode('Ghi chú cho giờ kín thêm mới (không bắt buộc, chỉ xem nội bộ)'));
+  var oGhi = el('input');
+  oGhi.type = 'text';
+  oGhi.maxLength = 200;
+  oGhi.placeholder = 'vd Khách combo 19h-23h · Chị Lan 09xx';
+  ghi.appendChild(oGhi);
+  f.appendChild(ghi);
+  loi.hidden = true;
+  f.appendChild(loi);
+  var luu = el('button', 'nutLon', 'Lưu giờ ngày này');
+  luu.type = 'submit';
+  f.appendChild(luu);
+  box.appendChild(f);
+
+  function chonGio(gt, tu) {
+    var s = el('select'), moc = [];
+    for (var m = tu ? 0 : 30; m <= (tu ? 1410 : 1440); m += 30) moc.push(m);
+    if (moc.indexOf(gt) < 0) moc.push(gt);
+    moc.sort(function (a, b) { return a - b; }).forEach(function (m) { s.add(new Option(gioMoc(m), m)); });
+    s.value = gt;
+    return s;
+  }
+  function veDs() {
+    ds.textContent = '';
+    if (!kin.length) ds.appendChild(el('p', 'nhoNhe', 'Không có khung kín: phòng trống cả ngày.'));
+    kin.forEach(function (k, i) {
+      var hang = el('div', 'khungKin'), l1 = el('label', null, 'Kín từ'), l2 = el('label', null, 'đến');
+      var s1 = chonGio(k[0], true), s2 = chonGio(k[1], false);
+      s1.addEventListener('change', function () { k[0] = +s1.value; xem(); });
+      s2.addEventListener('change', function () { k[1] = +s2.value; xem(); });
+      l1.appendChild(s1);
+      l2.appendChild(s2);
+      hang.appendChild(l1);
+      hang.appendChild(l2);
+      var bo = nut('✕', 'nutNho', function () { kin.splice(i, 1); veDs(); });
+      bo.setAttribute('aria-label', 'Bỏ khung này');
+      hang.appendChild(bo);
+      ds.appendChild(hang);
+    });
+    xem();
+  }
+  function xem() {
+    var sai = kin.some(function (k) { return k[1] <= k[0]; }), gop = gopKhoang(kin);
+    loi.hidden = !sai;
+    loi.textContent = sai ? 'Giờ kết thúc của mỗi khung phải sau giờ bắt đầu.' : '';
+    luu.disabled = sai;
+    thanh.textContent = '';
+    gop.forEach(function (k) {
+      var i = el('i', 'kinXem');
+      i.style.left = k[0] / 14.4 + '%';
+      i.style.width = (k[1] - k[0]) / 14.4 + '%';
+      thanh.appendChild(i);
+    });
+    var trong = truKhoang([[0, 1440]], gop);
+    tt.className = 'conTrong' + (trong.length ? '' : ' het');
+    tt.textContent = !gop.length ? '✓ Trống cả ngày' : !trong.length ? 'Kín cả ngày' : 'Trống ' + trong.map(moTaKhoang).join(', ');
+  }
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (kin.some(function (k) { return k[1] <= k[0]; })) return;
+    var kh = keHoachNgay(p, ngay, gopKhoang(kin), oGhi.value.trim());
+    if (!kh.sua.length && !kh.them.length) { bao('Giờ ngày này không đổi.'); moNgay(p, ngay); return; }
+    luuNgay(p, ngay, kh);
+  });
+  veDs();
+  byId('phu').hidden = false;
+}
+
+function dongMoi(p, a, b, ghiChu) {
+  return { dong: 0, phong: p, ngayNhan: iso(dauNgay(a)), gioNhan: gioPhut(a), ngayTra: iso(dauNgay(b)), gioTra: gioPhut(b), tt: 'Đã đặt',
+    ghiChu: ghiChu, bd: iso(dauNgay(a)) + 'T' + gioPhut(a), kt: iso(dauNgay(b)) + 'T' + gioPhut(b), chuKy: '', dang: true };
+}
+function luotGui(r) { return { phong: r.phong, ngayNhan: r.ngayNhan, gioNhan: r.gioNhan, ngayTra: r.ngayTra, gioTra: r.gioTra, ghiChu: r.ghiChu }; }
+
+/* Lưu: đổi ngay trên màn hình, gửi Sheet ở nền. Số dòng / chữ ký của dòng cũ đọc lúc tới lượt gửi (dòng vừa thêm đã có số thật). */
+function luuNgay(p, ngay, kh) {
+  var suaMoi = kh.sua.map(function (s) { return s.moi ? dongMoi(p, s.moi.a, s.moi.b, s.r.ghiChu) : null; });
+  var themMoi = kh.them.map(function (t) { return dongMoi(p, t.a, t.b, t.ghiChu); });
+  var cu = kh.sua.map(function (s) { return s.r; });
+  DL.dong = DL.dong.filter(function (x) { return cu.indexOf(x) < 0; }).concat(suaMoi.filter(Boolean), themMoi);
+  doiDuLieu();
+  moNgay(p, ngay);
+  xepHang(function () {
+    return { hanh: 'suaNgay',
+      sua: kh.sua.map(function (s, i) { return { dong: s.r.dong, chuKy: s.r.chuKy, luot: suaMoi[i] ? luotGui(suaMoi[i]) : null }; }),
+      them: themMoi.map(luotGui) };
+  }, function (kq) {
+    suaMoi.forEach(function (r, i) { if (r) { r.dong = kq.sua[i].dong; r.chuKy = kq.sua[i].chuKy; r.dang = false; } });
+    themMoi.forEach(function (r, i) { r.dong = kq.them[i].dong; r.chuKy = kq.them[i].chuKy; r.dang = false; });
+  });
+}
 
 /* ------------------------------ Form khoá / sửa ------------------------------ */
 function khoiCon(k, ds) {
