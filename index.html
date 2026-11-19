@@ -331,7 +331,7 @@ var CHU = {
     tomTat2N1D: ' (giá 2 ngày 1 đêm)',
     themDem: '💡 Đặt thêm 1 đêm (trả phòng {0}): cả {1} đêm tính giá ngày thường, tổng {2} — chỉ thêm {3}.',
     nutThemDem: 'Thêm 1 đêm',
-    lechGio: '💡 Chỉ lệch {0}: trống {1} → {2}', nutLechGio: 'Xem giá giờ này',
+    lechGio: '💡 Chỉ lệch {0}', nutLechGio: 'Check-in {0}',
     tomTatDem: 'nhận {0} {1}, trả {2} {3} ({4}), {5}',
     tomTatGio: '{0} từ {1} đến {2}{3}, {4}',
     quaDemTomTat: ' (qua đêm {0} tiếng)',
@@ -423,7 +423,7 @@ var CHU = {
     tomTat2N1D: ' (2 days 1 night rate)',
     themDem: '💡 Add 1 more night (check-out {0}): all {1} nights at weekday rates, total {2} — only {3} more.',
     nutThemDem: 'Add 1 night',
-    lechGio: '💡 Only {0} off: free {1} → {2}', nutLechGio: 'See this time',
+    lechGio: '💡 Only {0} off', nutLechGio: 'Check in {0}',
     tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
     tomTatGio: '{0} from {1} to {2}{3}, {4}',
     quaDemTomTat: ' (overnight, {0} hours)',
@@ -434,8 +434,11 @@ var CHU = {
     lichCgTrong: 'Free hours', lichCgKin: 'Booked', thangTruoc: 'Previous month', thangSau: 'Next month',
   },
 };
+/* Thiếu chữ ở ngôn ngữ đang chọn thì lấy bản tiếng Việt, vẫn thiếu thì để trống (không bao giờ hiện "undefined"). */
 function c(k) {
   var v = CHU[NN][k], a = arguments;
+  if (v === undefined) v = CHU.vi[k];
+  if (v === undefined) return '';
   if (typeof v === 'function') return v.apply(null, [].slice.call(a, 1));
   return String(v).replace(/\{(\d)\}/g, function (_, i) { return a[+i + 1]; });
 }
@@ -1050,8 +1053,8 @@ function doGan(ten, bd, kt) {
   return kq;
 }
 
-/* Phòng kín khung đã chọn nhưng chỉ lệch tối đa 3 tiếng: gợi ý giờ tròn gần nhất cùng độ dài còn trống, bấm là xem giá
-   giờ đó. Trả về null nếu không có giờ hợp lệ trên ô chọn giờ (giờ nhận 0–23 cùng ngày, giờ trả trong giới hạn). */
+/* Phòng kín khung đã chọn nhưng chỉ lệch tối đa 3 tiếng: nút "Check-in 23h" (giờ tròn gần nhất còn trống, giữ nguyên số
+   giờ khách chọn), bấm là xem giá giờ đó. Trả về null nếu không có giờ hợp lệ trên ô chọn giờ (giờ nhận 0–23 cùng ngày, giờ trả trong giới hạn). */
 function goiYLechGio(ten, ngayM, tu, den, gan) {
   if (!gan.khe || gan.lech > 180) return null;
   var L = (den - tu) * 60, g = gan.khe, bd = ngayM + tu * 60, a, b;
@@ -1059,8 +1062,10 @@ function goiYLechGio(ten, ngayM, tu, den, gan) {
   else { b = Math.floor((g[1] - ngayM) / 60) * 60 + ngayM; a = b - L; if (a < g[0]) return null; }
   var tu2 = (a - ngayM) / 60, den2 = (b - ngayM) / 60;
   if (tu2 < 0 || tu2 > 23 || den2 > denToiDa(tu2) || a + 60 <= BAY_GIO || trangThai(ten, a, b) !== 'trong') return null;
-  var hop = el('div', 'themDem'), nut = el('button', null, c('nutLechGio'));
-  hop.appendChild(el('span', null, c('lechGio', c('tieng', Math.abs(tu2 - tu)), gio(tu2), moc(den2))));
+  var gioNhan = NN === 'en' ? (tu2 % 12 || 12) + (tu2 < 12 ? 'AM' : 'PM') : tu2 + 'h';
+  var hop = el('div', 'themDem'), nut = el('button', null, c('nutLechGio', gioNhan));
+  hop.appendChild(el('span', null, c('lechGio', c('tieng', Math.abs(tu2 - tu)))));
+  nut.title = gio(tu2) + ' → ' + moc(den2);
   nut.type = 'button';
   nut.addEventListener('click', function () {
     KHACH_SUA = true;
