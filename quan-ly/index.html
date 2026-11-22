@@ -170,7 +170,7 @@
   form .hang { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
   form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--phu); }
   form input, form select { font: inherit; color: var(--chu); border: 1px solid #9CA3AF; border-radius: 8px; padding: 10px; background: var(--the); width: 100%; }
-  form input[readonly], form select:disabled { background: #F3F4F6; color: var(--phu); }
+  form input[readonly], form input:disabled, form select:disabled { background: #F3F4F6; color: var(--phu); }
   form .rong { grid-column: 1 / -1; }
   .goiY { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 10px; }
   .goiY button { border: 1px dashed #9CA3AF; background: var(--the); border-radius: 999px; padding: 5px 10px; font-size: 13px; }
@@ -318,7 +318,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-22e';
+var BAN_TRANG = '2026-11-22f';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -1297,7 +1297,8 @@ function laKhoaTron(r) { return !coKhach(r) && loai(r) === 'tu' && !docGhi(r.ghi
 
 /* o = { r }: sửa giờ + thông tin của đúng một dòng, không kéo theo dòng liền kề. o = { phong, bd, kt }: booking mới.
    o.nhap (kèm o.bd, o.kt): bản đang nhập dở được điền lại khi lưu lỗi.
-   - Dòng Airbnb đồng bộ: chỉ đổi giờ, ngày đi theo Airbnb.
+   - Dòng Airbnb đồng bộ: sửa được cả ngày và giờ (khách tới sớm, trả sớm, trả muộn). Trong khoảng ngày khách đặt thì đồng bộ
+     vẫn nhận ra dòng; vượt ra ngoài thì cảnh báo, vì khách huỷ / đổi trên Airbnb sẽ phải sửa tay.
    - Khoá trơn: giờ mới thay phần khoá của các đêm đó, đêm ngoài khoảng vẫn khoá. Ghi tên khách thì thành booking riêng. */
 function moBooking(o) {
   var cu = o.r || null, t = cu ? docGhi(cu.ghiChu) : (o.nhap || {}), dien = o.nhap || t;
@@ -1370,6 +1371,14 @@ function moBooking(o) {
   var vao = o.bd != null ? o.bd : bd0, ra = o.kt != null ? o.kt : kt0;
   function laCu(r) { return !!cu && (r === cu || (r.dong === cu.dong && r.chuKy === cu.chuKy)); }
   function doiGio() { return !cu || vao !== bd0 || ra !== kt0; }
+  /* Đồng bộ chỉ nhận ra dòng khi ngày nhận nằm trong [nhận, trả) và ngày kín không quá ngày trả trên Airbnb. Trang chỉ biết
+     ngày đang ghi; dòng đã rút về trong một ngày thì khách vẫn đặt ít nhất tới hôm sau. */
+  function ngoaiNgayAirbnb() {
+    var a0 = dauNgay(bd0), b0 = dauNgay(kt0), a = dauNgay(vao), b = dauNgay(ra), sang0h = bd0 === a0;
+    if (sang0h && vao !== bd0) return true;   // mảnh buổi sáng sau khi chỉnh theo ngày
+    if (!sang0h && b0 === a0) b0 = a0 + 1440;
+    return a < a0 || b > b0 || (!sang0h && a >= b0);
+  }
   function napGio(s, gt) {
     var ds = [];
     for (var m = 0; m < 1440; m += 30) ds.push(m);
@@ -1441,6 +1450,10 @@ function moBooking(o) {
       return;
     }
     /* Giờ được trả lại: nói rõ phần nào mở bán, phần nào vẫn kín vì dòng khác. */
+    if (theoAirbnb && ngoaiNgayAirbnb()) {
+      kq.appendChild(el('div', 'canhBao', '⚠ Giờ này có thể vượt ngoài ngày khách đặt trên Airbnb. Vẫn lưu được, nhưng nếu khách huỷ hoặc đổi ngày ' +
+        'trên Airbnb thì bạn cần tự sửa booking này trên web.'));
+    }
     var bo = truKhoang([[bd0, kt0]], [[vao, ra]].concat(giu));
     var conKin = DL.dong.filter(function (r) {
       return r.phong === phong && r.bd && r.kt && !laCu(r) && bo.some(function (x) { return phut(r.bd) < x[1] && phut(r.kt) > x[0]; });
@@ -1489,12 +1502,9 @@ function moBooking(o) {
     }));
   });
   if (theoAirbnb) {
-    mau.hidden = e.themDem.hidden = e.botDem.hidden = true;
-    e.ngayVao.disabled = true;
-    e.ngayRa.disabled = kt0 - dauNgay(kt0) >= don;   // kín đến 0h: check-out rơi vào ngày trước, cho chọn lại ngày
-    e.gioVao.disabled = bd0 === dauNgay(bd0);   // mảnh bắt đầu 00:00: đổi giờ đầu thì đồng bộ không còn nhận ra
+    mau.hidden = true;
     var goiYAirbnb = f.querySelector('.ngayAirbnb');
-    goiYAirbnb.textContent = 'Ngày đi theo Airbnb (tự đổi khi khách đổi trên Airbnb). Ở đây chỉ chỉnh giờ.';
+    goiYAirbnb.textContent = 'Sửa được cả ngày và giờ, vd khách tới sớm, trả sớm hoặc trả muộn. Chỉ đổi trên web này, không đổi gì trên Airbnb.';
     goiYAirbnb.hidden = false;
   }
   veGio();
@@ -1523,10 +1533,6 @@ function moBooking(o) {
       /* Đã có khách thì là booking riêng: mở chặn trên Airbnb không xoá mất khách. Chưa có tên thì vẫn theo ngày đã chặn. */
       if (coTen) m.nhan = '';
       else if (dauNgay(vao) < dauNgay(bd0) || dauNgay(ra) > dauNgay(kt0)) return hienLoi('Dời ra ngoài ngày đã chặn thì ghi tên khách giúp mình.');
-    }
-    if (theoAirbnb && dauNgay(ra) !== dauNgay(kt0)) {
-      return hienLoi('Ngày trả theo Airbnb là ' + ngayNgan(dauNgay(kt0)) + ': chọn check-out sao cho giờ dọn xong trong ngày đó' +
-        (don ? ' (muộn nhất ' + gioPhut(1410 - don) + ').' : '.'));
     }
     if (kh.khac.length && !dongYTrung) return hienLoi('Phòng đang trùng giờ. Đổi phòng/giờ, hoặc tick "vẫn lưu".');
     var ghi = taoGhi(m);
