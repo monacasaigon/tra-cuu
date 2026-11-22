@@ -137,6 +137,9 @@ try {
   .ghiChu { margin: 14px 4px 0; font-size: 12px; color: var(--phu); }
   .themDem { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--vang); color: var(--vangChu); font-size: 13px; line-height: 1.4; }
   .themDem span { flex: 1; }
+  .themDem.trongNgay { flex-wrap: wrap; }
+  .themDem.trongNgay span { flex: 1 1 210px; }
+  .themDem.trongNgay b { display: block; margin-top: 2px; font-size: 17px; }
   .themDem button { flex: none; padding: 8px 12px; border: 0; border-radius: 9px; background: var(--vangChu); color: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 
   /* Lịch trống của một phòng: nút trên ảnh phòng mở lịch 1 tháng, mỗi ngày một thanh giờ trống 0h → 24h. */
@@ -332,6 +335,8 @@ var CHU = {
     themDem: '💡 Đặt thêm 1 đêm (trả phòng {0}): cả {1} đêm tính giá ngày thường, tổng {2} — chỉ thêm {3}.',
     nutThemDem: 'Thêm 1 đêm',
     lechGio: '💡 Chỉ lệch {0}', nutLechGio: 'Check-in {0}',
+    trongNgay: '💡 Phòng vẫn trống trong ngày, chuyển sang đặt từ {0} đến {1}', nutTrongNgay: 'Đặt {0} → {1}',
+    giaiComboToi: '👉 Phòng đã kín đêm đó được tính giá combo giờ dù trả sau {0}. Phòng còn trống cả đêm tính gói Qua đêm, ở được đến {1}.',
     tomTatDem: 'nhận {0} {1}, trả {2} {3} ({4}), {5}',
     tomTatGio: '{0} từ {1} đến {2}{3}, {4}',
     quaDemTomTat: ' (qua đêm {0} tiếng)',
@@ -424,6 +429,8 @@ var CHU = {
     themDem: '💡 Add 1 more night (check-out {0}): all {1} nights at weekday rates, total {2} — only {3} more.',
     nutThemDem: 'Add 1 night',
     lechGio: '💡 Only {0} off', nutLechGio: 'Check in {0}',
+    trongNgay: '💡 Still free during the day: switch to {0} – {1}', nutTrongNgay: 'Book {0} → {1}',
+    giaiComboToi: '👉 Rooms already booked that night are charged hourly, even after {0}. Rooms free all night count as Overnight: stay until {1}.',
     tomTatDem: 'check-in after {0} {1}, check-out before {2} {3} ({4}), {5}',
     tomTatGio: '{0} from {1} to {2}{3}, {4}',
     quaDemTomTat: ' (overnight, {0} hours)',
@@ -503,6 +510,15 @@ function trangThai(phong, bd, kt) {
   return LICH.some(function (b) { return b.phong === p && b.bd < kt - 1 && b.kt > bd + 1; }) ? 'dat' : 'trong';
 }
 
+/* Combo tối: đêm đó phòng đã bán (có lượt kín trong 23:00 → 06:00 hôm sau) thì không bán được gói Qua đêm nữa, nên khung
+   nhận từ 09:00, trả sau 21:00 tới 24:00 vẫn tính giá combo giờ. Khung này phải chừa 1 tiếng dọn trước khi phòng kín lại. */
+function demDaBan(ten, ngayM) { return trangThai(ten, ngayM + 23 * 60, ngayM + 30 * 60) !== 'trong'; }
+function laComboToi(ten, ngayM, tu, den) { return tu >= COMBO_TU && den > COMBO_DEN && den <= 24 && demDaBan(ten, ngayM); }
+function phongTrongGio(ten, ngayM, tu, den) {
+  var don = laComboToi(ten, ngayM, tu, den) ? GIO_DON : 0;
+  return trangThai(ten, ngayM + tu * 60, ngayM + den * 60 + don) === 'trong';
+}
+
 /* Gói 2 ngày 1 đêm: mỗi đêm theo giá ngày thường/cuối tuần, rồi trừ ưu đãi trong tab "Ưu đãi & lễ".
    Ở đủ số đêm thì cuối tuần tính giá ngày thường, riêng đêm lễ vẫn giữ giá lễ.
    Ưu đãi ở dài chỉ lấy mức cao nhất; Early-bird và Last-minute cộng thêm. */
@@ -569,6 +585,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
 /* Combo giờ ban ngày: nhận từ 09:00, trả trước 21:00. Dưới 3 giờ tính Combo 3 giờ; dài hơn thì trang so Combo 3 giờ,
    Combo 6 giờ (cộng giờ thêm) và "Combo 13 tiếng" (giá gói Qua đêm), lấy giá rẻ nhất. Cuối tuần theo ngày (T7, CN),
    kể cả Combo 13 tiếng: Chủ nhật ban ngày làm tròn lên thì lấy giá qua đêm cuối tuần, thứ 6 ban ngày lấy giá ngày thường.
+   Ngoại lệ combo tối (xem laComboToi): đêm đó đã bán thì trả tới 24:00 vẫn là combo giờ, quá 13 tiếng thì cộng giờ thêm.
    Gói Qua đêm khi trả sau 21:00, hoặc nhận từ 22:00 đến trước 09:00 sáng: ở 13 tiếng kể từ giờ nhận, tối đa đến
    13:00. Ở quá giờ trả thì cộng giờ thêm, hoặc tính giá 2 ngày 1 đêm (nhận trước 14:00 thì cộng giờ) nếu rẻ hơn.
    Cuối tuần theo đêm (đêm T6, T7): qua đêm thứ 6 giá cuối tuần, qua đêm Chủ nhật giá ngày thường; nhận lúc rạng sáng
@@ -579,7 +596,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
    12 tiếng, combo giờ ban ngày không quá 4 tiếng (tính theo giá 2N1Đ thì đêm nay và đêm mai như tab 2 ngày 1 đêm);
    chỉ giảm giá gói (không giảm giờ thêm).
    Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
-var COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
+var GIO_DON = 60, COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
 function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
 /* Giờ trả của gói Qua đêm: 13 tiếng sau giờ nhận, tối đa đến 13:00 (chỉ chạm khi nhận lúc rạng sáng). */
 function gioTraQuaDem(tu) { return Math.min(tu + 13, QUA_DEM_MUON + (tu < COMBO_TU ? 0 : 24)); }
@@ -590,7 +607,7 @@ function denToiDa(tu) { return tu < COMBO_TU ? QUA_DEM_MUON : (D ? D.gioTra : GI
 function giaGio(ten, ngayM, tu, den, soKhach) {
   var g = D.gia[ten], u = D.uuDai;
   if (!g || !g.thuong[0]) return null;
-  var quaDem = laQuaDem(tu, den), soGio = den - tu, ra = gioTraQuaDem(tu);
+  var quaDem = laQuaDem(tu, den) && !laComboToi(ten, ngayM, tu, den), soGio = den - tu, ra = gioTraQuaDem(tu);
   var ngayXet = quaDem && tu < COMBO_TU ? ngayM - 1440 : ngayM, ct = quaDem ? cuoiTuanDem(ngayXet) : cuoiTuanCombo(ngayXet);
   var b = ct ? g.cuoiTuan : g.thuong, x = b[4] || 0, ds, thuong;
   /* Mỗi cách tính ghi lại giá gói và bảng giá đã dùng (laCT: cuối tuần/lễ) để nhãn và Last-minute tính đúng. */
@@ -610,7 +627,7 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
     thuong = ds[0];
   } else {
     /* Combo 13 tiếng ban ngày lấy giá qua đêm theo ngày (Chủ nhật ban ngày: cuối tuần; thứ 6 ban ngày: ngày thường). */
-    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), cach(2, 0, den)];
+    ds = [cach(0, Math.max(0, soGio - 3), den), cach(1, Math.max(0, soGio - 6), den), cach(2, Math.max(0, soGio - 13), den)];
     thuong = soGio >= 6 ? ds[1] : ds[0];
   }
   ds = ds.filter(Boolean);
@@ -674,7 +691,7 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
   var congGio = tot.them ? c('congGio', tot.them) : '';
   var moTa = kieu === '2n1d' ? c('moTa2N1D', moc(tu), moc(tot.tra))
     : kieu === 'quaDem' ? (som ? c('moTaQuaDemSom', congGio, moc(tu), moc(tot.tra)) : c('moTaQuaDem', tot.tra - tu, congGio, moc(tu), moc(tot.tra)))
-    : c('soGio', soGio) + ' · ' + (tot.goi === 2 ? c('tron13') : CHU[NN].goi[tot.goi] + congGio);
+    : c('soGio', soGio) + ' · ' + (tot.goi === 2 ? c('tron13') : CHU[NN].goi[tot.goi]) + congGio;
   return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: moTa + ' · ' + c('khach', soKhach), tra: tot.tra, kieu: kieu,
     fs: tot.fs ? [tot.fs.f] : [] };
 }
@@ -1053,6 +1070,45 @@ function doGan(ten, bd, kt) {
   return kq;
 }
 
+/* Bấm gợi ý: đổi ô giờ rồi xem lại giá, cuộn tới đúng thẻ phòng đó. */
+function doiKhungGio(ten, tu, den) {
+  KHACH_SUA = true;
+  byId('tuGio').value = String(tu);
+  dsGioDen(false);
+  byId('denGio').value = String(den);
+  giaiThichGio();
+  kiemTra();
+  var the = Array.from(byId('ketQua').querySelectorAll('.phong')).filter(function (o) { return o.dataset.phong === ten; })[0];
+  (the || byId('ketQua')).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* Phòng kín khung đã chọn nhưng còn trống trong ngày: gợi ý trọn khoảng trống dài nhất (từ 3 tiếng), chừa 1 tiếng dọn trước
+   khi phòng kín lại, kèm giá. Đêm đó đã bán thì tới 24:00 (giá combo tối), chưa bán thì tới 21:00 như combo thường. */
+function goiYTrongNgay(ten, ngayM, tu, den, soKhach) {
+  var p = chuan(ten), con = Math.max(ngayM, HOM_NAY + gioDatSomNhat() * 60), cuoi = ngayM + 2880, ds = [], tot = null;
+  LICH.filter(function (b) { return b.phong === p && b.kt > con && b.bd < cuoi; })
+    .sort(function (a, b) { return a.bd - b.bd; })
+    .forEach(function (b) { if (b.bd > con) ds.push([con, b.bd]); con = Math.max(con, b.kt); });
+  if (con < cuoi) ds.push([con, cuoi]);
+  var tran = demDaBan(ten, ngayM) ? 24 : COMBO_DEN;
+  ds.forEach(function (g) {
+    var a = Math.max(COMBO_TU, Math.ceil((g[0] - ngayM) / 60)), b = Math.min(tran, Math.floor((g[1] - GIO_DON - ngayM) / 60));
+    if (b - a < 3) return;
+    if (!tot || b - a > tot[1] - tot[0] || (b - a === tot[1] - tot[0] && Math.abs(a - tu) < Math.abs(tot[0] - tu))) tot = [a, b];
+  });
+  if (!tot || (tot[0] === tu && tot[1] === den) || !phongTrongGio(ten, ngayM, tot[0], tot[1])) return null;
+  function gon(h) { return h === 24 && NN !== 'en' ? '24h' : gioGon(h * 60); }
+  var tuChu = gon(tot[0]), denChu = gon(tot[1]), gia = giaGio(ten, ngayM, tot[0], tot[1], soKhach);
+  var hop = el('div', 'themDem trongNgay'), chu = el('span', null, c('trongNgay', tuChu, denChu));
+  if (gia) chu.appendChild(el('b', null, tien(gia.tong)));
+  hop.appendChild(chu);
+  var nut = el('button', null, c('nutTrongNgay', tuChu, denChu));
+  nut.type = 'button';
+  nut.addEventListener('click', function () { doiKhungGio(ten, tot[0], tot[1]); });
+  hop.appendChild(nut);
+  return hop;
+}
+
 /* Phòng kín khung đã chọn nhưng chỉ lệch tối đa 3 tiếng: nút "Check-in 23h" (giờ tròn gần nhất còn trống, giữ nguyên số
    giờ khách chọn), bấm là xem giá giờ đó. Trả về null nếu không có giờ hợp lệ trên ô chọn giờ (giờ nhận 0–23 cùng ngày, giờ trả trong giới hạn). */
 function goiYLechGio(ten, ngayM, tu, den, gan) {
@@ -1061,22 +1117,13 @@ function goiYLechGio(ten, ngayM, tu, den, gan) {
   if (g[0] > bd) { a = Math.ceil((g[0] - ngayM) / 60) * 60 + ngayM; b = a + L; if (b > g[1]) return null; }
   else { b = Math.floor((g[1] - ngayM) / 60) * 60 + ngayM; a = b - L; if (a < g[0]) return null; }
   var tu2 = (a - ngayM) / 60, den2 = (b - ngayM) / 60;
-  if (tu2 < 0 || tu2 > 23 || den2 > denToiDa(tu2) || a + 60 <= BAY_GIO || trangThai(ten, a, b) !== 'trong') return null;
+  if (tu2 < 0 || tu2 > 23 || den2 > denToiDa(tu2) || a + 60 <= BAY_GIO || !phongTrongGio(ten, ngayM, tu2, den2)) return null;
   var gioNhan = NN === 'en' ? (tu2 % 12 || 12) + (tu2 < 12 ? 'AM' : 'PM') : tu2 + 'h';
   var hop = el('div', 'themDem'), nut = el('button', null, c('nutLechGio', gioNhan));
   hop.appendChild(el('span', null, c('lechGio', c('tieng', Math.abs(tu2 - tu)))));
   nut.title = gio(tu2) + ' → ' + moc(den2);
   nut.type = 'button';
-  nut.addEventListener('click', function () {
-    KHACH_SUA = true;
-    byId('tuGio').value = String(tu2);
-    dsGioDen(false);
-    byId('denGio').value = String(den2);
-    giaiThichGio();
-    kiemTra();
-    var the = Array.from(byId('ketQua').querySelectorAll('.phong')).filter(function (o) { return o.dataset.phong === ten; })[0];
-    (the || byId('ketQua')).scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  nut.addEventListener('click', function () { doiKhungGio(ten, tu2, den2); });
   hop.appendChild(nut);
   return hop;
 }
@@ -1192,7 +1239,7 @@ function veLich() {
    Khách tự chỉnh lại giờ sau khi thấy giá. */
 function khungTuongTrung(ten, m) {
   var som = m === HOM_NAY ? gioDatSomNhat() : 0, tu = +byId('tuGio').value, den = +byId('denGio').value, h;
-  function trong(a, b) { return trangThai(ten, m + a * 60, m + b * 60) === 'trong'; }
+  function trong(a, b) { return phongTrongGio(ten, m, a, b); }
   if (tu >= som && den > tu && den <= denToiDa(tu) && trong(tu, den)) return [tu, den];
   for (h = Math.max(COMBO_TU, som); h + 3 <= COMBO_DEN; h++) if (trong(h, h + 3)) return [h, h + 3];
   if (som <= QUA_DEM_TU && trong(QUA_DEM_TU, gioTraQuaDem(QUA_DEM_TU))) return [QUA_DEM_TU, gioTraQuaDem(QUA_DEM_TU)];
@@ -1318,11 +1365,15 @@ function kiemTraGio() {
   if (kt <= BAY_GIO) return c('loiKhungQua');
   if (bd + 60 <= BAY_GIO) return c('loiGioNhanQua', gio(Math.floor((BAY_GIO - HOM_NAY) / 60)));
   function mocNgay(h) { return h >= 24 ? gio(h - 24) + ' ' + ngay(ngayM + 1440) : gio(h); }
+  var coComboToi = false;
+  giaiThichGio();
   var ds = D.phong.map(function (ten, viTri) {
     if (soKhach > sucChua(ten)) return khongVua(ten, viTri);
-    var tong = trangThai(ten, bd, kt);
-    var loai = tong === 'trong' ? 'trong' : 'kin';
-    if (loai === 'trong') soTrong++;
+    var loai = phongTrongGio(ten, ngayM, tu, den) ? 'trong' : 'kin';
+    if (loai === 'trong') {
+      soTrong++;
+      if (laComboToi(ten, ngayM, tu, den)) coComboToi = true;
+    }
     var o = thePhong(ten, loai, { trong: c('conTrong'), kin: c('daKin') }[loai]);
     var thanh = el('div', 'gio'), moc = el('div', 'moc');
     thanh.style.gridTemplateColumns = 'repeat(' + soO + ', 1fr)';
@@ -1346,12 +1397,13 @@ function kiemTraGio() {
     }
     if (loai === 'kin') {
       gan = doGan(ten, bd, kt);
-      var lech = goiYLechGio(ten, ngayM, tu, den, gan);
-      if (lech) o.noiDung.appendChild(lech);
+      var goiY = goiYLechGio(ten, ngayM, tu, den, gan) || goiYTrongNgay(ten, ngayM, tu, den, soKhach);
+      if (goiY) o.noiDung.appendChild(goiY);
     }
     return { o: o, thuTu: thuTuPhong(loai, viTri, gia, gan) };
   });
-  hienKetQua(ds, soTrong, (quaDem ? c('quaDemTieng', ra - tu) : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + mocNgay(ra) + ' · ' + c('khach', soKhach));
+  var ghiQuaDem = quaDem && !coComboToi;
+  hienKetQua(ds, soTrong, (ghiQuaDem ? c('quaDemTieng', ra - tu) : '') + ngay(ngayM) + ' · ' + gio(tu) + ' → ' + mocNgay(ghiQuaDem ? ra : den) + ' · ' + c('khach', soKhach));
   var cg = el('div', 'chuGiai');
   [['trong', c('cgTrong')], ['dat', c('cgDat')], ['qua', c('cgQua')], ['chon', c('cgChon')]].forEach(function (x) {
     var s = el('span');
@@ -1437,6 +1489,7 @@ function ganForm() {
   });
   byId('tuGio').addEventListener('change', function () { dsGioDen(true); giaiThichGio(); });
   byId('denGio').addEventListener('change', giaiThichGio);
+  byId('ngayGio').addEventListener('change', giaiThichGio);
 
   byId('ngayNhan').addEventListener('change', function () {
     if (!this.value) return;
@@ -1564,7 +1617,10 @@ function dsGioDen(giu) {
 function giaiThichGio() {
   var tu = +byId('tuGio').value, den = +byId('denGio').value, p = byId('giaiThich'), ra = gioTraQuaDem(tu);
   p.hidden = !(tu >= COMBO_TU && tu < QUA_DEM_TU && den > COMBO_DEN && den < ra);
-  if (!p.hidden) p.textContent = c('giaiSau21', gio(COMBO_DEN), gio(tu), moc(ra), ra - tu);
+  if (p.hidden) return;
+  var chon = byId('ngayGio').value, m = chon ? phut(chon) : null;
+  var coToi = !!(D && LICH && m !== null && D.phong.some(function (ten) { return laComboToi(ten, m, tu, den); }));
+  p.textContent = coToi ? c('giaiComboToi', gio(COMBO_DEN), moc(ra)) : c('giaiSau21', gio(COMBO_DEN), gio(tu), moc(ra), ra - tu);
 }
 
 /* Dòng phụ thu dưới ô số khách: tab combo ghi cả mức combo giờ và qua đêm, tab 2 ngày 1 đêm ghi theo đêm. */
