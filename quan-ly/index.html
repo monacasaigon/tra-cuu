@@ -332,7 +332,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-23d';
+var BAN_TRANG = '2026-11-23e';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -722,7 +722,7 @@ function veViecNgay(box) {
   box.textContent = '';
   var khung = el('section', 'viec'), tren = el('div', 'dauViec');
   tren.appendChild(el('h2', null, 'Việc cần làm · ' + ngayNgan(dau) + (VIEC.so > 1 ? ' → ' + ngayNgan(cuoi) : '')));
-  [['Hôm nay', 0, 1], ['Ngày mai', 1, 1], ['7 ngày', 0, 7], ['14 ngày', 0, 14], ['30 ngày', 0, 30]].forEach(function (x) {
+  [['Hôm nay', 0, 1], ['Ngày mai', 1, 1], ['7 ngày', 0, 7]].forEach(function (x) {
     var dang = VIEC.tu === x[1] && VIEC.so === x[2], b = nut(x[0], 'nutNho' + (dang ? ' on' : ''), function () { doi(x[1], x[2]); });
     b.setAttribute('aria-pressed', dang);
     tren.appendChild(b);
@@ -764,7 +764,6 @@ function veViecNgay(box) {
   }
   ngayDs.forEach(function (x) { luoi.appendChild(gom ? theNgayGom(x.ngay, x.kq, hn, xong, theoGio) : theNgayViec(x.ngay, x.kq, hn, xong)); });
   khung.appendChild(luoi);
-  if (gom && VIEC.so < 90) khung.appendChild(nut('+ Xem thêm 7 ngày', 'nutNho xemThem', function () { doi(VIEC.tu, Math.min(90, VIEC.so + 7)); }));
   khung.appendChild(el('p', 'dangO', 'Dự kiến: giả sử phòng trống hoặc khoá chưa có tên có khách, tự đổi khi có booking. ' + (gom
     ? 'Bấm số phòng để chỉnh, bấm "Theo giờ" để xem giờ và tick việc.'
     : 'Check-out là giờ khách trả, sau đó là giờ dọn. Bấm vào việc để chỉnh. Dấu tick chỉ lưu trên máy này.')));
