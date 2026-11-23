@@ -630,7 +630,9 @@ function giaDem(ten, nhan, soDem, soKhach) {
    24 tiếng, combo giờ ban ngày không quá 4 tiếng (tính theo giá 2N1Đ thì đêm nay và đêm mai như tab 2 ngày 1 đêm);
    chỉ giảm giá gói (không giảm giờ thêm).
    Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
-var GIO_DON = 60, COMBO_TU = 7, COMBO_DEN = 22, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;   // combo giờ nhận từ 7h, trả tới 22h (chủ nhà, 24/11/2026)
+/* GIO_DON = giờ dọn chừa thêm TRƯỚC khi phòng kín lại: 0, vì giờ kín trong Sheet đã gồm 1 tiếng chuẩn bị trước check-in của khách sau
+   (khách check-in 11h thì Sheet kín từ 10h), và 1 tiếng đó cũng là giờ dọn. Combo trả đúng giờ phòng kín lại là đủ (chủ nhà, 24/11/2026). */
+var GIO_DON = 0, COMBO_TU = 7, COMBO_DEN = 22, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;   // combo giờ nhận từ 7h, trả tới 22h (chủ nhà, 24/11/2026)
 function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
 /* Giờ trả của gói Qua đêm: 13 tiếng sau giờ nhận, tối đa đến 13:00 (chỉ chạm khi nhận lúc rạng sáng). */
 function gioTraQuaDem(tu) { return Math.min(tu + 13, QUA_DEM_MUON + (tu < COMBO_TU ? 0 : 24)); }
