@@ -258,6 +258,7 @@
   .dongViec.gomRa .dauGom { display: block; font-weight: 700; }
   .nhacHd { display: block; margin: 2px 0 0; color: #92400E; font-weight: 600; }
   .gioNhanVao { display: inline-block; min-width: 46px; margin-right: 4px; font-variant-numeric: tabular-nums; color: var(--chu); }
+  .phongRa.xong > div > button, .phongRa.xong > div > small, .phongRa.xong > div > a { opacity: .45; text-decoration: line-through; }
   .daGuiHd { display: block; margin-top: 4px; font-size: 13px; color: var(--phu); }
   .daGuiHd input { width: 18px; height: 18px; margin: 0 4px 0 0; vertical-align: -4px; }
   .phongRa { display: flex; align-items: flex-start; gap: 8px; padding-top: 6px; }
@@ -336,7 +337,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-24c';
+var BAN_TRANG = '2026-11-24d';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -708,7 +709,17 @@ function viecTrongNgay(ngay) {
   return { viec: viec, dangO: dangO, oTiep: oTiep, vao: vao, ra: ra, soDon: don.filter(function (v) { return !v.duKien; }).length };
 }
 var KHO_VIEC = 'monacaViecXong';
-function docViecXong() { try { return JSON.parse(localStorage.getItem(KHO_VIEC) || '{}') || {}; } catch (e) { return {}; } }
+/* Dấu tick lưu trên máy chủ (Script Properties VIEC_XONG) nên điện thoại và máy tính thấy giống nhau; DL.viecXong là bản đang dùng,
+   cũng nằm trong bản lưu tạm của trang. Khoá = mã việc ('ngày|phòng|loại|giờ|tên'), hướng dẫn check-in thêm '|hd'. */
+function docViecXong() { return DL ? (DL.viecXong = DL.viecXong || {}) : {}; }
+function datViec(ks, bat) {
+  var o = docViecXong();
+  ks.forEach(function (k) { if (bat) o[k] = 1; else delete o[k]; });
+  luuDem();
+  goiApi({ hanh: 'viecXong', dat: bat ? ks : [], bo: bat ? [] : ks }).then(function (kq) {
+    if (DL && kq && typeof kq === 'object') { DL.viecXong = kq; luuDem(); }
+  }, function (e) { bao('Chưa lưu được dấu tick: ' + e.message, 6000); });
+}
 /* Bấm vào check-in / check-out / khoá: mở thẳng form sửa dòng đó. Dọn phòng: mở bảng ngày. */
 function suaTuViec(v, ngay) {
   if (v.moi) {
@@ -844,10 +855,7 @@ function theNgayViec(ngay, kq, hn, xong) {
     o.setAttribute('aria-label', 'Đã xong: ' + ngayNgan(ngay) + ', '
       + (gom ? (v.loai === 'vao' ? 'check-in phòng ' : 'check-out phòng ') + ds.map(function (x) { return soPhong(x.p); }).join(', ') : soPhong(v.p) + ' ' + v.chu));
     o.addEventListener('change', function () {
-      var moi = docViecXong();
-      Object.keys(moi).forEach(function (k) { if (+k.split('|')[0] < hn - 60 * 1440) delete moi[k]; });
-      ds.forEach(function (x) { if (o.checked) moi[x.ma] = 1; else delete moi[x.ma]; });
-      try { localStorage.setItem(KHO_VIEC, JSON.stringify(moi)); } catch (e) {}
+      datViec(ds.map(function (x) { return x.ma; }), o.checked);
       hang.classList.toggle('xong', o.checked);
     });
     hang.appendChild(o);
@@ -869,10 +877,10 @@ function theNgayViec(ngay, kq, hn, xong) {
           var lb = el('label', 'daGuiHd'), cb = el('input'), kHd = x.ma + '|hd';
           cb.type = 'checkbox';
           cb.checked = !!xong[kHd];
+          dong.classList.toggle('xong', cb.checked);
           cb.addEventListener('change', function () {
-            var moi = docViecXong();
-            if (cb.checked) moi[kHd] = 1; else delete moi[kHd];
-            try { localStorage.setItem(KHO_VIEC, JSON.stringify(moi)); } catch (e) {}
+            datViec([kHd], cb.checked);
+            dong.classList.toggle('xong', cb.checked);
           });
           lb.appendChild(cb);
           lb.appendChild(document.createTextNode(' Đã gửi hướng dẫn check-in'));
