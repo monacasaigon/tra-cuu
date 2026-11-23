@@ -306,7 +306,7 @@ var CHU = {
     lyDoTuDem: 'Từ {0} đêm: giá ngày thường',
     lmDem: 'Last-minute −{0}% (đặt trước ngày nhận phòng 1 ngày)',
     lmGio: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 4 tiếng)',
-    lmQuaDem: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 12 tiếng)',
+    lmQuaDem: 'Last-minute −{0}% (đặt phòng trước giờ nhận phòng 1 ngày)',
     eb: 'Early-bird −{0}%',
     ebTruLe: 'Early-bird −{0}% (trừ đêm lễ)',
     oDem: 'Ở {0} đêm −{1}%',
@@ -403,7 +403,7 @@ var CHU = {
     lyDoTuDem: '{0}+ nights: weekday rates',
     lmDem: 'Last-minute −{0}% (booked 1 day before check-in)',
     lmGio: 'Last-minute −{0}% (booked within 4 hours of check-in)',
-    lmQuaDem: 'Last-minute −{0}% (booked within 12 hours of check-in)',
+    lmQuaDem: 'Last-minute −{0}% (booked 1 day before check-in)',
     eb: 'Early-bird −{0}%',
     ebTruLe: 'Early-bird −{0}% (except holiday nights)',
     oDem: '{0}-night stay −{1}%',
@@ -627,7 +627,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
    Combo ban ngày mà trang chọn được giá rẻ hơn gói thông thường (Combo 3/6 giờ + giờ thêm) thì giá thông thường
    hiện gạch ngang để khách thấy phần lợi.
    Last-minute chỉ ngày (đêm) thường theo đúng luật cuối tuần ở trên: qua đêm khi giờ nhận cách lúc xem trang không quá
-   12 tiếng, combo giờ ban ngày không quá 4 tiếng (tính theo giá 2N1Đ thì đêm nay và đêm mai như tab 2 ngày 1 đêm);
+   24 tiếng, combo giờ ban ngày không quá 4 tiếng (tính theo giá 2N1Đ thì đêm nay và đêm mai như tab 2 ngày 1 đêm);
    chỉ giảm giá gói (không giảm giờ thêm).
    Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
 var GIO_DON = 60, COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
@@ -701,9 +701,9 @@ function giaGio(ten, ngayM, tu, den, soKhach) {
     tong = tot.sau;
   } else {
     /* Last-minute, không áp cho cuối tuần/lễ: tính theo giá 2N1Đ thì như tab 2 ngày 1 đêm (đêm nay và đêm mai);
-       qua đêm khi giờ nhận cách lúc xem trang không quá 12 tiếng; combo giờ ban ngày không quá 4 tiếng. */
+       qua đêm khi giờ nhận cách lúc xem trang không quá 24 tiếng (1 ngày, chủ nhà 24/11/2026; không áp cuối tuần/lễ); combo giờ ban ngày không quá 4 tiếng. */
     var la2N1D = tot.goi === 3, conLai = ngayM + tu * 60 - BAY_GIO;
-    var coLm = la2N1D ? ngayXet <= HOM_NAY + 1440 : conLai <= (quaDem ? 12 : 4) * 60;
+    var coLm = la2N1D ? ngayXet <= HOM_NAY + 1440 : conLai <= (quaDem ? 24 : 4) * 60;
     if (u.lastMinute && !ct && coLm) {
       var lm = lamTron(tot.goiGia * u.lastMinute / 100), tenLm = c(la2N1D ? 'lmDem' : quaDem ? 'lmQuaDem' : 'lmGio', u.lastMinute);
       dong.push([tenLm, -lm]);
@@ -856,7 +856,7 @@ function veFlash() {
 }
 /* Giá Last-minute rẻ nhất hôm nay của gói goi (0 Combo 3 giờ, 1 Combo 6 giờ, 2 Qua đêm, 2N1Đ) ở các phòng không có flash
    sale cho gói đó, theo đúng luật Last-minute của trang (chỉ ngày/đêm thường; combo nhận trong 4 tiếng tới và xong trước
-   21:00, qua đêm nhận 22:00 tối nay khi còn trong 12 tiếng, 2N1Đ đêm nay) và phòng còn trống: { ten, gia } hoặc null. */
+   21:00, qua đêm nhận 22:00 tối nay khi còn trong 24 tiếng, 2N1Đ đêm nay) và phòng còn trống: { ten, gia } hoặc null. */
 function lmHomNay(goi) {
   var lm = D.uuDai.lastMinute, bg = bayGioMay(), tot = null;
   if (!lm) return null;
@@ -875,7 +875,7 @@ function lmHomNay(goi) {
       }
     } else if (goi === 2) {
       var nhan = HOM_NAY + QUA_DEM_TU * 60;
-      ok = !cuoiTuanDem(HOM_NAY) && nhan > bg && nhan - bg <= 12 * 60 && trangThai(ten, nhan, nhan + 13 * 60) === 'trong';
+      ok = !cuoiTuanDem(HOM_NAY) && nhan > bg && nhan - bg <= 24 * 60 && trangThai(ten, nhan, nhan + 13 * 60) === 'trong';
     } else {
       ok = !cuoiTuanDem(HOM_NAY) && trangThai(ten, HOM_NAY + D.gioNhan * 60, HOM_NAY + 1440 + D.gioTra * 60) === 'trong';
     }
