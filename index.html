@@ -501,13 +501,14 @@ function cuoiTuanDem(m) { var t = thu(m); return t === 5 || t === 6 || laLe(m); 
 /* Giờ trên ô "Đến" tính từ 0:00 ngày đã chọn: 24 trở lên là hôm sau (36 = 12:00 trưa hôm sau). */
 function moc(h) { return h >= 24 ? gio(h - 24) + ' ' + c('homSau') : gio(h); }
 
-/* Sức chứa: phòng 101 và 202 ở được 4 khách; phòng khác theo "Số khách tối đa mỗi phòng" trong Sheet. */
-var SUC_CHUA = { '101': 4, '202': 4 };
+/* Sức chứa: phòng lớn 101 và 202 ở được 6 khách (chủ nhà, 23/11/2026); phòng khác theo "Số khách tối đa mỗi phòng" trong Sheet. */
+var SUC_CHUA = { '101': 6, '202': 6 };
 function sucChua(ten) { var so = (String(ten).match(/\d+/) || [])[0]; return SUC_CHUA[so] || D.uuDai.toiDaKhach || 3; }
 /* Phụ thu combo giờ ban ngày cho mỗi khách từ khách thứ 3 (Sheet chưa có dòng này thì dùng 50.000đ). */
 function phuThuGio() { var v = D.uuDai.phuThuGio; return typeof v === 'number' ? v : 50000; }
-/* "3" hoặc "3, 4" (bản Anh "3rd" hoặc "3rd & 4th") cho dòng phụ thu. */
+/* "3" hoặc "3, 4" (bản Anh "3rd" hoặc "3rd & 4th"); từ 3 khách thêm thì "3–6" ("3rd–6th") cho dòng phụ thu. */
 function khachThem(n) {
+  if (n >= 3) return NN === 'en' ? '3rd–' + (2 + n) + 'th' : '3–' + (2 + n);
   var ds = [];
   for (var i = 3; i < 3 + n; i++) ds.push(NN === 'en' ? i + (i === 3 ? 'rd' : 'th') : i);
   return ds.join(NN === 'en' ? ' & ' : ', ');
