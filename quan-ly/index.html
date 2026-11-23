@@ -256,6 +256,10 @@
   .uuTien { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--dau); color: #fff;
     font-size: 12px; font-weight: 800; white-space: nowrap; vertical-align: 1px; }
   .dongViec.gomRa .dauGom { display: block; font-weight: 700; }
+  .nhacHd { display: block; margin: 2px 0 0; color: #92400E; font-weight: 600; }
+  .gioNhanVao { display: inline-block; min-width: 46px; margin-right: 4px; font-variant-numeric: tabular-nums; color: var(--chu); }
+  .daGuiHd { display: block; margin-top: 4px; font-size: 13px; color: var(--phu); }
+  .daGuiHd input { width: 18px; height: 18px; margin: 0 4px 0 0; vertical-align: -4px; }
   .phongRa { display: flex; align-items: flex-start; gap: 8px; padding-top: 6px; }
   .phongRa > div { flex: 1; min-width: 0; }
   .phongRa > div > button { border: 0; padding: 0; background: none; text-align: left; font-weight: 600; }
@@ -332,7 +336,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-24b';
+var BAN_TRANG = '2026-11-24c';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -828,11 +832,12 @@ function theNgayViec(ngay, kq, hn, xong) {
   var hangDs = [];
   kq.viec.forEach(function (v) {
     var gomDuoc = v.loai === 'ra' || v.loai === 'vao';
-    var nhom = gomDuoc && hangDs.filter(function (x) { return x[0].loai === v.loai && x[0].luc === v.luc; })[0];
+    /* Check-out: gom theo giờ. Check-in: gom cả ngày vào một mục, mỗi khách ghi giờ riêng. */
+    var nhom = gomDuoc && hangDs.filter(function (x) { return x[0].loai === v.loai && (v.loai === 'vao' || x[0].luc === v.luc); })[0];
     if (nhom) nhom.push(v); else hangDs.push([v]);
   });
   hangDs.forEach(function (ds) {
-    var v = ds[0], gom = ds.length > 1, daXong = ds.every(function (x) { return xong[x.ma]; });
+    var v = ds[0], gom = ds.length > 1 || v.loai === 'vao', daXong = ds.every(function (x) { return xong[x.ma]; });
     var hang = datMau(el('div', 'dongViec' + (v.duKien ? ' duKien' : '') + (gom ? ' gomRa' : '') + (daXong ? ' xong' : '')), v.p), o = el('input');
     o.type = 'checkbox';
     o.checked = daXong;
@@ -849,15 +854,30 @@ function theNgayViec(ngay, kq, hn, xong) {
     hang.appendChild(el('span', 'gioViec', v.luc === ngay + 1440 ? '24:00' : gioPhut(v.luc)));
     if (gom) {
       var ndGom = el('div', 'ndViec');
-      ndGom.appendChild(el('span', 'dauGom', (v.loai === 'vao' ? 'Check-in · ' : 'Check-out · ') + ds.length + ' phòng'));
+      ndGom.appendChild(el('span', 'dauGom', v.loai === 'vao' ? 'Check-in · ' + ds.length + ' khách' : 'Check-out · ' + ds.length + ' phòng'));
+      if (v.loai === 'vao') ndGom.appendChild(el('small', 'nhacHd', '📩 Nhớ gửi hướng dẫn check-in cho khách trước giờ nhận phòng'));
       ds.forEach(function (x) {
         var dong = datMau(el('div', 'phongRa'), x.p), ten = el('div'), bx = nut('', '', function () { suaTuViec(x, ngay); });
         bx.className = '';
+        if (x.loai === 'vao') bx.appendChild(el('span', 'gioNhanVao', gioPhut(x.luc)));
         bx.appendChild(el('b', null, soPhong(x.p)));
         bx.appendChild(document.createTextNode(' · ' + x.chu.replace(/^Check-(out|in) · /, '')));
         ten.appendChild(bx);
         x.phu.forEach(function (s) { ten.appendChild(el('small', null, s)); });
         if (x.sdt) { var ax = el('a', null, x.sdt); ax.href = 'tel:' + x.sdt.replace(/[^\d+]/g, ''); ten.appendChild(ax); }
+        if (x.loai === 'vao') {
+          var lb = el('label', 'daGuiHd'), cb = el('input'), kHd = x.ma + '|hd';
+          cb.type = 'checkbox';
+          cb.checked = !!xong[kHd];
+          cb.addEventListener('change', function () {
+            var moi = docViecXong();
+            if (cb.checked) moi[kHd] = 1; else delete moi[kHd];
+            try { localStorage.setItem(KHO_VIEC, JSON.stringify(moi)); } catch (e) {}
+          });
+          lb.appendChild(cb);
+          lb.appendChild(document.createTextNode(' Đã gửi hướng dẫn check-in'));
+          ten.appendChild(lb);
+        }
         dong.appendChild(ten);
         var suaX = nut('✎ Sửa', 'nutNho suaViec', function () { suaTuViec(x, ngay); });
         suaX.setAttribute('aria-label', 'Sửa ' + ngayNgan(ngay) + ', ' + soPhong(x.p) + ' ' + x.chu);
