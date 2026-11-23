@@ -522,7 +522,7 @@ function trangThai(phong, bd, kt) {
 }
 
 /* Combo tối: đêm đó phòng đã bán (có lượt kín trong 23:00 → 06:00 hôm sau) thì không bán được gói Qua đêm nữa, nên khung
-   nhận từ 09:00, trả sau 21:00 tới 24:00 vẫn tính giá combo giờ.
+   nhận từ 07:00, trả sau 22:00 tới 24:00 vẫn tính giá combo giờ.
    Mọi combo giờ (ban ngày, combo tối) và gói Qua đêm nhận rạng sáng (00:00 → 08:00) phải chừa 1 tiếng dọn trước khi phòng kín lại
    (donTruocKhachSau); gói Qua đêm nhận tối và 2N1Đ không cộng. */
 function demDaBan(ten, ngayM) { return trangThai(ten, ngayM + 23 * 60, ngayM + 30 * 60) !== 'trong'; }
@@ -616,11 +616,11 @@ function giaDem(ten, nhan, soDem, soKhach) {
   return { tong: tong, goc: goc, dong: dong, lyDo: lyDo, moTa: c('dem', soDem) + ' · ' + c('khach', soKhach), fs: fsDs };
 }
 
-/* Combo giờ ban ngày: nhận từ 09:00, trả trước 21:00, chừa 1 tiếng dọn trước khi phòng kín lại. Dưới 3 giờ tính Combo 3 giờ; dài hơn thì trang so Combo 3 giờ,
+/* Combo giờ ban ngày: nhận từ 07:00, trả trước 22:00, chừa 1 tiếng dọn trước khi phòng kín lại. Dưới 3 giờ tính Combo 3 giờ; dài hơn thì trang so Combo 3 giờ,
    Combo 6 giờ (cộng giờ thêm) và "Combo 13 tiếng" (giá gói Qua đêm), lấy giá rẻ nhất. Cuối tuần theo ngày (T7, CN),
    kể cả Combo 13 tiếng: Chủ nhật ban ngày làm tròn lên thì lấy giá qua đêm cuối tuần, thứ 6 ban ngày lấy giá ngày thường.
    Ngoại lệ combo tối (xem laComboToi): đêm đó đã bán thì trả tới 24:00 vẫn là combo giờ, quá 13 tiếng thì cộng giờ thêm.
-   Gói Qua đêm khi trả sau 21:00, hoặc nhận từ 22:00 đến trước 09:00 sáng: ở 13 tiếng kể từ giờ nhận, tối đa đến
+   Gói Qua đêm khi trả sau 22:00, hoặc nhận từ 22:00 đến trước 07:00 sáng: ở 13 tiếng kể từ giờ nhận, tối đa đến
    13:00 (nhận rạng sáng mà phòng kín lại sớm thì tới trước giờ kín 1 tiếng). Ở quá giờ trả thì cộng giờ thêm, hoặc tính giá 2 ngày 1 đêm (nhận trước 14:00 thì cộng giờ) nếu rẻ hơn.
    Cuối tuần theo đêm (đêm T6, T7): qua đêm thứ 6 giá cuối tuần, qua đêm Chủ nhật giá ngày thường; nhận lúc rạng sáng
    thuộc đêm hôm trước.
@@ -630,7 +630,7 @@ function giaDem(ten, nhan, soDem, soKhach) {
    24 tiếng, combo giờ ban ngày không quá 4 tiếng (tính theo giá 2N1Đ thì đêm nay và đêm mai như tab 2 ngày 1 đêm);
    chỉ giảm giá gói (không giảm giờ thêm).
    Early-bird như gói 2 ngày 1 đêm, trừ ngày (đêm) lễ. Phụ thu từ khách thứ 3: combo ban ngày tính theo khách, qua đêm như 1 đêm. */
-var GIO_DON = 60, COMBO_TU = 9, COMBO_DEN = 21, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;
+var GIO_DON = 60, COMBO_TU = 7, COMBO_DEN = 22, QUA_DEM_TU = 22, QUA_DEM_MUON = 13;   // combo giờ nhận từ 7h, trả tới 22h (chủ nhà, 24/11/2026)
 function laQuaDem(tu, den) { return tu < COMBO_TU || tu >= QUA_DEM_TU || den > COMBO_DEN; }
 /* Giờ trả của gói Qua đêm: 13 tiếng sau giờ nhận, tối đa đến 13:00 (chỉ chạm khi nhận lúc rạng sáng). */
 function gioTraQuaDem(tu) { return Math.min(tu + 13, QUA_DEM_MUON + (tu < COMBO_TU ? 0 : 24)); }
@@ -856,7 +856,7 @@ function veFlash() {
 }
 /* Giá Last-minute rẻ nhất hôm nay của gói goi (0 Combo 3 giờ, 1 Combo 6 giờ, 2 Qua đêm, 2N1Đ) ở các phòng không có flash
    sale cho gói đó, theo đúng luật Last-minute của trang (chỉ ngày/đêm thường; combo nhận trong 4 tiếng tới và xong trước
-   21:00, qua đêm nhận 22:00 tối nay khi còn trong 24 tiếng, 2N1Đ đêm nay) và phòng còn trống: { ten, gia } hoặc null. */
+   22:00, qua đêm nhận 22:00 tối nay khi còn trong 24 tiếng, 2N1Đ đêm nay) và phòng còn trống: { ten, gia } hoặc null. */
 function lmHomNay(goi) {
   var lm = D.uuDai.lastMinute, bg = bayGioMay(), tot = null;
   if (!lm) return null;
@@ -1133,7 +1133,7 @@ function goiYTraSom(ten, ngayM, tu, den, soKhach) {
 }
 
 /* Phòng kín khung đã chọn nhưng còn trống trong ngày: gợi ý trọn khoảng trống dài nhất (từ 3 tiếng), chừa 1 tiếng dọn trước
-   khi phòng kín lại, kèm giá. Đêm đó đã bán thì tới 24:00 (giá combo tối), chưa bán thì tới 21:00 như combo thường. */
+   khi phòng kín lại, kèm giá. Đêm đó đã bán thì tới 24:00 (giá combo tối), chưa bán thì tới 22:00 như combo thường. */
 function goiYTrongNgay(ten, ngayM, tu, den, soKhach) {
   var p = chuan(ten), con = Math.max(ngayM, HOM_NAY + gioDatSomNhat() * 60), cuoi = ngayM + 2880, ds = [], tot = null;
   LICH.filter(function (b) { return b.phong === p && b.kt > con && b.bd < cuoi; })
@@ -1547,7 +1547,7 @@ function capNhatDuLieu(moi) {
 var KHACH_SUA = false, NGAY_FORM = null;
 function bayGioMay() { return phut(new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 16)); }
 
-/* Ngày giờ mặc định: hôm nay; combo giờ lấy giờ tròn kế tiếp, trước 09:00 sáng thì 09:00, sau 23:00 thì 09:00 hôm sau. */
+/* Ngày giờ mặc định: hôm nay; combo giờ lấy giờ tròn kế tiếp, trước 07:00 sáng thì 07:00, sau 23:00 thì 07:00 hôm sau. */
 function ganMacDinh(bayGio) {
   var homNay = Math.floor(bayGio / 1440) * 1440, ngayMai = homNay + 1440;
   ['ngayNhan', 'ngayGio'].forEach(function (id) { byId(id).min = iso(homNay); byId(id).value = iso(homNay); });
@@ -1695,7 +1695,7 @@ function dienTuLink() {
 }
 
 /* Ô "Đến" chỉ có giờ sau giờ nhận, tới giờ trả muộn nhất (denToiDa). Đổi giờ nhận combo thì giữ giờ trả nếu còn hợp lệ;
-   giờ nhận của gói Qua đêm (hoặc combo không còn đủ 3 giờ trước 21:00) thì đặt giờ trả theo gói Qua đêm. */
+   giờ nhận của gói Qua đêm (hoặc combo không còn đủ 3 giờ trước 22:00) thì đặt giờ trả theo gói Qua đêm. */
 function dsGioDen(giu) {
   var tu = +byId('tuGio').value, s = byId('denGio'), cu = +s.value, max = denToiDa(tu);
   var quaDem = laQuaDem(tu, tu + 1), macDinh = quaDem || tu + 3 > COMBO_DEN ? gioTraQuaDem(tu) : tu + 3;
@@ -1704,7 +1704,7 @@ function dsGioDen(giu) {
   s.value = giu && !quaDem && cu > tu && cu <= max ? cu : macDinh;
 }
 
-/* Dòng nhắc dưới ô chọn giờ, chỉ hiện khi khách nhận giờ combo mà chọn trả lố qua 21:00 nhưng chưa tới giờ trả
+/* Dòng nhắc dưới ô chọn giờ, chỉ hiện khi khách nhận giờ combo mà chọn trả lố qua 22:00 nhưng chưa tới giờ trả
    của gói Qua đêm (vd 19:00 → 23:00): báo là đã thành gói Qua đêm và được ở tới mấy giờ. */
 function giaiThichGio() {
   var tu = +byId('tuGio').value, den = +byId('denGio').value, p = byId('giaiThich'), ra = gioTraQuaDem(tu);
