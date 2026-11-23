@@ -337,7 +337,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-24d';
+var BAN_TRANG = '2026-11-24e';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -839,16 +839,16 @@ function theNgayViec(ngay, kq, hn, xong) {
   if (kq.sat) dem.appendChild(el('span', 'gap', ' · ⚠ thiếu giờ dọn'));
   the.appendChild(dem);
   if (!kq.viec.length) the.appendChild(el('p', 'khongViec', 'Không có việc check-in, check-out hay dọn phòng.'));
-  /* Check-out cùng giờ gom một hàng (phòng xếp theo ưu tiên dọn), check-in cùng giờ cũng vậy; các hàng dọn phòng theo thứ tự ưu tiên. */
+  /* Mọi check-in trong ngày gom một mục, mọi check-out cũng một mục (mỗi khách ghi giờ riêng, có nhắc và ô gửi hướng dẫn); các hàng dọn phòng theo thứ tự ưu tiên. */
   var hangDs = [];
   kq.viec.forEach(function (v) {
     var gomDuoc = v.loai === 'ra' || v.loai === 'vao';
     /* Check-out: gom theo giờ. Check-in: gom cả ngày vào một mục, mỗi khách ghi giờ riêng. */
-    var nhom = gomDuoc && hangDs.filter(function (x) { return x[0].loai === v.loai && (v.loai === 'vao' || x[0].luc === v.luc); })[0];
+    var nhom = gomDuoc && hangDs.filter(function (x) { return x[0].loai === v.loai && true; })[0];
     if (nhom) nhom.push(v); else hangDs.push([v]);
   });
   hangDs.forEach(function (ds) {
-    var v = ds[0], gom = ds.length > 1 || v.loai === 'vao', daXong = ds.every(function (x) { return xong[x.ma]; });
+    var v = ds[0], gom = ds.length > 1 || v.loai === 'vao' || v.loai === 'ra', daXong = ds.every(function (x) { return xong[x.ma]; });
     var hang = datMau(el('div', 'dongViec' + (v.duKien ? ' duKien' : '') + (gom ? ' gomRa' : '') + (daXong ? ' xong' : '')), v.p), o = el('input');
     o.type = 'checkbox';
     o.checked = daXong;
@@ -862,18 +862,18 @@ function theNgayViec(ngay, kq, hn, xong) {
     hang.appendChild(el('span', 'gioViec', v.luc === ngay + 1440 ? '24:00' : gioPhut(v.luc)));
     if (gom) {
       var ndGom = el('div', 'ndViec');
-      ndGom.appendChild(el('span', 'dauGom', v.loai === 'vao' ? 'Check-in · ' + ds.length + ' khách' : 'Check-out · ' + ds.length + ' phòng'));
-      if (v.loai === 'vao') ndGom.appendChild(el('small', 'nhacHd', '📩 Nhớ gửi hướng dẫn check-in cho khách trước giờ nhận phòng'));
+      ndGom.appendChild(el('span', 'dauGom', (v.loai === 'vao' ? 'Check-in · ' : 'Check-out · ') + ds.length + ' khách'));
+      ndGom.appendChild(el('small', 'nhacHd', v.loai === 'vao' ? '📩 Nhớ gửi hướng dẫn check-in cho khách trước giờ nhận phòng' : '📩 Nhớ gửi hướng dẫn check-out cho khách trước giờ trả phòng'));
       ds.forEach(function (x) {
         var dong = datMau(el('div', 'phongRa'), x.p), ten = el('div'), bx = nut('', '', function () { suaTuViec(x, ngay); });
         bx.className = '';
-        if (x.loai === 'vao') bx.appendChild(el('span', 'gioNhanVao', gioPhut(x.luc)));
+        bx.appendChild(el('span', 'gioNhanVao', gioPhut(x.luc)));
         bx.appendChild(el('b', null, soPhong(x.p)));
         bx.appendChild(document.createTextNode(' · ' + x.chu.replace(/^Check-(out|in) · /, '')));
         ten.appendChild(bx);
         x.phu.forEach(function (s) { ten.appendChild(el('small', null, s)); });
         if (x.sdt) { var ax = el('a', null, x.sdt); ax.href = 'tel:' + x.sdt.replace(/[^\d+]/g, ''); ten.appendChild(ax); }
-        if (x.loai === 'vao') {
+        {
           var lb = el('label', 'daGuiHd'), cb = el('input'), kHd = x.ma + '|hd';
           cb.type = 'checkbox';
           cb.checked = !!xong[kHd];
@@ -883,7 +883,7 @@ function theNgayViec(ngay, kq, hn, xong) {
             dong.classList.toggle('xong', cb.checked);
           });
           lb.appendChild(cb);
-          lb.appendChild(document.createTextNode(' Đã gửi hướng dẫn check-in'));
+          lb.appendChild(document.createTextNode(x.loai === 'vao' ? ' Đã gửi hướng dẫn check-in' : ' Đã gửi hướng dẫn check-out'));
           ten.appendChild(lb);
         }
         dong.appendChild(ten);
