@@ -332,7 +332,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-23c';
+var BAN_TRANG = '2026-11-23d';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -664,13 +664,18 @@ function viecTrongNgay(ngay) {
         var cungNgay = sau && sau.bd < ngay + 2880 && sau.bd - l.kt < 1440;
         /* Phòng kín lại bằng khoá chưa có tên trước khách sau (thường là booking chưa ghi tên): hạn dọn là lúc khoá. */
         var ke = kinLaiPhong(p, l.kt - 1), khoaTruoc = ke < (cungNgay ? sau.bd : ngay + 2880) && ke - l.kt < 1440;
-        var sat = khoaTruoc ? ke - co < GIO_DON : cungNgay && sau.bd - co < GIO_DON;
-        /* Hạn dọn = lúc phòng kín lại cho khách sau (đã gồm 1 tiếng chuẩn bị), kèm giờ khách đó check-in. */
-        var cbSau = sau ? chuanBiCua(sau.r) : 0, choSau = sau ? ' cho ' + (tenKhach(sau.r) || 'khách sau') + (cbSau ? ' (check-in ' + gioPhut(sau.bd + cbSau) + ')' : '') : '';
+        /* Khách trả → khách sau nhận cách nhau từ 1 tiếng là đủ dọn: giờ dọn của khách trước và giờ chuẩn bị của khách sau
+           được trùng nhau (chủ nhà, 23/11/2026). Hạn dọn = lúc phòng kín lại cho khách sau, nhưng không sớm hơn 1 tiếng sau
+           check-out và không muộn hơn giờ khách sau check-in. */
+        var cbSau = sau ? chuanBiCua(sau.r) : 0, vaoSau = sau ? sau.bd + cbSau : Infinity;
+        var hanSau = sau ? Math.min(vaoSau, Math.max(sau.bd, co + GIO_DON)) : Infinity;
+        var sat = khoaTruoc ? ke - co < GIO_DON : cungNgay && vaoSau - co < GIO_DON;
+        var choSau = sau ? ' cho ' + (tenKhach(sau.r) || 'khách sau') + (cbSau ? ' (check-in ' + gioPhut(vaoSau) + ')' : '') : '';
         them('don', co, 'Dọn phòng', [khoaTruoc ? 'Xong trước ' + moc(ke) + ' · phòng đã khoá (chưa có tên khách)'
           : !cungNgay ? 'Phòng trống lại từ ' + moc(l.kt) + ', chưa có khách vào liền sau'
-          : sat ? 'Phòng kín lại lúc ' + moc(sau.bd) + choSau + (sau.bd > co ? ', chỉ có ' + (sau.bd - co) + ' phút dọn' : ', không chừa giờ dọn')
-          : 'Xong trước ' + moc(sau.bd) + choSau], sat, Math.min(ke, sau ? sau.bd : Infinity));
+          : sat ? 'Khách sau check-in ' + moc(vaoSau) + ' (' + (tenKhach(sau.r) || 'khách sau') + ')'
+            + (vaoSau > co ? ', chỉ có ' + (vaoSau - co) + ' phút dọn' : ', không chừa giờ dọn')
+          : 'Xong trước ' + moc(hanSau) + choSau], sat, Math.min(ke, hanSau));
       }
       if (vaoNgay < ngay && raNgay > ngay) {
         dangO.push(soPhong(p) + ' ' + ten);
@@ -1406,6 +1411,13 @@ function chuanBiCua(r) {
   if (laKhoaTron(r) || laManhSau(r)) return 0;
   return phut(r.kt) - phut(r.bd) - donCua(r) > GIO_CHUAN_BI ? GIO_CHUAN_BI : 0;
 }
+/* Dòng r có thật sự trùng booking mới (check-in ci, check-out co) không. Hai booking chỉ chồng phần chuẩn bị / dọn mà khách
+   trả → khách sau nhận vẫn cách nhau từ 1 tiếng thì không trùng: 1 tiếng đó vừa dọn vừa chuẩn bị. Khoá trơn xét theo giờ kín. */
+function trungThat(r, ci, co) {
+  if (laKhoaTron(r)) return true;
+  var rci = phut(r.bd) + chuanBiCua(r), rco = phut(r.kt) - donCua(r);
+  return !(rco + GIO_DON <= ci || co + GIO_DON <= rci);
+}
 /* Các khoảng chuẩn bị / dọn của một dòng, để tô màu riêng trên thanh lịch. */
 function khoangDem(r) {
   var bd = phut(r.bd), kt = phut(r.kt), cb = chuanBiCua(r), d = donCua(r), ra = [];
@@ -1531,7 +1543,7 @@ function moBooking(o) {
       hopPhong.textContent = '';
       DL.phong.forEach(function (p) {
         var trung = ra > vao ? dsTrung(p, vao, ra) : [];
-        var that = trung.filter(function (r) { return !laChanTron(r); });
+        var that = trung.filter(function (r) { return !laChanTron(r) && trungThat(r, ciNay(), coNay()); });
         var b = datMau(nut('', p === phong ? 'on' : '', function () { phong = p; dongYTrung = false; thayChan = true; datMau(box, p); veGio(); }), p);
         b.setAttribute('aria-pressed', p === phong);
         b.appendChild(el('b', null, tenGon(p)));
@@ -1547,7 +1559,7 @@ function moBooking(o) {
     /* Sửa mà giữ nguyên giờ: không xét trùng, không đụng dòng nào khác. */
     if (!doiGio()) { kh = { chan: [], khac: [], giu: [] }; return; }
     var ds = dsTrung(phong, vao, ra).filter(function (r) { return !laCu(r); });
-    var chan = ds.filter(laChanTron), khac = ds.filter(function (r) { return !laChanTron(r); });
+    var chan = ds.filter(laChanTron), khac = ds.filter(function (r) { return !laChanTron(r) && trungThat(r, ciNay(), coNay()); });
     var giu = khoaTron ? chanConLai(cu, vao, ra, don, chuanBi) : [];
     kh = { chan: chan, khac: khac, giu: giu };
     function ke(r) { return (tenKhach(r) || tenLuot(r)) + ': ' + moc(phut(r.bd)) + ' → ' + moc(phut(r.kt)); }
@@ -1572,7 +1584,8 @@ function moBooking(o) {
           : 'Ngoài giờ khách ở, trang tra cứu sẽ mở bán lại.'), thayChan, function (v) { thayChan = v; });
     }
     if (!cu) {
-      if (!ds.length) kq.appendChild(el('div', 'trongOk', '✓ ' + tenGon(phong) + ' trống trọn khung này'));
+      if (!khac.length && !chan.length) kq.appendChild(el('div', 'trongOk', '✓ ' + tenGon(phong) + ' trống trọn khung này'
+        + (ds.length ? ' (cách khách liền kề đủ 1 tiếng dọn)' : '')));
       return;
     }
     /* Giờ được trả lại: nói rõ phần nào mở bán, phần nào vẫn kín vì dòng khác. */
