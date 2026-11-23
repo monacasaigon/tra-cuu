@@ -332,7 +332,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-24a';
+var BAN_TRANG = '2026-11-24b';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -824,10 +824,11 @@ function theNgayViec(ngay, kq, hn, xong) {
   if (kq.sat) dem.appendChild(el('span', 'gap', ' · ⚠ thiếu giờ dọn'));
   the.appendChild(dem);
   if (!kq.viec.length) the.appendChild(el('p', 'khongViec', 'Không có việc check-in, check-out hay dọn phòng.'));
-  /* Check-out cùng giờ gom một hàng (phòng xếp theo ưu tiên dọn); ngay sau là các hàng dọn phòng theo thứ tự ưu tiên. */
+  /* Check-out cùng giờ gom một hàng (phòng xếp theo ưu tiên dọn), check-in cùng giờ cũng vậy; các hàng dọn phòng theo thứ tự ưu tiên. */
   var hangDs = [];
   kq.viec.forEach(function (v) {
-    var nhom = v.loai === 'ra' && hangDs.filter(function (x) { return x[0].loai === 'ra' && x[0].luc === v.luc; })[0];
+    var gomDuoc = v.loai === 'ra' || v.loai === 'vao';
+    var nhom = gomDuoc && hangDs.filter(function (x) { return x[0].loai === v.loai && x[0].luc === v.luc; })[0];
     if (nhom) nhom.push(v); else hangDs.push([v]);
   });
   hangDs.forEach(function (ds) {
@@ -836,7 +837,7 @@ function theNgayViec(ngay, kq, hn, xong) {
     o.type = 'checkbox';
     o.checked = daXong;
     o.setAttribute('aria-label', 'Đã xong: ' + ngayNgan(ngay) + ', '
-      + (gom ? 'check-out phòng ' + ds.map(function (x) { return soPhong(x.p); }).join(', ') : soPhong(v.p) + ' ' + v.chu));
+      + (gom ? (v.loai === 'vao' ? 'check-in phòng ' : 'check-out phòng ') + ds.map(function (x) { return soPhong(x.p); }).join(', ') : soPhong(v.p) + ' ' + v.chu));
     o.addEventListener('change', function () {
       var moi = docViecXong();
       Object.keys(moi).forEach(function (k) { if (+k.split('|')[0] < hn - 60 * 1440) delete moi[k]; });
@@ -848,12 +849,12 @@ function theNgayViec(ngay, kq, hn, xong) {
     hang.appendChild(el('span', 'gioViec', v.luc === ngay + 1440 ? '24:00' : gioPhut(v.luc)));
     if (gom) {
       var ndGom = el('div', 'ndViec');
-      ndGom.appendChild(el('span', 'dauGom', 'Check-out · ' + ds.length + ' phòng'));
+      ndGom.appendChild(el('span', 'dauGom', (v.loai === 'vao' ? 'Check-in · ' : 'Check-out · ') + ds.length + ' phòng'));
       ds.forEach(function (x) {
         var dong = datMau(el('div', 'phongRa'), x.p), ten = el('div'), bx = nut('', '', function () { suaTuViec(x, ngay); });
         bx.className = '';
         bx.appendChild(el('b', null, soPhong(x.p)));
-        bx.appendChild(document.createTextNode(' · ' + x.chu.replace(/^Check-out · /, '')));
+        bx.appendChild(document.createTextNode(' · ' + x.chu.replace(/^Check-(out|in) · /, '')));
         ten.appendChild(bx);
         x.phu.forEach(function (s) { ten.appendChild(el('small', null, s)); });
         if (x.sdt) { var ax = el('a', null, x.sdt); ax.href = 'tel:' + x.sdt.replace(/[^\d+]/g, ''); ten.appendChild(ax); }
