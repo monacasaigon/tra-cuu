@@ -337,6 +337,7 @@ var CHU = {
     nutThemDem: 'Thêm 1 đêm',
     lechGio: '💡 Chỉ lệch {0}', nutLechGio: 'Check-in {0}',
     trongNgay: '💡 Phòng vẫn trống trong ngày, chuyển sang đặt từ {0} đến {1}', nutTrongNgay: 'Đặt {0} → {1}',
+    trongQuaDem: '💡 Phòng vẫn trống qua đêm, chuyển sang gói Qua đêm từ {0} đến {1} hôm sau', nutTrongQuaDem: 'Đặt qua đêm {0} → {1}',
     canDon: '🧹 Phòng kín lại lúc {0}, cần chừa 1 tiếng dọn trước đó.',
     canDonTra: '🧹 Phòng kín lại lúc {0}, cần 1 tiếng dọn: trả phòng muộn nhất {1}.',
     traSom: '💡 Vẫn nhận phòng lúc {0} được, chỉ cần trả trước {1}', nutTraSom: 'Trả phòng {0}',
@@ -434,6 +435,7 @@ var CHU = {
     nutThemDem: 'Add 1 night',
     lechGio: '💡 Only {0} off', nutLechGio: 'Check in {0}',
     trongNgay: '💡 Still free during the day: switch to {0} – {1}', nutTrongNgay: 'Book {0} → {1}',
+    trongQuaDem: '💡 Still free overnight: switch to the Overnight package, {0} – {1} next day', nutTrongQuaDem: 'Book overnight {0} → {1}',
     canDon: '🧹 The room is booked from {0} and needs 1 hour of cleaning before that.',
     canDonTra: '🧹 The room is booked from {0} and needs 1 hour of cleaning: check out by {1} at the latest.',
     traSom: '💡 You can still check in at {0}, just check out by {1}', nutTraSom: 'Check out {0}',
@@ -1155,6 +1157,33 @@ function goiYTrongNgay(ten, ngayM, tu, den, soKhach) {
   return hop;
 }
 
+/* Khách tìm nguyên ngày (tab 2 ngày 1 đêm, tìm 1 đêm; hoặc combo ban ngày không còn khoảng trống nào trong ngày) mà phòng vẫn
+   trống buổi tối: gợi ý gói Qua đêm trọn 13 tiếng, chừa 1 tiếng dọn trước khi phòng kín lại, kèm giá. Nhận 22h; sáng hôm
+   sau có khách sớm thì lùi giờ nhận (21h, 20h, 19h) để vẫn đủ 13 tiếng; tối còn kín tới 22h thì thử 23h.
+   Bấm là chuyển sang tab combo giờ với đúng ngày giờ đó. */
+function goiYTrongQuaDem(ten, ngayM, soKhach) {
+  var tu = [QUA_DEM_TU, QUA_DEM_TU - 1, QUA_DEM_TU - 2, QUA_DEM_TU - 3, QUA_DEM_TU + 1].filter(function (h) {
+    var den = gioTraQuaDem(h);
+    return den <= denToiDa(h) && ngayM + h * 60 + 60 > BAY_GIO && phongTrongGio(ten, ngayM, h, den)
+      && trangThai(ten, ngayM + h * 60, ngayM + den * 60 + GIO_DON) === 'trong';
+  })[0];
+  if (tu === undefined) return null;
+  var den = gioTraQuaDem(tu);
+  var tuChu = gioGon(tu * 60), denChu = gioGon(den * 60), gia = giaGio(ten, ngayM, tu, den, soKhach);
+  var hop = el('div', 'themDem trongNgay'), chu = el('span', null, c('trongQuaDem', tuChu, denChu));
+  if (gia) chu.appendChild(el('b', null, tien(gia.tong)));
+  hop.appendChild(chu);
+  var nut = el('button', null, c('nutTrongQuaDem', tuChu, denChu));
+  nut.type = 'button';
+  nut.addEventListener('click', function () {
+    if (cheDo !== 'gio') { chonCheDo('gio'); goiYKhach(); }
+    byId('ngayGio').value = iso(ngayM);
+    doiKhungGio(ten, tu, den);
+  });
+  hop.appendChild(nut);
+  return hop;
+}
+
 /* Phòng kín khung đã chọn nhưng chỉ lệch tối đa 3 tiếng: nút "Check-in 23h" (giờ tròn gần nhất còn trống, giữ nguyên số
    giờ khách chọn), bấm là xem giá giờ đó. Trả về null nếu không có giờ hợp lệ trên ô chọn giờ (giờ nhận 0–23 cùng ngày, giờ trả trong giới hạn). */
 function goiYLechGio(ten, ngayM, tu, den, gan) {
@@ -1404,7 +1433,7 @@ function kiemTraDem() {
     var gia = loai === 'trong' ? giaDem(ten, nhan, soDem, soKhach) : null;
     if (gia) o.noiDung.appendChild(khoiGia(ten, gia, tomTat));
     if (gia && gia.fs.length) danhDauFlash(o);
-    var them = gia && goiYThemDem(ten, nhan, tra, soDem, soKhach, gia);
+    var them = gia ? goiYThemDem(ten, nhan, tra, soDem, soKhach, gia) : loai === 'kin' && soDem === 1 ? goiYTrongQuaDem(ten, nhan, soKhach) : null;
     if (them) o.noiDung.appendChild(them);
     return { o: o, thuTu: thuTuPhong(loai, viTri, gia, loai === 'trong' ? null : doGan(ten, bd, kt)) };
   });
@@ -1457,7 +1486,8 @@ function kiemTraGio() {
       gan = doGan(ten, bd, kt + donTruocKhachSau(ten, ngayM, tu, den));
       var ghi = ghiChuDon(ten, ngayM, tu, den);
       if (ghi) o.noiDung.appendChild(ghi);
-      var goiY = goiYTraSom(ten, ngayM, tu, den, soKhach) || goiYLechGio(ten, ngayM, tu, den, gan) || goiYTrongNgay(ten, ngayM, tu, den, soKhach);
+      var goiY = goiYTraSom(ten, ngayM, tu, den, soKhach) || goiYLechGio(ten, ngayM, tu, den, gan) || goiYTrongNgay(ten, ngayM, tu, den, soKhach)
+        || (!quaDem && goiYTrongQuaDem(ten, ngayM, soKhach));
       if (goiY) o.noiDung.appendChild(goiY);
     }
     return { o: o, thuTu: thuTuPhong(loai, viTri, gia, gan) };
