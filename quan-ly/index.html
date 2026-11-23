@@ -332,7 +332,7 @@
 /* API: web app Apps Script (Execute as me, Anyone), hàm doPost. Mọi thao tác kèm khoá bí mật của chủ nhà. */
 var API = 'https://script.google.com/macros/s/AKfycbxlyugzghvFzZNkScF2WmAJDVKNSbyo2CA06NLzREdQJ3chM_xY87QUMlzLMkPrdPNU/exec';
 /* Phiên bản trang: đổi mỗi lần sửa trang. Tab mở lâu (vd trên điện thoại) tự dò bản trên GitHub, khác thì hiện nút tải lại. */
-var BAN_TRANG = '2026-11-23e';
+var BAN_TRANG = '2026-11-24a';
 /* Khoá nằm sau dấu # của link (không gửi lên máy chủ GitHub), lưu lại trên máy rồi xoá khỏi thanh địa chỉ. */
 var KHO_KHOA = 'monacaQuanLyKhoa', KHO_DL = 'monacaQuanLyDL';
 function layKhoa(s) { var m = String(s || '').match(/(?:khoa=)?([0-9a-f]{32,})/i); return m ? m[1].toLowerCase() : ''; }
@@ -1633,7 +1633,7 @@ function moBooking(o) {
       if (x[1] === 0) { vao = d + DL.gioNhan * 60 - chuanBi; ra = d + dem * 1440 + DL.gioTra * 60 + don; }
       else if (x[1] === 1) { vao = d + 1320 - chuanBi; ra = d + 1440 + 660 + don; }
       else {
-        if (g < 540 || g + x[1] * 60 > 1260) g = 840;
+        if (g < 420 || g + x[1] * 60 > 1320) g = 840;   // combo giờ trong khung 7h–22h
         vao = d + g - chuanBi; ra = d + g + x[1] * 60 + don;
       }
       doiMoc();
