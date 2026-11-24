@@ -337,7 +337,8 @@ var CHU = {
     nutThemDem: 'Thêm 1 đêm',
     lechGio: '💡 Chỉ lệch {0}', nutLechGio: 'Check-in {0}',
     trongNgay: '💡 Phòng vẫn trống trong ngày, chuyển sang đặt từ {0} đến {1}', nutTrongNgay: 'Đặt {0} → {1}',
-    trongQuaDem: '💡 Phòng vẫn trống qua đêm, chuyển sang gói Qua đêm từ {0} đến {1} hôm sau', nutTrongQuaDem: 'Đặt qua đêm {0} → {1}',
+    trongQuaDem: '💡 Phòng vẫn trống qua đêm, chuyển sang gói Qua đêm (combo 13 tiếng, giờ check-in tuỳ chọn)', nutTrongQuaDem: 'Đặt qua đêm {0} → {1}',
+    trongTuGio: '💡 Phòng vẫn trống sau {0}, chuyển sang gói Qua đêm (combo 13 tiếng, giờ check-in tuỳ chọn)',
     canDon: '🧹 Phòng kín lại lúc {0}, cần chừa 1 tiếng dọn trước đó.',
     canDonTra: '🧹 Phòng kín lại lúc {0}, cần 1 tiếng dọn: trả phòng muộn nhất {1}.',
     traSom: '💡 Vẫn nhận phòng lúc {0} được, chỉ cần trả trước {1}', nutTraSom: 'Trả phòng {0}',
@@ -435,7 +436,8 @@ var CHU = {
     nutThemDem: 'Add 1 night',
     lechGio: '💡 Only {0} off', nutLechGio: 'Check in {0}',
     trongNgay: '💡 Still free during the day: switch to {0} – {1}', nutTrongNgay: 'Book {0} → {1}',
-    trongQuaDem: '💡 Still free overnight: switch to the Overnight package, {0} – {1} next day', nutTrongQuaDem: 'Book overnight {0} → {1}',
+    trongQuaDem: '💡 Still free overnight: switch to the Overnight package (13-hour combo, flexible check-in time)', nutTrongQuaDem: 'Book overnight {0} → {1}',
+    trongTuGio: '💡 Room is still free after {0}: switch to the Overnight package (13-hour combo, flexible check-in time)',
     canDon: '🧹 The room is booked from {0} and needs 1 hour of cleaning before that.',
     canDonTra: '🧹 The room is booked from {0} and needs 1 hour of cleaning: check out by {1} at the latest.',
     traSom: '💡 You can still check in at {0}, just check out by {1}', nutTraSom: 'Check out {0}',
@@ -1174,7 +1176,21 @@ function goiYTrongQuaDem(ten, ngayM, soKhach) {
   if (tu === undefined) return null;
   var den = gioTraQuaDem(tu);
   var tuChu = gioGon(tu * 60), denChu = gioGon(den * 60), gia = giaGio(ten, ngayM, tu, den, soKhach);
-  var hop = el('div', 'themDem trongNgay'), chu = el('span', null, c('trongQuaDem', tuChu, denChu));
+  /* Phòng thật ra trống sớm hơn giờ nhận gói Qua đêm (vd. khách trước trả lúc 20h, gói nhận 22h): ghi rõ phòng trống sau mấy giờ
+     (đúng như thanh giờ: hết lượt kín liền trước, kể cả giờ dọn), để khách không hiểu lầm là phòng chỉ trống từ giờ nhận gói.
+     Áp dụng mọi phòng, mọi ngày, kể cả giờ lẻ (lượt kín liền trước hết lúc 20h30 thì ghi "sau 20h30"). Chỉ ghi khi có lượt
+     kín liền trước; trống từ sáng hoặc từ giờ hiện tại thì dùng câu không nêu giờ. */
+  var tuTrong = tu, h = tu - 1;
+  while (h >= 0 && ngayM + h * 60 + 60 > BAY_GIO && trangThai(ten, ngayM + h * 60, ngayM + h * 60 + 60) === 'trong') tuTrong = h--;
+  var trongTu = tu * 60;
+  if (h >= 0 && ngayM + h * 60 + 60 > BAY_GIO) {
+    var p = chuan(ten);
+    trongTu = LICH.reduce(function (m, b) {
+      return b.phong === p && b.bd < ngayM + tuTrong * 60 - 1 && b.kt > ngayM + h * 60 + 1 ? Math.max(m, Math.min(b.kt - ngayM, tuTrong * 60)) : m;
+    }, h * 60);
+  }
+  var hop = el('div', 'themDem trongNgay'),
+      chu = el('span', null, trongTu < tu * 60 ? c('trongTuGio', gioGon(trongTu)) : c('trongQuaDem'));
   if (gia) chu.appendChild(el('b', null, tien(gia.tong)));
   hop.appendChild(chu);
   var nut = el('button', null, c('nutTrongQuaDem', tuChu, denChu));
